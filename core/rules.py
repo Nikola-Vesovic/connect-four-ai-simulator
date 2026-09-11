@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from core.types import GameResult, Move, Player
+from core.types import EMPTY, GameResult, Move, Player
 
 ROWS = 6
 COLS = 7
@@ -56,3 +56,14 @@ class Board(Protocol):
     def result(self) -> GameResult: ...
 
     def copy(self) -> Board: ...
+
+
+def render(board: Board) -> str:
+    """Text view of any board, top row first, with 1-based column labels underneath."""
+    symbols = {EMPTY: ".", Player.ONE: "X", Player.TWO: "O"}
+    rows = [
+        " ".join(symbols[board.cell(row, col)] for col in range(COLS))
+        for row in reversed(range(ROWS))
+    ]
+    rows.append(" ".join(str(col + 1) for col in range(COLS)))
+    return "\n".join(rows)

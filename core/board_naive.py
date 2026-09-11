@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from core.rules import CELLS, COLS, CONNECT, DIRECTIONS, ROWS
+from core.rules import CELLS, COLS, CONNECT, DIRECTIONS, ROWS, render
 from core.types import EMPTY, GameResult, Move, Player
 
 
@@ -155,13 +155,7 @@ class NaiveBoard:
     # ------------------------------------------------------------------ display
 
     def __str__(self) -> str:
-        symbols = {EMPTY: ".", Player.ONE: "X", Player.TWO: "O"}
-        rows = [
-            " ".join(symbols[self._grid[row][col]] for col in range(COLS))
-            for row in reversed(range(ROWS))
-        ]
-        rows.append(" ".join(str(col + 1) for col in range(COLS)))
-        return "\n".join(rows)
+        return render(self)
 
     def __repr__(self) -> str:
         played = "".join(str(col + 1) for col in self._history)
