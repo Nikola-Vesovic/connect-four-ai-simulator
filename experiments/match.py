@@ -147,6 +147,13 @@ def play_game(
     return GameRecord(board.result(), board.moves_played, nodes[0], nodes[1], *seconds)
 
 
+def game_seeds(seed: int, games: int) -> list[tuple[int, int]]:
+    """The seed pair each game is played from. Fixed by the master seed alone, so a game's
+    outcome never depends on which games ran before it."""
+    rng = random.Random(seed)
+    return [(rng.randrange(2**63), rng.randrange(2**63)) for _ in range(games)]
+
+
 def play_match(
     agent_a: Agent,
     agent_b: Agent,
@@ -157,11 +164,9 @@ def play_match(
     budget: Budget = UNLIMITED,
 ) -> MatchResult:
     """Play `games` games, swapping seats every game, and tally them from A's side."""
-    rng = random.Random(seed)
-    seed_pairs = [(rng.randrange(2**63), rng.randrange(2**63)) for _ in range(games)]
     match = MatchResult(agent_a.name, agent_b.name, seed)
 
-    for index, (seed_a, seed_b) in enumerate(seed_pairs):
+    for index, (seed_a, seed_b) in enumerate(game_seeds(seed, games)):
         agent_a.new_game(seed_a)
         agent_b.new_game(seed_b)
         a_first = index % 2 == 0

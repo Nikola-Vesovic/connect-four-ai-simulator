@@ -21,7 +21,7 @@ from agents.greedy_agent import GreedyAgent
 from agents.random_agent import RandomAgent
 from core.board_naive import NaiveBoard
 from core.types import GameResult, Move
-from experiments.match import play_game, play_match
+from experiments.match import Tally, game_seeds, play_game, play_match
 from search.ordering import CENTER_FIRST
 from search.stats import UNLIMITED, Budget, SearchStats
 
@@ -270,3 +270,78 @@ def test_greedy_beats_random_decisively():
     match = play_match(GreedyAgent(), RandomAgent(), games=2_000, seed=2026)
     assert match.a_first.score > 0.95
     assert match.b_first.score > 0.90
+
+
+def test_greedy_never_loses_a_game_it_could_have_saved():
+    """The end-to-end form of the blocking rule, and the sharpest property in the phase.
+
+    Greedy answers every single immediate threat, so the only way it can lose is from a
+    position where *every* legal column hands the opponent a win. Any other loss means the
+    safety rule leaks -- something no win rate would reveal, since greedy scores 98.6%
+    either way.
+    """
+    rng = random.Random(2026)
+    greedy, opponent = GreedyAgent(), RandomAgent()
+    losses = 0
+
+    for index in range(500):
+        opponent.new_game(rng.randrange(2**63))
+        greedy_first = index % 2 == 0
+        board = NaiveBoard()
+        before_greedys_last_move = None
+
+        while not board.is_terminal():
+            if (board.moves_played % 2 == 0) == greedy_first:
+                before_greedys_last_move = board.copy()
+                move, _ = greedy.choose_move(board)
+            else:
+                move, _ = opponent.choose_move(board)
+            board.play(move)
+
+        if board.result() is GameResult.DRAW:
+            continue
+        if (board.result() is GameResult.ONE_WINS) == greedy_first:
+            continue
+
+        losses += 1
+        assert not safe_columns(before_greedys_last_move), (
+            f"lost from a position that still had safe columns\n{before_greedys_last_move}"
+        )
+
+    assert losses > 0, "greedy lost nothing in this sample, so the property proved nothing"
+
+
+def test_match_aggregates_do_not_depend_on_the_order_games_are_played_in():
+    """Each game is fixed by its own seed pair, so the totals must survive a reshuffle.
+
+    This is the guard for state leaking between games. It costs nothing today -- both
+    agents here are stateless between games -- and it is exactly what breaks first when
+    Phase 11 lets MCTS keep its tree.
+    """
+    games, seed = 200, 99
+    in_order = play_match(RandomAgent(), RandomAgent(), games=games, seed=seed)
+
+    shuffled = list(enumerate(game_seeds(seed, games)))
+    random.Random(5).shuffle(shuffled)
+    agent_a, agent_b = RandomAgent(), RandomAgent()
+    tally, plies = Tally(), 0
+    for index, (seed_a, seed_b) in shuffled:
+        agent_a.new_game(seed_a)
+        agent_b.new_game(seed_b)
+        a_first = index % 2 == 0
+        first, second = (agent_a, agent_b) if a_first else (agent_b, agent_a)
+        game = play_game(first, second)
+        plies += game.plies
+        if game.result is GameResult.DRAW:
+            tally.draws += 1
+        elif (game.result is GameResult.ONE_WINS) == a_first:
+            tally.wins += 1
+        else:
+            tally.losses += 1
+
+    assert (tally.wins, tally.draws, tally.losses, plies) == (
+        in_order.overall.wins,
+        in_order.overall.draws,
+        in_order.overall.losses,
+        in_order.plies,
+    )
