@@ -7,14 +7,27 @@ Plan rada: [../plan/BUILD_PLAN.md](../plan/BUILD_PLAN.md)
 
 ```
 connect4/
-  core/          board_naive.py (referentna implementacija), rules.py (ugovor), types.py
-  agents/        random, greedy, minimax, alphabeta, mcts, oracle        [faze 4-11]
-  search/        evaluacija, uredjivanje poteza, transpoziciona tabela   [faze 5-10]
-  gui/           pygame prikaz                                           [faza 3]
-  experiments/   turniri, benchmark, ablacije, grafici                   [faze 12-14]
+  core/          rules.py (ugovor), types.py, board_naive.py (referentna), bitboard.py   [1-2]
+  agents/        base.py (interfejs), random_agent.py, greedy_agent.py                    [4]
+                 minimax, alphabeta, mcts, oracle                                         [5-11]
+  search/        stats.py (Budget + SearchStats), ordering.py (centar-prvo)               [4]
+                 evaluacija, transpoziciona tabela, tajmer                                [5-10]
+  gui/           pygame prikaz                                                            [3, odlozeno]
+  experiments/   match.py (mec izmedju dva agenta, sa semenom)                            [4]
+                 turniri, benchmark, ablacije, grafici                                    [12-14]
   data/          test pozicije, sirovi rezultati, slike
   tests/         pytest
 ```
+
+## Pokretanje meca
+
+```sh
+python -m experiments.match --a greedy --b random --games 10000 --seed 2026
+```
+
+Rezultat je uvek razdvojen po tome ko je igrao prvi: sa nasumicnom igrom prvi igrac vec
+dobija 55.4% partija (mereno u fazi 2), pa procenat pobeda bez te podele nista ne govori
+o jacini agenta.
 
 ## Pokretanje testova
 
