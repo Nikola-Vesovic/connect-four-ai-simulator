@@ -1,0 +1,10 @@
+[project]
+name = "connect4"
+version = "0.1.0"
+description = "Connect Four agents: minimax / alpha-beta / negascout vs MCTS"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
