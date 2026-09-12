@@ -16,11 +16,13 @@ are the one thing that does not reproduce, so `fingerprint` leaves them out.
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import random
 from dataclasses import dataclass, field
 from typing import Sequence
 
+from agents.alphabeta import NegamaxAgent
 from agents.base import Agent
 from agents.greedy_agent import GreedyAgent
 from agents.minimax import MinimaxAgent
@@ -34,6 +36,8 @@ AGENTS = {
     "random": RandomAgent,
     "greedy": GreedyAgent,
     "minimax": MinimaxAgent,
+    "negamax": functools.partial(NegamaxAgent, pruning=False),
+    "alphabeta": functools.partial(NegamaxAgent, pruning=True),
 }
 BOARDS = {"bitboard": Bitboard, "naive": NaiveBoard}
 

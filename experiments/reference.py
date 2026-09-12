@@ -17,17 +17,20 @@ leaving a stale file that quietly fails a Phase 6 gate for the wrong reason.
 
     python -m experiments.reference --generate
     python -m experiments.reference --verify
+    python -m experiments.reference --verify --agent alphabeta
 """
 
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import random
 import time
 from collections.abc import Callable
 from pathlib import Path
 
+from agents.alphabeta import NegamaxAgent
 from agents.base import Agent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
@@ -36,6 +39,14 @@ from search import evaluation
 from search.evaluation import DEFAULT
 
 PATH = Path(__file__).resolve().parent.parent / "data" / "testsets" / "minimax_reference.json"
+
+# Which search to replay the file with. The value is under contract for all of them; the
+# node count only for the two that have no cutoffs, which is why it is carried alongside.
+SEARCHES: dict[str, tuple[Callable[[int], Agent], bool]] = {
+    "minimax": (MinimaxAgent, True),
+    "negamax": (functools.partial(NegamaxAgent, pruning=False), True),
+    "alphabeta": (functools.partial(NegamaxAgent, pruning=True), False),
+}
 
 # 200 positions get the cheap depths; the expensive ones go to a prefix of the same list,
 # so a deeper entry always has the shallower entries for the same position beside it.
@@ -181,6 +192,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--generate", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--agent", default="minimax", choices=sorted(SEARCHES))
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--max-depth", type=int, default=None)
     args = parser.parse_args()
@@ -195,8 +207,19 @@ def main() -> None:
         )
     if args.verify:
         data = load()
-        checked, wrong = verify(data, max_depth=args.max_depth, check_nodes=True)
-        print(f"checked {checked} records, {len(wrong)} disagreements")
+        factory, check_nodes = SEARCHES[args.agent]
+        started = time.perf_counter()
+        checked, wrong = verify(
+            data,
+            agent_factory=factory,
+            max_depth=args.max_depth,
+            check_nodes=check_nodes,
+        )
+        contract = "value and nodes" if check_nodes else "value only"
+        print(
+            f"{args.agent}: checked {checked} records ({contract}), "
+            f"{len(wrong)} disagreements in {time.perf_counter() - started:.0f}s"
+        )
         for row in wrong[:10]:
             print(" ", row)
 
