@@ -25,8 +25,10 @@ import argparse
 import json
 import random
 import time
+from collections.abc import Callable
 from pathlib import Path
 
+from agents.base import Agent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
 from core.types import Score
@@ -137,24 +139,40 @@ def save(data: dict, path: Path = PATH) -> None:
         handle.write("\n")
 
 
-def verify(data: dict, max_depth: int | None = None) -> tuple[int, list[dict]]:
-    """Replay the file with plain minimax. Returns (checked, disagreements)."""
+def verify(
+    data: dict,
+    *,
+    agent_factory: Callable[[int], Agent] = MinimaxAgent,
+    max_depth: int | None = None,
+    check_nodes: bool = False,
+) -> tuple[int, list[dict]]:
+    """Replay the file with a search and compare. Returns (checked, disagreements).
+
+    Only the **value** is compared by default, because only the value is under contract:
+    alpha-beta visits a different set of nodes on purpose, and two correct searches may
+    prefer different equally-good moves. `check_nodes` adds the node count, which is worth
+    having when replaying with plain minimax itself -- it has no cutoffs, so its count is
+    deterministic and makes a sharper regression net.
+
+    `agent_factory` takes a depth and returns an agent, so Phase 6 onwards can point this
+    at negamax, alpha-beta or negascout without touching anything here.
+    """
     if data["metadata"]["signature"] != signature():
         raise ValueError(
             "The reference set was generated with a different score scale or different "
             "evaluation weights. Regenerate it, and re-run the Phase 6 gate against the "
             "new values -- do not compare across signatures."
         )
-    agents: dict[int, MinimaxAgent] = {}
+    agents: dict[int, Agent] = {}
     checked = 0
     wrong = []
     for record in data["records"]:
         if max_depth is not None and record["depth"] > max_depth:
             continue
-        agent = agents.setdefault(record["depth"], MinimaxAgent(record["depth"]))
+        agent = agents.setdefault(record["depth"], agent_factory(record["depth"]))
         _, stats = agent.choose_move(Bitboard.from_move_string(record["moves"]))
         checked += 1
-        if stats.value != record["value"] or stats.nodes != record["nodes"]:
+        if stats.value != record["value"] or (check_nodes and stats.nodes != record["nodes"]):
             wrong.append({**record, "got_value": stats.value, "got_nodes": stats.nodes})
     return checked, wrong
 
@@ -177,7 +195,7 @@ def main() -> None:
         )
     if args.verify:
         data = load()
-        checked, wrong = verify(data, max_depth=args.max_depth)
+        checked, wrong = verify(data, max_depth=args.max_depth, check_nodes=True)
         print(f"checked {checked} records, {len(wrong)} disagreements")
         for row in wrong[:10]:
             print(" ", row)

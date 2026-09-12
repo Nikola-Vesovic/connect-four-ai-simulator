@@ -24,6 +24,7 @@ from core.board_naive import NaiveBoard
 from core.types import GameResult, Move, Score
 from experiments.match import (
     Tally,
+    format_report,
     game_seeds,
     play_game,
     play_match,
@@ -331,12 +332,19 @@ def test_match_aggregates_do_not_depend_on_the_order_games_are_played_in():
 def test_two_deterministic_agents_play_one_game_over_and_over_without_an_opening():
     """The reason openings exist. Minimax and greedy are both deterministic, so from the
     empty board every game with the same seating is the same game, and a 400-game match
-    would report a sample of two."""
+    would report a sample of two. The runner says so rather than leaving it to be noticed."""
     match = play_match(MinimaxAgent(2), GreedyAgent(), games=40, seed=1)
     assert match.a_first.wins in (0, 20) and match.b_first.wins in (0, 20)
+    assert match.repeats_one_game
+    assert "sample of two" in format_report(match)
 
     varied = play_match(MinimaxAgent(2), GreedyAgent(), games=40, seed=1, opening_plies=4)
     assert 0 < varied.overall.wins < 40
+    assert not varied.repeats_one_game
+
+
+def test_a_real_match_is_not_mistaken_for_a_repeated_one():
+    assert not play_match(RandomAgent(), GreedyAgent(), games=40, seed=1).repeats_one_game
 
 
 def test_an_opening_is_legal_short_and_fixed_by_its_seed():

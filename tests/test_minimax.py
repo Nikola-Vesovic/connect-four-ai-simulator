@@ -315,7 +315,12 @@ def test_the_reference_set_covers_the_whole_game():
 
 def test_minimax_reproduces_its_own_reference_values():
     """The shallow half of the file, in the suite. The whole file is replayed by
-    `python -m experiments.reference --verify`, which is the Phase 6 gate."""
-    checked, wrong = reference.verify(reference.load(), max_depth=3)
+    `python -m experiments.reference --verify`, which is the Phase 6 gate.
+
+    `check_nodes` is on here and off by default: plain minimax has no cutoffs, so its
+    node count is deterministic and worth pinning, but alpha-beta will visit a different
+    set of nodes on purpose and only the value is under contract.
+    """
+    checked, wrong = reference.verify(reference.load(), max_depth=3, check_nodes=True)
     assert checked == 600
     assert wrong == []

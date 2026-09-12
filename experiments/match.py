@@ -73,6 +73,7 @@ class MatchResult:
     agent_a: str
     agent_b: str
     seed: int
+    opening_plies: int = 0
     a_first: Tally = field(default_factory=Tally)  # games A started, scored from A's side
     b_first: Tally = field(default_factory=Tally)  # games B started, scored from A's side
     plies: int = 0
@@ -112,6 +113,25 @@ class MatchResult:
     @property
     def second_mover_wins(self) -> int:
         return self.a_first.losses + self.b_first.wins
+
+    @property
+    def repeats_one_game(self) -> bool:
+        """Symptom of two deterministic agents started from the same empty board.
+
+        Without an opening, every game with the same seating is literally the same game,
+        so each tally comes out pure: all wins, all draws or all losses. Cheap to check
+        and worth checking, because the run looks perfectly normal otherwise.
+        """
+
+        def pure(tally: Tally) -> bool:
+            return max(tally.wins, tally.draws, tally.losses) == tally.games
+
+        return (
+            self.opening_plies == 0
+            and self.games >= 4
+            and pure(self.a_first)
+            and pure(self.b_first)
+        )
 
     def fingerprint(self) -> tuple:
         """Everything about this run that a re-run from the same seed must reproduce."""
@@ -204,7 +224,7 @@ def play_match(
     each position once from each seat and the seat split stays a paired comparison
     rather than two independent ones.
     """
-    match = MatchResult(agent_a.name, agent_b.name, seed)
+    match = MatchResult(agent_a.name, agent_b.name, seed, opening_plies=opening_plies)
     seeds = game_seeds(seed, games)
 
     for index, (seed_a, seed_b) in enumerate(seeds):
@@ -262,7 +282,8 @@ def format_report(match: MatchResult) -> str:
 
     lines = [
         f"A = {match.agent_a}   B = {match.agent_b}   "
-        f"games = {match.games}   seed = {match.seed}",
+        f"games = {match.games}   seed = {match.seed}   "
+        f"opening = {match.opening_plies} random plies",
         "",
         f"{'':<22}{'A wins':>8}{'draws':>8}{'B wins':>8}{'A score':>10}",
         row("A moves first", match.a_first),
@@ -276,6 +297,12 @@ def format_report(match: MatchResult) -> str:
         f"B ({match.agent_b}): {cost(match.moves_b, match.nodes_b, match.seconds_b)}",
         f"fingerprint  {match.digest()}",
     ]
+    if match.repeats_one_game:
+        lines.append(
+            "\nWARNING: every game with the same seating had the same result, which is what\n"
+            "two deterministic agents do from an empty board. This is a sample of two, not\n"
+            f"of {match.games}. Re-run with --opening-plies 4."
+        )
     return "\n".join(lines)
 
 
