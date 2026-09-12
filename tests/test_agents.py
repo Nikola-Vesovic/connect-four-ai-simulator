@@ -18,46 +18,22 @@ import pytest
 
 from agents.base import Agent
 from agents.greedy_agent import GreedyAgent
+from agents.minimax import MinimaxAgent
 from agents.random_agent import RandomAgent
 from core.board_naive import NaiveBoard
-from core.types import GameResult, Move
-from experiments.match import Tally, game_seeds, play_game, play_match
+from core.types import GameResult, Move, Score
+from experiments.match import (
+    Tally,
+    game_seeds,
+    play_game,
+    play_match,
+    random_opening,
+)
+from helpers import random_position, safe_columns, winning_columns
 from search.ordering import CENTER_FIRST
 from search.stats import UNLIMITED, Budget, SearchStats
 
 # --------------------------------------------------------------------------- helpers
-
-
-def random_position(rng: random.Random, max_plies: int = 30) -> NaiveBoard:
-    board = NaiveBoard()
-    for _ in range(rng.randrange(max_plies)):
-        if board.is_terminal():
-            break
-        board.play(rng.choice(board.legal_moves()))
-    return board
-
-
-def winning_columns(board: NaiveBoard) -> list[Move]:
-    """Columns that win at once for the player to move, per the independent scan."""
-    me = board.player_to_move
-    found = []
-    for col in board.legal_moves():
-        board.play(col)
-        if board.scan_for_winner() is me:
-            found.append(col)
-        board.undo()
-    return found
-
-
-def safe_columns(board: NaiveBoard) -> list[Move]:
-    """Columns after which the opponent cannot win with their very next disc."""
-    safe = []
-    for col in board.legal_moves():
-        board.play(col)
-        if board.is_terminal() or not winning_columns(board):
-            safe.append(col)
-        board.undo()
-    return safe
 
 
 class RogueAgent(Agent):
@@ -224,7 +200,9 @@ def test_greedy_reports_what_it_looked_at():
     assert stats.depth == 2
     # Seven columns priced for an immediate win, then column 3 plus its seven replies.
     assert stats.nodes == 15
-    assert stats.value is None  # no score scale exists before Phase 5
+    # A safe move on an empty board is not an assessment of the position, so greedy has
+    # nothing to say about its value even now that a scale exists.
+    assert stats.value is None
 
 
 # --------------------------------------------------------------------------- the harness
@@ -345,3 +323,51 @@ def test_match_aggregates_do_not_depend_on_the_order_games_are_played_in():
         in_order.overall.losses,
         in_order.plies,
     )
+
+
+# ------------------------------------------------------- openings for deterministic play
+
+
+def test_two_deterministic_agents_play_one_game_over_and_over_without_an_opening():
+    """The reason openings exist. Minimax and greedy are both deterministic, so from the
+    empty board every game with the same seating is the same game, and a 400-game match
+    would report a sample of two."""
+    match = play_match(MinimaxAgent(2), GreedyAgent(), games=40, seed=1)
+    assert match.a_first.wins in (0, 20) and match.b_first.wins in (0, 20)
+
+    varied = play_match(MinimaxAgent(2), GreedyAgent(), games=40, seed=1, opening_plies=4)
+    assert 0 < varied.overall.wins < 40
+
+
+def test_an_opening_is_legal_short_and_fixed_by_its_seed():
+    opening = random_opening(12345, 4)
+    assert len(opening) == 4
+    assert random_opening(12345, 4) == opening
+    assert random_opening(12346, 4) != opening
+
+    board = NaiveBoard.from_moves(opening)
+    assert not board.is_terminal() and board.moves_played == 4
+
+
+def test_paired_games_share_an_opening_so_the_seat_split_stays_paired():
+    seeds = game_seeds(77, 6)
+    openings = [random_opening(seeds[i - i % 2][0], 4) for i in range(6)]
+    assert openings[0] == openings[1]
+    assert openings[2] == openings[3]
+    assert openings[0] != openings[2]
+
+
+def test_an_opening_belongs_to_neither_agent():
+    """The opening counts towards the length of the game but not towards either agent's
+    move count, or the nodes-per-move figures would be diluted by moves nobody searched."""
+    record = play_game(GreedyAgent(), GreedyAgent(), opening=random_opening(3, 4))
+    assert record.first_moves + record.second_moves == record.plies - 4
+
+
+def test_a_match_with_an_opening_still_reproduces_from_its_seed():
+    def run() -> tuple:
+        return play_match(
+            MinimaxAgent(2), GreedyAgent(), games=20, seed=8, opening_plies=4
+        ).fingerprint()
+
+    assert run() == run()

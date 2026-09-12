@@ -1,0 +1,9500 @@
+{
+ "metadata": {
+  "generated_by": "experiments.reference, plain depth-limited minimax",
+  "seed": 2026,
+  "positions": 200,
+  "records": 1050,
+  "depth_plan": [
+   [
+    1,
+    200
+   ],
+   [
+    2,
+    200
+   ],
+   [
+    3,
+    200
+   ],
+   [
+    4,
+    200
+   ],
+   [
+    5,
+    200
+   ],
+   [
+    6,
+    40
+   ],
+   [
+    7,
+    10
+   ]
+  ],
+  "signature": {
+   "win": 10000,
+   "max_mate_distance": 42,
+   "evaluation": "full",
+   "three": 18,
+   "two": 3,
+   "center": 2,
+   "parity": 6
+  },
+  "seconds": 265.6
+ },
+ "records": [
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 1,
+   "value": 6,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 1,
+   "value": 16,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 1,
+   "value": -31,
+   "move": 5,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 1,
+   "value": 9999,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 1,
+   "value": 9,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 1,
+   "value": 6,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 1,
+   "value": 39,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 1,
+   "value": -7,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 1,
+   "value": 25,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 1,
+   "value": 19,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 1,
+   "value": -5,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 1,
+   "value": 14,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 1,
+   "value": 28,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 1,
+   "value": 40,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 1,
+   "value": 61,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 1,
+   "value": 7,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 1,
+   "value": 58,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 1,
+   "value": 69,
+   "move": 4,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 1,
+   "value": 59,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 1,
+   "value": 9,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 1,
+   "value": 34,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 1,
+   "value": 6,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 1,
+   "value": 11,
+   "move": 5,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 1,
+   "value": 46,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 1,
+   "value": 95,
+   "move": 4,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 1,
+   "value": 14,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 1,
+   "value": -46,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 1,
+   "value": 27,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2324256",
+   "plies": 7,
+   "depth": 1,
+   "value": 11,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "63154656552",
+   "plies": 11,
+   "depth": 1,
+   "value": 30,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "1341256",
+   "plies": 7,
+   "depth": 1,
+   "value": 13,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "642",
+   "plies": 3,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "47",
+   "plies": 2,
+   "depth": 1,
+   "value": 19,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "32517471666656577345175563",
+   "plies": 26,
+   "depth": 1,
+   "value": 20,
+   "move": 3,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "5214224",
+   "plies": 7,
+   "depth": 1,
+   "value": 4,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2556262277765",
+   "plies": 13,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7671",
+   "plies": 4,
+   "depth": 1,
+   "value": 19,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "737223563242261727",
+   "plies": 18,
+   "depth": 1,
+   "value": 24,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "4654513253",
+   "plies": 10,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "466423",
+   "plies": 6,
+   "depth": 1,
+   "value": 5,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6514111357",
+   "plies": 10,
+   "depth": 1,
+   "value": -3,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "37125277146427722",
+   "plies": 17,
+   "depth": 1,
+   "value": 53,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "642325746447362",
+   "plies": 15,
+   "depth": 1,
+   "value": 21,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "66455412621713665621",
+   "plies": 20,
+   "depth": 1,
+   "value": 142,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "264241526673",
+   "plies": 12,
+   "depth": 1,
+   "value": 54,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "172523445",
+   "plies": 9,
+   "depth": 1,
+   "value": 28,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6653",
+   "plies": 4,
+   "depth": 1,
+   "value": 30,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "61443577575173311",
+   "plies": 17,
+   "depth": 1,
+   "value": -1,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "154",
+   "plies": 3,
+   "depth": 1,
+   "value": 4,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4767545",
+   "plies": 7,
+   "depth": 1,
+   "value": -9,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7154544514246",
+   "plies": 13,
+   "depth": 1,
+   "value": 26,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "547",
+   "plies": 3,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "327533747",
+   "plies": 9,
+   "depth": 1,
+   "value": 23,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "35",
+   "plies": 2,
+   "depth": 1,
+   "value": 9,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "44717174412",
+   "plies": 11,
+   "depth": 1,
+   "value": 9999,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "1377253313212",
+   "plies": 13,
+   "depth": 1,
+   "value": 23,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "45613647",
+   "plies": 8,
+   "depth": 1,
+   "value": 42,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "63",
+   "plies": 2,
+   "depth": 1,
+   "value": 7,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4314532466",
+   "plies": 10,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4",
+   "plies": 1,
+   "depth": 1,
+   "value": 0,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "12734717",
+   "plies": 8,
+   "depth": 1,
+   "value": 28,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "22",
+   "plies": 2,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6742766327124253654",
+   "plies": 19,
+   "depth": 1,
+   "value": 17,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "55355463374225",
+   "plies": 14,
+   "depth": 1,
+   "value": 32,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "16572327465244646153",
+   "plies": 20,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "755",
+   "plies": 3,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5214544537725543767711222",
+   "plies": 25,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "65614233111736246416136",
+   "plies": 23,
+   "depth": 1,
+   "value": 93,
+   "move": 3,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "6237146",
+   "plies": 7,
+   "depth": 1,
+   "value": 7,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "575334",
+   "plies": 6,
+   "depth": 1,
+   "value": 53,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "26765423753331752",
+   "plies": 17,
+   "depth": 1,
+   "value": 34,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2",
+   "plies": 1,
+   "depth": 1,
+   "value": 4,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3774764",
+   "plies": 7,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5571173434376312211",
+   "plies": 19,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "216375541655565",
+   "plies": 15,
+   "depth": 1,
+   "value": 34,
+   "move": 5,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "3217",
+   "plies": 4,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4323",
+   "plies": 4,
+   "depth": 1,
+   "value": 6,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2327763112",
+   "plies": 10,
+   "depth": 1,
+   "value": 30,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "413417135613522331366172467544",
+   "plies": 30,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "2536143564",
+   "plies": 10,
+   "depth": 1,
+   "value": -7,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "67414333267113741",
+   "plies": 17,
+   "depth": 1,
+   "value": 51,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6251132167313",
+   "plies": 13,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "376",
+   "plies": 3,
+   "depth": 1,
+   "value": 0,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "667714",
+   "plies": 6,
+   "depth": 1,
+   "value": 0,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "214226723544741376",
+   "plies": 18,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6161377436717455463",
+   "plies": 19,
+   "depth": 1,
+   "value": 9999,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2537434576617523734",
+   "plies": 19,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "173",
+   "plies": 3,
+   "depth": 1,
+   "value": 5,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6",
+   "plies": 1,
+   "depth": 1,
+   "value": 4,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "11324274144133",
+   "plies": 14,
+   "depth": 1,
+   "value": 43,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "752112441561",
+   "plies": 12,
+   "depth": 1,
+   "value": -31,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7577441737",
+   "plies": 10,
+   "depth": 1,
+   "value": 9999,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "27575513",
+   "plies": 8,
+   "depth": 1,
+   "value": 6,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "7354235612",
+   "plies": 10,
+   "depth": 1,
+   "value": 11,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "51675721566",
+   "plies": 11,
+   "depth": 1,
+   "value": -22,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "663262163",
+   "plies": 9,
+   "depth": 1,
+   "value": 19,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "425246176",
+   "plies": 9,
+   "depth": 1,
+   "value": 5,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "45171226",
+   "plies": 8,
+   "depth": 1,
+   "value": 36,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3724536462",
+   "plies": 10,
+   "depth": 1,
+   "value": -21,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2125341",
+   "plies": 7,
+   "depth": 1,
+   "value": 16,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "127",
+   "plies": 3,
+   "depth": 1,
+   "value": 11,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "116671426416674161343342",
+   "plies": 24,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "261",
+   "plies": 3,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2312137213",
+   "plies": 10,
+   "depth": 1,
+   "value": 9999,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "13525637",
+   "plies": 8,
+   "depth": 1,
+   "value": 36,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "75231517",
+   "plies": 8,
+   "depth": 1,
+   "value": 2,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "725466172",
+   "plies": 9,
+   "depth": 1,
+   "value": 35,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "726162222677566425655514",
+   "plies": 24,
+   "depth": 1,
+   "value": -96,
+   "move": 3,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "3",
+   "plies": 1,
+   "depth": 1,
+   "value": 2,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "23745633623274437166",
+   "plies": 20,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "57764336644",
+   "plies": 11,
+   "depth": 1,
+   "value": 1,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5",
+   "plies": 1,
+   "depth": 1,
+   "value": 2,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "45744115754",
+   "plies": 11,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3347537712421345277",
+   "plies": 19,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "744614345",
+   "plies": 9,
+   "depth": 1,
+   "value": 37,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3146351455216254272156544",
+   "plies": 25,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "2665411117555744611363",
+   "plies": 22,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "71741167452",
+   "plies": 11,
+   "depth": 1,
+   "value": 7,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "32452164672373217",
+   "plies": 17,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "722",
+   "plies": 3,
+   "depth": 1,
+   "value": 12,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "12646454522",
+   "plies": 11,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "667532521",
+   "plies": 9,
+   "depth": 1,
+   "value": 26,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4561537676541",
+   "plies": 13,
+   "depth": 1,
+   "value": 19,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "1567",
+   "plies": 4,
+   "depth": 1,
+   "value": 7,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6333413134377267721172",
+   "plies": 22,
+   "depth": 1,
+   "value": 8,
+   "move": 1,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "35761765772671565576135",
+   "plies": 23,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "2173224622646574537145",
+   "plies": 22,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "323433651353661754464",
+   "plies": 21,
+   "depth": 1,
+   "value": -14,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "57462",
+   "plies": 5,
+   "depth": 1,
+   "value": -6,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "16341234731456324",
+   "plies": 17,
+   "depth": 1,
+   "value": 40,
+   "move": 5,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6556163622145132614344442",
+   "plies": 25,
+   "depth": 1,
+   "value": 46,
+   "move": 4,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "17456342132756773",
+   "plies": 17,
+   "depth": 1,
+   "value": 1,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "514744573633451117455",
+   "plies": 21,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "526652241473",
+   "plies": 12,
+   "depth": 1,
+   "value": 20,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "264337771327157",
+   "plies": 15,
+   "depth": 1,
+   "value": 24,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6537437731773544276",
+   "plies": 19,
+   "depth": 1,
+   "value": 34,
+   "move": 4,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "1236217663624311766742453523751",
+   "plies": 31,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "471163257743",
+   "plies": 12,
+   "depth": 1,
+   "value": 34,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "347262273555217225744616",
+   "plies": 24,
+   "depth": 1,
+   "value": 32,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "22573217377",
+   "plies": 11,
+   "depth": 1,
+   "value": -7,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "15537673562657255141727",
+   "plies": 23,
+   "depth": 1,
+   "value": 9999,
+   "move": 5,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "162654216243274513457413671",
+   "plies": 27,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "76764412325757",
+   "plies": 14,
+   "depth": 1,
+   "value": 17,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "734362416642",
+   "plies": 12,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "51",
+   "plies": 2,
+   "depth": 1,
+   "value": 19,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5424",
+   "plies": 4,
+   "depth": 1,
+   "value": 3,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "366223",
+   "plies": 6,
+   "depth": 1,
+   "value": 7,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3214634",
+   "plies": 7,
+   "depth": 1,
+   "value": 33,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "46736724135661556357572522",
+   "plies": 26,
+   "depth": 1,
+   "value": -28,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "44",
+   "plies": 2,
+   "depth": 1,
+   "value": 13,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "512",
+   "plies": 3,
+   "depth": 1,
+   "value": 0,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "434141",
+   "plies": 6,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "45444334",
+   "plies": 8,
+   "depth": 1,
+   "value": 54,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2322",
+   "plies": 4,
+   "depth": 1,
+   "value": 11,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "3654641246524336431335572",
+   "plies": 25,
+   "depth": 1,
+   "value": -8,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "62437672464672",
+   "plies": 14,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "33636643143",
+   "plies": 11,
+   "depth": 1,
+   "value": 15,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "47533132574",
+   "plies": 11,
+   "depth": 1,
+   "value": -68,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "31232154144254323",
+   "plies": 17,
+   "depth": 1,
+   "value": 9999,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "65134157",
+   "plies": 8,
+   "depth": 1,
+   "value": 28,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "375",
+   "plies": 3,
+   "depth": 1,
+   "value": -2,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "323",
+   "plies": 3,
+   "depth": 1,
+   "value": -2,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "51742714525573",
+   "plies": 14,
+   "depth": 1,
+   "value": 31,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5176421135112372345432124",
+   "plies": 25,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "276",
+   "plies": 3,
+   "depth": 1,
+   "value": 2,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "75647672163",
+   "plies": 11,
+   "depth": 1,
+   "value": 37,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "77221415513773722447111",
+   "plies": 23,
+   "depth": 1,
+   "value": 6,
+   "move": 3,
+   "nodes": 5,
+   "leaves": 5
+  },
+  {
+   "moves": "12616444127",
+   "plies": 11,
+   "depth": 1,
+   "value": 38,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "441243623512665113664621",
+   "plies": 24,
+   "depth": 1,
+   "value": 9999,
+   "move": 2,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "2752531112536",
+   "plies": 13,
+   "depth": 1,
+   "value": 39,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "332132172346",
+   "plies": 12,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "45462563",
+   "plies": 8,
+   "depth": 1,
+   "value": 29,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "11634421747117261",
+   "plies": 17,
+   "depth": 1,
+   "value": 24,
+   "move": 3,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "45333356",
+   "plies": 8,
+   "depth": 1,
+   "value": 34,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "61534157237155265",
+   "plies": 17,
+   "depth": 1,
+   "value": 9999,
+   "move": 0,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "26535176151411734535",
+   "plies": 20,
+   "depth": 1,
+   "value": 17,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "173717366",
+   "plies": 9,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "51362",
+   "plies": 5,
+   "depth": 1,
+   "value": -2,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6115175743211263453213",
+   "plies": 22,
+   "depth": 1,
+   "value": 9999,
+   "move": 1,
+   "nodes": 6,
+   "leaves": 6
+  },
+  {
+   "moves": "243426761111157",
+   "plies": 15,
+   "depth": 1,
+   "value": 58,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "417422363",
+   "plies": 9,
+   "depth": 1,
+   "value": 1,
+   "move": 2,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5771332562617212511",
+   "plies": 19,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "4363165154",
+   "plies": 10,
+   "depth": 1,
+   "value": 9999,
+   "move": 6,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "2161474267374373",
+   "plies": 16,
+   "depth": 1,
+   "value": 9999,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "511",
+   "plies": 3,
+   "depth": 1,
+   "value": 5,
+   "move": 3,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "1233352325431444",
+   "plies": 16,
+   "depth": 1,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "5337131362513",
+   "plies": 13,
+   "depth": 1,
+   "value": 6,
+   "move": 4,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "6664212131476714447313",
+   "plies": 22,
+   "depth": 1,
+   "value": 57,
+   "move": 1,
+   "nodes": 7,
+   "leaves": 7
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 2,
+   "value": 0,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 40,
+   "leaves": 34
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 2,
+   "value": 9999,
+   "move": 1,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 47,
+   "leaves": 41
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 2,
+   "value": -30,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 42,
+   "leaves": 37
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 2,
+   "value": 8,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 34,
+   "leaves": 29
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 35,
+   "leaves": 30
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 2,
+   "value": 0,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 2,
+   "value": 2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 2,
+   "value": -35,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 2,
+   "value": -1,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 2,
+   "value": 9,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 2,
+   "value": -18,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 2,
+   "value": -45,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 2,
+   "value": 10,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 36,
+   "leaves": 31
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 2,
+   "value": 30,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 2,
+   "value": 1,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 2,
+   "value": 27,
+   "move": 4,
+   "nodes": 54,
+   "leaves": 47
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 2,
+   "value": 23,
+   "move": 3,
+   "nodes": 29,
+   "leaves": 24
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 2,
+   "value": 20,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 2,
+   "value": 2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 2,
+   "value": 10,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 2,
+   "value": -13,
+   "move": 5,
+   "nodes": 38,
+   "leaves": 32
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 2,
+   "value": 7,
+   "move": 6,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 2,
+   "value": 42,
+   "move": 4,
+   "nodes": 30,
+   "leaves": 25
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 2,
+   "value": -15,
+   "move": 0,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 2,
+   "value": 4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2324256",
+   "plies": 7,
+   "depth": 2,
+   "value": -4,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "63154656552",
+   "plies": 11,
+   "depth": 2,
+   "value": 7,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "1341256",
+   "plies": 7,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "642",
+   "plies": 3,
+   "depth": 2,
+   "value": -1,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "47",
+   "plies": 2,
+   "depth": 2,
+   "value": 9,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "32517471666656577345175563",
+   "plies": 26,
+   "depth": 2,
+   "value": -53,
+   "move": 3,
+   "nodes": 29,
+   "leaves": 24
+  },
+  {
+   "moves": "5214224",
+   "plies": 7,
+   "depth": 2,
+   "value": -26,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2556262277765",
+   "plies": 13,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "7671",
+   "plies": 4,
+   "depth": 2,
+   "value": 1,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "737223563242261727",
+   "plies": 18,
+   "depth": 2,
+   "value": -5,
+   "move": 4,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "4654513253",
+   "plies": 10,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "466423",
+   "plies": 6,
+   "depth": 2,
+   "value": -10,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6514111357",
+   "plies": 10,
+   "depth": 2,
+   "value": -18,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "37125277146427722",
+   "plies": 17,
+   "depth": 2,
+   "value": 19,
+   "move": 4,
+   "nodes": 54,
+   "leaves": 47
+  },
+  {
+   "moves": "642325746447362",
+   "plies": 15,
+   "depth": 2,
+   "value": -63,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "66455412621713665621",
+   "plies": 20,
+   "depth": 2,
+   "value": 119,
+   "move": 3,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "264241526673",
+   "plies": 12,
+   "depth": 2,
+   "value": 29,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "172523445",
+   "plies": 9,
+   "depth": 2,
+   "value": 5,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6653",
+   "plies": 4,
+   "depth": 2,
+   "value": 3,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "61443577575173311",
+   "plies": 17,
+   "depth": 2,
+   "value": -43,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "154",
+   "plies": 3,
+   "depth": 2,
+   "value": -7,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "4767545",
+   "plies": 7,
+   "depth": 2,
+   "value": -34,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "7154544514246",
+   "plies": 13,
+   "depth": 2,
+   "value": 18,
+   "move": 4,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "547",
+   "plies": 3,
+   "depth": 2,
+   "value": 2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "327533747",
+   "plies": 9,
+   "depth": 2,
+   "value": -10,
+   "move": 6,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "35",
+   "plies": 2,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "44717174412",
+   "plies": 11,
+   "depth": 2,
+   "value": 9999,
+   "move": 0,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "1377253313212",
+   "plies": 13,
+   "depth": 2,
+   "value": -1,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "45613647",
+   "plies": 8,
+   "depth": 2,
+   "value": 21,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "63",
+   "plies": 2,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "4314532466",
+   "plies": 10,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "4",
+   "plies": 1,
+   "depth": 2,
+   "value": -11,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "12734717",
+   "plies": 8,
+   "depth": 2,
+   "value": 2,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "22",
+   "plies": 2,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6742766327124253654",
+   "plies": 19,
+   "depth": 2,
+   "value": -50,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "55355463374225",
+   "plies": 14,
+   "depth": 2,
+   "value": 6,
+   "move": 0,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "16572327465244646153",
+   "plies": 20,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "755",
+   "plies": 3,
+   "depth": 2,
+   "value": -3,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "5214544537725543767711222",
+   "plies": 25,
+   "depth": 2,
+   "value": -9,
+   "move": 3,
+   "nodes": 53,
+   "leaves": 46
+  },
+  {
+   "moves": "65614233111736246416136",
+   "plies": 23,
+   "depth": 2,
+   "value": 63,
+   "move": 3,
+   "nodes": 30,
+   "leaves": 25
+  },
+  {
+   "moves": "6237146",
+   "plies": 7,
+   "depth": 2,
+   "value": -10,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "575334",
+   "plies": 6,
+   "depth": 2,
+   "value": 36,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "26765423753331752",
+   "plies": 17,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2",
+   "plies": 1,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "3774764",
+   "plies": 7,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "5571173434376312211",
+   "plies": 19,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "216375541655565",
+   "plies": 15,
+   "depth": 2,
+   "value": 8,
+   "move": 6,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "3217",
+   "plies": 4,
+   "depth": 2,
+   "value": 4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "4323",
+   "plies": 4,
+   "depth": 2,
+   "value": -14,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2327763112",
+   "plies": 10,
+   "depth": 2,
+   "value": 18,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "413417135613522331366172467544",
+   "plies": 30,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 24,
+   "leaves": 20
+  },
+  {
+   "moves": "2536143564",
+   "plies": 10,
+   "depth": 2,
+   "value": -73,
+   "move": 6,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "67414333267113741",
+   "plies": 17,
+   "depth": 2,
+   "value": 4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6251132167313",
+   "plies": 13,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "376",
+   "plies": 3,
+   "depth": 2,
+   "value": -9,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "667714",
+   "plies": 6,
+   "depth": 2,
+   "value": -11,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "214226723544741376",
+   "plies": 18,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "6161377436717455463",
+   "plies": 19,
+   "depth": 2,
+   "value": 9999,
+   "move": 0,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "2537434576617523734",
+   "plies": 19,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 42,
+   "leaves": 37
+  },
+  {
+   "moves": "173",
+   "plies": 3,
+   "depth": 2,
+   "value": -4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6",
+   "plies": 1,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "11324274144133",
+   "plies": 14,
+   "depth": 2,
+   "value": -10,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "752112441561",
+   "plies": 12,
+   "depth": 2,
+   "value": -68,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "7577441737",
+   "plies": 10,
+   "depth": 2,
+   "value": 9999,
+   "move": 1,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "27575513",
+   "plies": 8,
+   "depth": 2,
+   "value": -14,
+   "move": 6,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "7354235612",
+   "plies": 10,
+   "depth": 2,
+   "value": -20,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "51675721566",
+   "plies": 11,
+   "depth": 2,
+   "value": -87,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "663262163",
+   "plies": 9,
+   "depth": 2,
+   "value": -14,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "425246176",
+   "plies": 9,
+   "depth": 2,
+   "value": -35,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "45171226",
+   "plies": 8,
+   "depth": 2,
+   "value": 21,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "3724536462",
+   "plies": 10,
+   "depth": 2,
+   "value": -57,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2125341",
+   "plies": 7,
+   "depth": 2,
+   "value": -9,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "127",
+   "plies": 3,
+   "depth": 2,
+   "value": 4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "116671426416674161343342",
+   "plies": 24,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 19,
+   "leaves": 16
+  },
+  {
+   "moves": "261",
+   "plies": 3,
+   "depth": 2,
+   "value": 2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "2312137213",
+   "plies": 10,
+   "depth": 2,
+   "value": 9999,
+   "move": 0,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "13525637",
+   "plies": 8,
+   "depth": 2,
+   "value": 23,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "75231517",
+   "plies": 8,
+   "depth": 2,
+   "value": -29,
+   "move": 0,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "725466172",
+   "plies": 9,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "726162222677566425655514",
+   "plies": 24,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 29,
+   "leaves": 24
+  },
+  {
+   "moves": "3",
+   "plies": 1,
+   "depth": 2,
+   "value": -7,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "23745633623274437166",
+   "plies": 20,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "57764336644",
+   "plies": 11,
+   "depth": 2,
+   "value": -33,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "5",
+   "plies": 1,
+   "depth": 2,
+   "value": -7,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "45744115754",
+   "plies": 11,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "3347537712421345277",
+   "plies": 19,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "744614345",
+   "plies": 9,
+   "depth": 2,
+   "value": 15,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "3146351455216254272156544",
+   "plies": 25,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 35,
+   "leaves": 30
+  },
+  {
+   "moves": "2665411117555744611363",
+   "plies": 22,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 36,
+   "leaves": 31
+  },
+  {
+   "moves": "71741167452",
+   "plies": 11,
+   "depth": 2,
+   "value": -13,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "32452164672373217",
+   "plies": 17,
+   "depth": 2,
+   "value": -24,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "722",
+   "plies": 3,
+   "depth": 2,
+   "value": 0,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "12646454522",
+   "plies": 11,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "667532521",
+   "plies": 9,
+   "depth": 2,
+   "value": 0,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "4561537676541",
+   "plies": 13,
+   "depth": 2,
+   "value": -9,
+   "move": 5,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "1567",
+   "plies": 4,
+   "depth": 2,
+   "value": -2,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6333413134377267721172",
+   "plies": 22,
+   "depth": 2,
+   "value": -25,
+   "move": 1,
+   "nodes": 41,
+   "leaves": 35
+  },
+  {
+   "moves": "35761765772671565576135",
+   "plies": 23,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 20,
+   "leaves": 17
+  },
+  {
+   "moves": "2173224622646574537145",
+   "plies": 22,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "323433651353661754464",
+   "plies": 21,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "57462",
+   "plies": 5,
+   "depth": 2,
+   "value": -18,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "16341234731456324",
+   "plies": 17,
+   "depth": 2,
+   "value": -15,
+   "move": 0,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6556163622145132614344442",
+   "plies": 25,
+   "depth": 2,
+   "value": -9998,
+   "move": 2,
+   "nodes": 41,
+   "leaves": 35
+  },
+  {
+   "moves": "17456342132756773",
+   "plies": 17,
+   "depth": 2,
+   "value": -55,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "514744573633451117455",
+   "plies": 21,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 47,
+   "leaves": 41
+  },
+  {
+   "moves": "526652241473",
+   "plies": 12,
+   "depth": 2,
+   "value": -17,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "264337771327157",
+   "plies": 15,
+   "depth": 2,
+   "value": -14,
+   "move": 3,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "6537437731773544276",
+   "plies": 19,
+   "depth": 2,
+   "value": -15,
+   "move": 4,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "1236217663624311766742453523751",
+   "plies": 31,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 27,
+   "leaves": 23
+  },
+  {
+   "moves": "471163257743",
+   "plies": 12,
+   "depth": 2,
+   "value": 5,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "347262273555217225744616",
+   "plies": 24,
+   "depth": 2,
+   "value": -17,
+   "move": 2,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "22573217377",
+   "plies": 11,
+   "depth": 2,
+   "value": -32,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "15537673562657255141727",
+   "plies": 23,
+   "depth": 2,
+   "value": 9999,
+   "move": 5,
+   "nodes": 35,
+   "leaves": 30
+  },
+  {
+   "moves": "162654216243274513457413671",
+   "plies": 27,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 47,
+   "leaves": 41
+  },
+  {
+   "moves": "76764412325757",
+   "plies": 14,
+   "depth": 2,
+   "value": -14,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "734362416642",
+   "plies": 12,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 42,
+   "leaves": 37
+  },
+  {
+   "moves": "51",
+   "plies": 2,
+   "depth": 2,
+   "value": 9,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "5424",
+   "plies": 4,
+   "depth": 2,
+   "value": -13,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "366223",
+   "plies": 6,
+   "depth": 2,
+   "value": -4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "3214634",
+   "plies": 7,
+   "depth": 2,
+   "value": 20,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "46736724135661556357572522",
+   "plies": 26,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 41,
+   "leaves": 35
+  },
+  {
+   "moves": "44",
+   "plies": 2,
+   "depth": 2,
+   "value": 0,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "512",
+   "plies": 3,
+   "depth": 2,
+   "value": -9,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "434141",
+   "plies": 6,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "45444334",
+   "plies": 8,
+   "depth": 2,
+   "value": 41,
+   "move": 4,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "2322",
+   "plies": 4,
+   "depth": 2,
+   "value": 1,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "3654641246524336431335572",
+   "plies": 25,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 41,
+   "leaves": 35
+  },
+  {
+   "moves": "62437672464672",
+   "plies": 14,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 35,
+   "leaves": 31
+  },
+  {
+   "moves": "33636643143",
+   "plies": 11,
+   "depth": 2,
+   "value": -9998,
+   "move": 3,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "47533132574",
+   "plies": 11,
+   "depth": 2,
+   "value": -110,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "31232154144254323",
+   "plies": 17,
+   "depth": 2,
+   "value": 9999,
+   "move": 0,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "65134157",
+   "plies": 8,
+   "depth": 2,
+   "value": 15,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "375",
+   "plies": 3,
+   "depth": 2,
+   "value": -14,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "323",
+   "plies": 3,
+   "depth": 2,
+   "value": -14,
+   "move": 2,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "51742714525573",
+   "plies": 14,
+   "depth": 2,
+   "value": -5,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "5176421135112372345432124",
+   "plies": 25,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 24,
+   "leaves": 21
+  },
+  {
+   "moves": "276",
+   "plies": 3,
+   "depth": 2,
+   "value": -4,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "75647672163",
+   "plies": 11,
+   "depth": 2,
+   "value": 6,
+   "move": 6,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "77221415513773722447111",
+   "plies": 23,
+   "depth": 2,
+   "value": -26,
+   "move": 3,
+   "nodes": 30,
+   "leaves": 25
+  },
+  {
+   "moves": "12616444127",
+   "plies": 11,
+   "depth": 2,
+   "value": 0,
+   "move": 1,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "441243623512665113664621",
+   "plies": 24,
+   "depth": 2,
+   "value": 9999,
+   "move": 2,
+   "nodes": 35,
+   "leaves": 30
+  },
+  {
+   "moves": "2752531112536",
+   "plies": 13,
+   "depth": 2,
+   "value": 23,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "332132172346",
+   "plies": 12,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "45462563",
+   "plies": 8,
+   "depth": 2,
+   "value": 1,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "11634421747117261",
+   "plies": 17,
+   "depth": 2,
+   "value": -11,
+   "move": 4,
+   "nodes": 42,
+   "leaves": 36
+  },
+  {
+   "moves": "45333356",
+   "plies": 8,
+   "depth": 2,
+   "value": 10,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "61534157237155265",
+   "plies": 17,
+   "depth": 2,
+   "value": 9999,
+   "move": 0,
+   "nodes": 48,
+   "leaves": 42
+  },
+  {
+   "moves": "26535176151411734535",
+   "plies": 20,
+   "depth": 2,
+   "value": -23,
+   "move": 4,
+   "nodes": 54,
+   "leaves": 47
+  },
+  {
+   "moves": "173717366",
+   "plies": 9,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "51362",
+   "plies": 5,
+   "depth": 2,
+   "value": -14,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "6115175743211263453213",
+   "plies": 22,
+   "depth": 2,
+   "value": 9999,
+   "move": 1,
+   "nodes": 36,
+   "leaves": 31
+  },
+  {
+   "moves": "243426761111157",
+   "plies": 15,
+   "depth": 2,
+   "value": 18,
+   "move": 5,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "417422363",
+   "plies": 9,
+   "depth": 2,
+   "value": -33,
+   "move": 4,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "5771332562617212511",
+   "plies": 19,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 41,
+   "leaves": 36
+  },
+  {
+   "moves": "4363165154",
+   "plies": 10,
+   "depth": 2,
+   "value": 9999,
+   "move": 6,
+   "nodes": 49,
+   "leaves": 43
+  },
+  {
+   "moves": "2161474267374373",
+   "plies": 16,
+   "depth": 2,
+   "value": 9999,
+   "move": 3,
+   "nodes": 42,
+   "leaves": 37
+  },
+  {
+   "moves": "511",
+   "plies": 3,
+   "depth": 2,
+   "value": -7,
+   "move": 3,
+   "nodes": 56,
+   "leaves": 49
+  },
+  {
+   "moves": "1233352325431444",
+   "plies": 16,
+   "depth": 2,
+   "value": 9999,
+   "move": 4,
+   "nodes": 41,
+   "leaves": 36
+  },
+  {
+   "moves": "5337131362513",
+   "plies": 13,
+   "depth": 2,
+   "value": -26,
+   "move": 4,
+   "nodes": 55,
+   "leaves": 48
+  },
+  {
+   "moves": "6664212131476714447313",
+   "plies": 22,
+   "depth": 2,
+   "value": 22,
+   "move": 1,
+   "nodes": 54,
+   "leaves": 47
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 3,
+   "value": 11,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 3,
+   "value": 25,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 143,
+   "leaves": 118
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 3,
+   "value": 9999,
+   "move": 1,
+   "nodes": 283,
+   "leaves": 242
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 231,
+   "leaves": 196
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 3,
+   "value": -6,
+   "move": 5,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 251,
+   "leaves": 216
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 3,
+   "value": 11,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 3,
+   "value": 44,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 182,
+   "leaves": 149
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 176,
+   "leaves": 146
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 3,
+   "value": 18,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 3,
+   "value": 12,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 3,
+   "value": -6,
+   "move": 3,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 3,
+   "value": 38,
+   "move": 5,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 3,
+   "value": 32,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 3,
+   "value": 8,
+   "move": 2,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 3,
+   "value": -18,
+   "move": 2,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 3,
+   "value": 14,
+   "move": 5,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 3,
+   "value": 29,
+   "move": 0,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 216,
+   "leaves": 181
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 3,
+   "value": 9997,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 3,
+   "value": 13,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 3,
+   "value": 51,
+   "move": 4,
+   "nodes": 359,
+   "leaves": 305
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 3,
+   "value": 9997,
+   "move": 3,
+   "nodes": 120,
+   "leaves": 95
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 3,
+   "value": 9997,
+   "move": 4,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 3,
+   "value": 11,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 3,
+   "value": 41,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 3,
+   "value": 11,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 3,
+   "value": 9,
+   "move": 5,
+   "nodes": 183,
+   "leaves": 146
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 3,
+   "value": 35,
+   "move": 5,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 3,
+   "value": 9997,
+   "move": 4,
+   "nodes": 133,
+   "leaves": 107
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 3,
+   "value": 17,
+   "move": 0,
+   "nodes": 392,
+   "leaves": 337
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 3,
+   "value": 16,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 307,
+   "leaves": 264
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 191,
+   "leaves": 160
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 3,
+   "value": 38,
+   "move": 3,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "2324256",
+   "plies": 7,
+   "depth": 3,
+   "value": 9,
+   "move": 1,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "63154656552",
+   "plies": 11,
+   "depth": 3,
+   "value": 27,
+   "move": 2,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "1341256",
+   "plies": 7,
+   "depth": 3,
+   "value": 24,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "642",
+   "plies": 3,
+   "depth": 3,
+   "value": 10,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "47",
+   "plies": 2,
+   "depth": 3,
+   "value": 32,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "32517471666656577345175563",
+   "plies": 26,
+   "depth": 3,
+   "value": 10,
+   "move": 3,
+   "nodes": 122,
+   "leaves": 97
+  },
+  {
+   "moves": "5214224",
+   "plies": 7,
+   "depth": 3,
+   "value": -6,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "2556262277765",
+   "plies": 13,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 342,
+   "leaves": 294
+  },
+  {
+   "moves": "7671",
+   "plies": 4,
+   "depth": 3,
+   "value": 16,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "737223563242261727",
+   "plies": 18,
+   "depth": 3,
+   "value": 30,
+   "move": 3,
+   "nodes": 257,
+   "leaves": 215
+  },
+  {
+   "moves": "4654513253",
+   "plies": 10,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "466423",
+   "plies": 6,
+   "depth": 3,
+   "value": 5,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6514111357",
+   "plies": 10,
+   "depth": 3,
+   "value": 0,
+   "move": 1,
+   "nodes": 356,
+   "leaves": 306
+  },
+  {
+   "moves": "37125277146427722",
+   "plies": 17,
+   "depth": 3,
+   "value": 65,
+   "move": 3,
+   "nodes": 359,
+   "leaves": 305
+  },
+  {
+   "moves": "642325746447362",
+   "plies": 15,
+   "depth": 3,
+   "value": -32,
+   "move": 1,
+   "nodes": 349,
+   "leaves": 300
+  },
+  {
+   "moves": "66455412621713665621",
+   "plies": 20,
+   "depth": 3,
+   "value": 147,
+   "move": 3,
+   "nodes": 257,
+   "leaves": 215
+  },
+  {
+   "moves": "264241526673",
+   "plies": 12,
+   "depth": 3,
+   "value": 9997,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "172523445",
+   "plies": 9,
+   "depth": 3,
+   "value": 42,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6653",
+   "plies": 4,
+   "depth": 3,
+   "value": 23,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "61443577575173311",
+   "plies": 17,
+   "depth": 3,
+   "value": -4,
+   "move": 3,
+   "nodes": 390,
+   "leaves": 335
+  },
+  {
+   "moves": "154",
+   "plies": 3,
+   "depth": 3,
+   "value": 5,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "4767545",
+   "plies": 7,
+   "depth": 3,
+   "value": -6,
+   "move": 2,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "7154544514246",
+   "plies": 13,
+   "depth": 3,
+   "value": 44,
+   "move": 4,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "547",
+   "plies": 3,
+   "depth": 3,
+   "value": 18,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "327533747",
+   "plies": 9,
+   "depth": 3,
+   "value": 21,
+   "move": 6,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "35",
+   "plies": 2,
+   "depth": 3,
+   "value": 16,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "44717174412",
+   "plies": 11,
+   "depth": 3,
+   "value": 9999,
+   "move": 0,
+   "nodes": 307,
+   "leaves": 264
+  },
+  {
+   "moves": "1377253313212",
+   "plies": 13,
+   "depth": 3,
+   "value": 40,
+   "move": 1,
+   "nodes": 349,
+   "leaves": 300
+  },
+  {
+   "moves": "45613647",
+   "plies": 8,
+   "depth": 3,
+   "value": 47,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "63",
+   "plies": 2,
+   "depth": 3,
+   "value": 10,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "4314532466",
+   "plies": 10,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 308,
+   "leaves": 265
+  },
+  {
+   "moves": "4",
+   "plies": 1,
+   "depth": 3,
+   "value": 0,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "12734717",
+   "plies": 8,
+   "depth": 3,
+   "value": 25,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "22",
+   "plies": 2,
+   "depth": 3,
+   "value": 12,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6742766327124253654",
+   "plies": 19,
+   "depth": 3,
+   "value": 5,
+   "move": 3,
+   "nodes": 355,
+   "leaves": 305
+  },
+  {
+   "moves": "55355463374225",
+   "plies": 14,
+   "depth": 3,
+   "value": 35,
+   "move": 1,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "16572327465244646153",
+   "plies": 20,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 341,
+   "leaves": 293
+  },
+  {
+   "moves": "755",
+   "plies": 3,
+   "depth": 3,
+   "value": 14,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "5214544537725543767711222",
+   "plies": 25,
+   "depth": 3,
+   "value": 13,
+   "move": 3,
+   "nodes": 331,
+   "leaves": 279
+  },
+  {
+   "moves": "65614233111736246416136",
+   "plies": 23,
+   "depth": 3,
+   "value": 85,
+   "move": 3,
+   "nodes": 154,
+   "leaves": 124
+  },
+  {
+   "moves": "6237146",
+   "plies": 7,
+   "depth": 3,
+   "value": 11,
+   "move": 1,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "575334",
+   "plies": 6,
+   "depth": 3,
+   "value": 63,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "26765423753331752",
+   "plies": 17,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 314,
+   "leaves": 270
+  },
+  {
+   "moves": "2",
+   "plies": 1,
+   "depth": 3,
+   "value": 8,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "3774764",
+   "plies": 7,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "5571173434376312211",
+   "plies": 19,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 323,
+   "leaves": 276
+  },
+  {
+   "moves": "216375541655565",
+   "plies": 15,
+   "depth": 3,
+   "value": 31,
+   "move": 2,
+   "nodes": 258,
+   "leaves": 216
+  },
+  {
+   "moves": "3217",
+   "plies": 4,
+   "depth": 3,
+   "value": 16,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "4323",
+   "plies": 4,
+   "depth": 3,
+   "value": 7,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "2327763112",
+   "plies": 10,
+   "depth": 3,
+   "value": 31,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "413417135613522331366172467544",
+   "plies": 30,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 97,
+   "leaves": 77
+  },
+  {
+   "moves": "2536143564",
+   "plies": 10,
+   "depth": 3,
+   "value": -17,
+   "move": 6,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "67414333267113741",
+   "plies": 17,
+   "depth": 3,
+   "value": 66,
+   "move": 3,
+   "nodes": 390,
+   "leaves": 335
+  },
+  {
+   "moves": "6251132167313",
+   "plies": 13,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 342,
+   "leaves": 294
+  },
+  {
+   "moves": "376",
+   "plies": 3,
+   "depth": 3,
+   "value": -2,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "667714",
+   "plies": 6,
+   "depth": 3,
+   "value": 1,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "214226723544741376",
+   "plies": 18,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 306,
+   "leaves": 263
+  },
+  {
+   "moves": "6161377436717455463",
+   "plies": 19,
+   "depth": 3,
+   "value": 9999,
+   "move": 0,
+   "nodes": 271,
+   "leaves": 233
+  },
+  {
+   "moves": "2537434576617523734",
+   "plies": 19,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 230,
+   "leaves": 198
+  },
+  {
+   "moves": "173",
+   "plies": 3,
+   "depth": 3,
+   "value": 7,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6",
+   "plies": 1,
+   "depth": 3,
+   "value": 8,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "11324274144133",
+   "plies": 14,
+   "depth": 3,
+   "value": 16,
+   "move": 4,
+   "nodes": 397,
+   "leaves": 341
+  },
+  {
+   "moves": "752112441561",
+   "plies": 12,
+   "depth": 3,
+   "value": -34,
+   "move": 5,
+   "nodes": 391,
+   "leaves": 336
+  },
+  {
+   "moves": "7577441737",
+   "plies": 10,
+   "depth": 3,
+   "value": 9999,
+   "move": 1,
+   "nodes": 294,
+   "leaves": 252
+  },
+  {
+   "moves": "27575513",
+   "plies": 8,
+   "depth": 3,
+   "value": 9,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "7354235612",
+   "plies": 10,
+   "depth": 3,
+   "value": 6,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "51675721566",
+   "plies": 11,
+   "depth": 3,
+   "value": -35,
+   "move": 4,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "663262163",
+   "plies": 9,
+   "depth": 3,
+   "value": 6,
+   "move": 1,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "425246176",
+   "plies": 9,
+   "depth": 3,
+   "value": -5,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "45171226",
+   "plies": 8,
+   "depth": 3,
+   "value": 50,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "3724536462",
+   "plies": 10,
+   "depth": 3,
+   "value": -21,
+   "move": 4,
+   "nodes": 350,
+   "leaves": 301
+  },
+  {
+   "moves": "2125341",
+   "plies": 7,
+   "depth": 3,
+   "value": 19,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "127",
+   "plies": 3,
+   "depth": 3,
+   "value": 13,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "116671426416674161343342",
+   "plies": 24,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 83,
+   "leaves": 66
+  },
+  {
+   "moves": "261",
+   "plies": 3,
+   "depth": 3,
+   "value": 12,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "2312137213",
+   "plies": 10,
+   "depth": 3,
+   "value": 9999,
+   "move": 0,
+   "nodes": 308,
+   "leaves": 265
+  },
+  {
+   "moves": "13525637",
+   "plies": 8,
+   "depth": 3,
+   "value": 51,
+   "move": 1,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "75231517",
+   "plies": 8,
+   "depth": 3,
+   "value": -5,
+   "move": 1,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "725466172",
+   "plies": 9,
+   "depth": 3,
+   "value": 34,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "726162222677566425655514",
+   "plies": 24,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 74,
+   "leaves": 59
+  },
+  {
+   "moves": "3",
+   "plies": 1,
+   "depth": 3,
+   "value": 0,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "23745633623274437166",
+   "plies": 20,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 282,
+   "leaves": 241
+  },
+  {
+   "moves": "57764336644",
+   "plies": 11,
+   "depth": 3,
+   "value": -5,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "5",
+   "plies": 1,
+   "depth": 3,
+   "value": 0,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "45744115754",
+   "plies": 11,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 342,
+   "leaves": 294
+  },
+  {
+   "moves": "3347537712421345277",
+   "plies": 19,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 256,
+   "leaves": 219
+  },
+  {
+   "moves": "744614345",
+   "plies": 9,
+   "depth": 3,
+   "value": 42,
+   "move": 4,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "3146351455216254272156544",
+   "plies": 25,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 198,
+   "leaves": 164
+  },
+  {
+   "moves": "2665411117555744611363",
+   "plies": 22,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 215,
+   "leaves": 180
+  },
+  {
+   "moves": "71741167452",
+   "plies": 11,
+   "depth": 3,
+   "value": 9,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "32452164672373217",
+   "plies": 17,
+   "depth": 3,
+   "value": 15,
+   "move": 1,
+   "nodes": 356,
+   "leaves": 306
+  },
+  {
+   "moves": "722",
+   "plies": 3,
+   "depth": 3,
+   "value": 12,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "12646454522",
+   "plies": 11,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "667532521",
+   "plies": 9,
+   "depth": 3,
+   "value": 26,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "4561537676541",
+   "plies": 13,
+   "depth": 3,
+   "value": 14,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "1567",
+   "plies": 4,
+   "depth": 3,
+   "value": 11,
+   "move": 5,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "6333413134377267721172",
+   "plies": 22,
+   "depth": 3,
+   "value": 33,
+   "move": 1,
+   "nodes": 205,
+   "leaves": 170
+  },
+  {
+   "moves": "35761765772671565576135",
+   "plies": 23,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 77,
+   "leaves": 62
+  },
+  {
+   "moves": "2173224622646574537145",
+   "plies": 22,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 255,
+   "leaves": 218
+  },
+  {
+   "moves": "323433651353661754464",
+   "plies": 21,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 220,
+   "leaves": 184
+  },
+  {
+   "moves": "57462",
+   "plies": 5,
+   "depth": 3,
+   "value": -7,
+   "move": 2,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "16341234731456324",
+   "plies": 17,
+   "depth": 3,
+   "value": 32,
+   "move": 0,
+   "nodes": 355,
+   "leaves": 305
+  },
+  {
+   "moves": "6556163622145132614344442",
+   "plies": 25,
+   "depth": 3,
+   "value": -9998,
+   "move": 2,
+   "nodes": 181,
+   "leaves": 150
+  },
+  {
+   "moves": "17456342132756773",
+   "plies": 17,
+   "depth": 3,
+   "value": -2,
+   "move": 4,
+   "nodes": 391,
+   "leaves": 336
+  },
+  {
+   "moves": "514744573633451117455",
+   "plies": 21,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 231,
+   "leaves": 196
+  },
+  {
+   "moves": "526652241473",
+   "plies": 12,
+   "depth": 3,
+   "value": 47,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "264337771327157",
+   "plies": 15,
+   "depth": 3,
+   "value": 15,
+   "move": 3,
+   "nodes": 338,
+   "leaves": 289
+  },
+  {
+   "moves": "6537437731773544276",
+   "plies": 19,
+   "depth": 3,
+   "value": 9997,
+   "move": 4,
+   "nodes": 257,
+   "leaves": 215
+  },
+  {
+   "moves": "1236217663624311766742453523751",
+   "plies": 31,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 94,
+   "leaves": 76
+  },
+  {
+   "moves": "471163257743",
+   "plies": 12,
+   "depth": 3,
+   "value": 51,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "347262273555217225744616",
+   "plies": 24,
+   "depth": 3,
+   "value": 9997,
+   "move": 2,
+   "nodes": 250,
+   "leaves": 209
+  },
+  {
+   "moves": "22573217377",
+   "plies": 11,
+   "depth": 3,
+   "value": -1,
+   "move": 3,
+   "nodes": 356,
+   "leaves": 306
+  },
+  {
+   "moves": "15537673562657255141727",
+   "plies": 23,
+   "depth": 3,
+   "value": 9999,
+   "move": 5,
+   "nodes": 200,
+   "leaves": 166
+  },
+  {
+   "moves": "162654216243274513457413671",
+   "plies": 27,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 234,
+   "leaves": 199
+  },
+  {
+   "moves": "76764412325757",
+   "plies": 14,
+   "depth": 3,
+   "value": 8,
+   "move": 2,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "734362416642",
+   "plies": 12,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 287,
+   "leaves": 247
+  },
+  {
+   "moves": "51",
+   "plies": 2,
+   "depth": 3,
+   "value": 32,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "5424",
+   "plies": 4,
+   "depth": 3,
+   "value": 1,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "366223",
+   "plies": 6,
+   "depth": 3,
+   "value": 13,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "3214634",
+   "plies": 7,
+   "depth": 3,
+   "value": 32,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "46736724135661556357572522",
+   "plies": 26,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 152,
+   "leaves": 126
+  },
+  {
+   "moves": "44",
+   "plies": 2,
+   "depth": 3,
+   "value": 23,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "512",
+   "plies": 3,
+   "depth": 3,
+   "value": -2,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "434141",
+   "plies": 6,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "45444334",
+   "plies": 8,
+   "depth": 3,
+   "value": 66,
+   "move": 4,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "2322",
+   "plies": 4,
+   "depth": 3,
+   "value": 8,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "3654641246524336431335572",
+   "plies": 25,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 185,
+   "leaves": 154
+  },
+  {
+   "moves": "62437672464672",
+   "plies": 14,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 188,
+   "leaves": 162
+  },
+  {
+   "moves": "33636643143",
+   "plies": 11,
+   "depth": 3,
+   "value": -9998,
+   "move": 3,
+   "nodes": 297,
+   "leaves": 254
+  },
+  {
+   "moves": "47533132574",
+   "plies": 11,
+   "depth": 3,
+   "value": -75,
+   "move": 1,
+   "nodes": 350,
+   "leaves": 301
+  },
+  {
+   "moves": "31232154144254323",
+   "plies": 17,
+   "depth": 3,
+   "value": 9999,
+   "move": 0,
+   "nodes": 270,
+   "leaves": 232
+  },
+  {
+   "moves": "65134157",
+   "plies": 8,
+   "depth": 3,
+   "value": 53,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "375",
+   "plies": 3,
+   "depth": 3,
+   "value": -7,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "323",
+   "plies": 3,
+   "depth": 3,
+   "value": 0,
+   "move": 1,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "51742714525573",
+   "plies": 14,
+   "depth": 3,
+   "value": 24,
+   "move": 3,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "5176421135112372345432124",
+   "plies": 25,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 109,
+   "leaves": 91
+  },
+  {
+   "moves": "276",
+   "plies": 3,
+   "depth": 3,
+   "value": 4,
+   "move": 6,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "75647672163",
+   "plies": 11,
+   "depth": 3,
+   "value": 29,
+   "move": 6,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "77221415513773722447111",
+   "plies": 23,
+   "depth": 3,
+   "value": 0,
+   "move": 1,
+   "nodes": 154,
+   "leaves": 124
+  },
+  {
+   "moves": "12616444127",
+   "plies": 11,
+   "depth": 3,
+   "value": 34,
+   "move": 2,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "441243623512665113664621",
+   "plies": 24,
+   "depth": 3,
+   "value": 9999,
+   "move": 2,
+   "nodes": 198,
+   "leaves": 164
+  },
+  {
+   "moves": "2752531112536",
+   "plies": 13,
+   "depth": 3,
+   "value": 54,
+   "move": 4,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "332132172346",
+   "plies": 12,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 342,
+   "leaves": 294
+  },
+  {
+   "moves": "45462563",
+   "plies": 8,
+   "depth": 3,
+   "value": 33,
+   "move": 4,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "11634421747117261",
+   "plies": 17,
+   "depth": 3,
+   "value": 20,
+   "move": 4,
+   "nodes": 228,
+   "leaves": 191
+  },
+  {
+   "moves": "45333356",
+   "plies": 8,
+   "depth": 3,
+   "value": 40,
+   "move": 4,
+   "nodes": 398,
+   "leaves": 342
+  },
+  {
+   "moves": "61534157237155265",
+   "plies": 17,
+   "depth": 3,
+   "value": 9999,
+   "move": 0,
+   "nodes": 324,
+   "leaves": 277
+  },
+  {
+   "moves": "26535176151411734535",
+   "plies": 20,
+   "depth": 3,
+   "value": 0,
+   "move": 4,
+   "nodes": 324,
+   "leaves": 276
+  },
+  {
+   "moves": "173717366",
+   "plies": 9,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 343,
+   "leaves": 295
+  },
+  {
+   "moves": "51362",
+   "plies": 5,
+   "depth": 3,
+   "value": -4,
+   "move": 3,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "6115175743211263453213",
+   "plies": 22,
+   "depth": 3,
+   "value": 9999,
+   "move": 1,
+   "nodes": 215,
+   "leaves": 180
+  },
+  {
+   "moves": "243426761111157",
+   "plies": 15,
+   "depth": 3,
+   "value": 9997,
+   "move": 2,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "417422363",
+   "plies": 9,
+   "depth": 3,
+   "value": -5,
+   "move": 4,
+   "nodes": 357,
+   "leaves": 307
+  },
+  {
+   "moves": "5771332562617212511",
+   "plies": 19,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 235,
+   "leaves": 201
+  },
+  {
+   "moves": "4363165154",
+   "plies": 10,
+   "depth": 3,
+   "value": 9999,
+   "move": 6,
+   "nodes": 336,
+   "leaves": 289
+  },
+  {
+   "moves": "2161474267374373",
+   "plies": 16,
+   "depth": 3,
+   "value": 9999,
+   "move": 3,
+   "nodes": 251,
+   "leaves": 216
+  },
+  {
+   "moves": "511",
+   "plies": 3,
+   "depth": 3,
+   "value": 7,
+   "move": 3,
+   "nodes": 399,
+   "leaves": 343
+  },
+  {
+   "moves": "1233352325431444",
+   "plies": 16,
+   "depth": 3,
+   "value": 9999,
+   "move": 4,
+   "nodes": 261,
+   "leaves": 223
+  },
+  {
+   "moves": "5337131362513",
+   "plies": 13,
+   "depth": 3,
+   "value": 6,
+   "move": 1,
+   "nodes": 379,
+   "leaves": 324
+  },
+  {
+   "moves": "6664212131476714447313",
+   "plies": 22,
+   "depth": 3,
+   "value": 58,
+   "move": 1,
+   "nodes": 318,
+   "leaves": 270
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 4,
+   "value": 0,
+   "move": 2,
+   "nodes": 2799,
+   "leaves": 2400
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 653,
+   "leaves": 529
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 4,
+   "value": 9999,
+   "move": 1,
+   "nodes": 1613,
+   "leaves": 1371
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 1083,
+   "leaves": 907
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 4,
+   "value": -29,
+   "move": 5,
+   "nodes": 2393,
+   "leaves": 2052
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 1313,
+   "leaves": 1124
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 4,
+   "value": -2,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 4,
+   "value": 7,
+   "move": 2,
+   "nodes": 2751,
+   "leaves": 2359
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 775,
+   "leaves": 622
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 803,
+   "leaves": 659
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 4,
+   "value": 2,
+   "move": 4,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2098,
+   "leaves": 1799
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 4,
+   "value": 3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 4,
+   "value": -42,
+   "move": 3,
+   "nodes": 2461,
+   "leaves": 2110
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 4,
+   "value": -6,
+   "move": 5,
+   "nodes": 2648,
+   "leaves": 2268
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 4,
+   "value": 12,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 4,
+   "value": -10,
+   "move": 2,
+   "nodes": 2767,
+   "leaves": 2370
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 4,
+   "value": -54,
+   "move": 2,
+   "nodes": 2419,
+   "leaves": 2074
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2716,
+   "leaves": 2329
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 4,
+   "value": 6,
+   "move": 4,
+   "nodes": 2725,
+   "leaves": 2334
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 1144,
+   "leaves": 954
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 4,
+   "value": 9997,
+   "move": 4,
+   "nodes": 2632,
+   "leaves": 2257
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 4,
+   "value": -1,
+   "move": 4,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 2149,
+   "leaves": 1843
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 4,
+   "value": 24,
+   "move": 0,
+   "nodes": 2229,
+   "leaves": 1878
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 4,
+   "value": 9997,
+   "move": 3,
+   "nodes": 450,
+   "leaves": 347
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 4,
+   "value": 9997,
+   "move": 4,
+   "nodes": 2646,
+   "leaves": 2266
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2148,
+   "leaves": 1842
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 4,
+   "value": 15,
+   "move": 1,
+   "nodes": 2798,
+   "leaves": 2399
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 4,
+   "value": -2,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 4,
+   "value": -18,
+   "move": 5,
+   "nodes": 772,
+   "leaves": 591
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 4,
+   "value": 3,
+   "move": 6,
+   "nodes": 2412,
+   "leaves": 2051
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 4,
+   "value": 9997,
+   "move": 4,
+   "nodes": 511,
+   "leaves": 405
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 4,
+   "value": -23,
+   "move": 4,
+   "nodes": 2736,
+   "leaves": 2346
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 4,
+   "value": 3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1761,
+   "leaves": 1508
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 1051,
+   "leaves": 874
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 4,
+   "value": 6,
+   "move": 3,
+   "nodes": 2648,
+   "leaves": 2268
+  },
+  {
+   "moves": "2324256",
+   "plies": 7,
+   "depth": 4,
+   "value": -10,
+   "move": 1,
+   "nodes": 2463,
+   "leaves": 2112
+  },
+  {
+   "moves": "63154656552",
+   "plies": 11,
+   "depth": 4,
+   "value": 2,
+   "move": 5,
+   "nodes": 2731,
+   "leaves": 2339
+  },
+  {
+   "moves": "1341256",
+   "plies": 7,
+   "depth": 4,
+   "value": -2,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "642",
+   "plies": 3,
+   "depth": 4,
+   "value": -4,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "47",
+   "plies": 2,
+   "depth": 4,
+   "value": 12,
+   "move": 2,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "32517471666656577345175563",
+   "plies": 26,
+   "depth": 4,
+   "value": -9996,
+   "move": 3,
+   "nodes": 506,
+   "leaves": 396
+  },
+  {
+   "moves": "5214224",
+   "plies": 7,
+   "depth": 4,
+   "value": -31,
+   "move": 4,
+   "nodes": 2799,
+   "leaves": 2400
+  },
+  {
+   "moves": "2556262277765",
+   "plies": 13,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 2039,
+   "leaves": 1746
+  },
+  {
+   "moves": "7671",
+   "plies": 4,
+   "depth": 4,
+   "value": -2,
+   "move": 3,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "737223563242261727",
+   "plies": 18,
+   "depth": 4,
+   "value": -5,
+   "move": 4,
+   "nodes": 1525,
+   "leaves": 1269
+  },
+  {
+   "moves": "4654513253",
+   "plies": 10,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2149,
+   "leaves": 1843
+  },
+  {
+   "moves": "466423",
+   "plies": 6,
+   "depth": 4,
+   "value": -9,
+   "move": 1,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6514111357",
+   "plies": 10,
+   "depth": 4,
+   "value": -24,
+   "move": 1,
+   "nodes": 2439,
+   "leaves": 2089
+  },
+  {
+   "moves": "37125277146427722",
+   "plies": 17,
+   "depth": 4,
+   "value": 28,
+   "move": 3,
+   "nodes": 2157,
+   "leaves": 1817
+  },
+  {
+   "moves": "642325746447362",
+   "plies": 15,
+   "depth": 4,
+   "value": -76,
+   "move": 1,
+   "nodes": 2269,
+   "leaves": 1943
+  },
+  {
+   "moves": "66455412621713665621",
+   "plies": 20,
+   "depth": 4,
+   "value": 122,
+   "move": 3,
+   "nodes": 1482,
+   "leaves": 1233
+  },
+  {
+   "moves": "264241526673",
+   "plies": 12,
+   "depth": 4,
+   "value": 9997,
+   "move": 4,
+   "nodes": 2581,
+   "leaves": 2213
+  },
+  {
+   "moves": "172523445",
+   "plies": 9,
+   "depth": 4,
+   "value": 3,
+   "move": 4,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6653",
+   "plies": 4,
+   "depth": 4,
+   "value": 6,
+   "move": 3,
+   "nodes": 2716,
+   "leaves": 2329
+  },
+  {
+   "moves": "61443577575173311",
+   "plies": 17,
+   "depth": 4,
+   "value": -67,
+   "move": 1,
+   "nodes": 2606,
+   "leaves": 2229
+  },
+  {
+   "moves": "154",
+   "plies": 3,
+   "depth": 4,
+   "value": -7,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "4767545",
+   "plies": 7,
+   "depth": 4,
+   "value": -39,
+   "move": 2,
+   "nodes": 2429,
+   "leaves": 2083
+  },
+  {
+   "moves": "7154544514246",
+   "plies": 13,
+   "depth": 4,
+   "value": 27,
+   "move": 4,
+   "nodes": 2538,
+   "leaves": 2159
+  },
+  {
+   "moves": "547",
+   "plies": 3,
+   "depth": 4,
+   "value": 2,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "327533747",
+   "plies": 9,
+   "depth": 4,
+   "value": -10,
+   "move": 6,
+   "nodes": 2462,
+   "leaves": 2111
+  },
+  {
+   "moves": "35",
+   "plies": 2,
+   "depth": 4,
+   "value": -3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "44717174412",
+   "plies": 11,
+   "depth": 4,
+   "value": 9999,
+   "move": 0,
+   "nodes": 1873,
+   "leaves": 1604
+  },
+  {
+   "moves": "1377253313212",
+   "plies": 13,
+   "depth": 4,
+   "value": -9996,
+   "move": 1,
+   "nodes": 2281,
+   "leaves": 1954
+  },
+  {
+   "moves": "45613647",
+   "plies": 8,
+   "depth": 4,
+   "value": 16,
+   "move": 2,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "63",
+   "plies": 2,
+   "depth": 4,
+   "value": -3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "4314532466",
+   "plies": 10,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1903,
+   "leaves": 1632
+  },
+  {
+   "moves": "4",
+   "plies": 1,
+   "depth": 4,
+   "value": -18,
+   "move": 2,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "12734717",
+   "plies": 8,
+   "depth": 4,
+   "value": 1,
+   "move": 3,
+   "nodes": 2673,
+   "leaves": 2292
+  },
+  {
+   "moves": "22",
+   "plies": 2,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6742766327124253654",
+   "plies": 19,
+   "depth": 4,
+   "value": -35,
+   "move": 3,
+   "nodes": 2263,
+   "leaves": 1936
+  },
+  {
+   "moves": "55355463374225",
+   "plies": 14,
+   "depth": 4,
+   "value": -1,
+   "move": 3,
+   "nodes": 2449,
+   "leaves": 2083
+  },
+  {
+   "moves": "16572327465244646153",
+   "plies": 20,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 1896,
+   "leaves": 1622
+  },
+  {
+   "moves": "755",
+   "plies": 3,
+   "depth": 4,
+   "value": -3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "5214544537725543767711222",
+   "plies": 25,
+   "depth": 4,
+   "value": -4,
+   "move": 3,
+   "nodes": 1941,
+   "leaves": 1613
+  },
+  {
+   "moves": "65614233111736246416136",
+   "plies": 23,
+   "depth": 4,
+   "value": 57,
+   "move": 3,
+   "nodes": 736,
+   "leaves": 587
+  },
+  {
+   "moves": "6237146",
+   "plies": 7,
+   "depth": 4,
+   "value": -10,
+   "move": 2,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "575334",
+   "plies": 6,
+   "depth": 4,
+   "value": 36,
+   "move": 4,
+   "nodes": 2744,
+   "leaves": 2353
+  },
+  {
+   "moves": "26765423753331752",
+   "plies": 17,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 1961,
+   "leaves": 1679
+  },
+  {
+   "moves": "2",
+   "plies": 1,
+   "depth": 4,
+   "value": -5,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "3774764",
+   "plies": 7,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2148,
+   "leaves": 1842
+  },
+  {
+   "moves": "5571173434376312211",
+   "plies": 19,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 1811,
+   "leaves": 1537
+  },
+  {
+   "moves": "216375541655565",
+   "plies": 15,
+   "depth": 4,
+   "value": 6,
+   "move": 5,
+   "nodes": 1523,
+   "leaves": 1270
+  },
+  {
+   "moves": "3217",
+   "plies": 4,
+   "depth": 4,
+   "value": 3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "4323",
+   "plies": 4,
+   "depth": 4,
+   "value": -9,
+   "move": 2,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "2327763112",
+   "plies": 10,
+   "depth": 4,
+   "value": 13,
+   "move": 3,
+   "nodes": 2715,
+   "leaves": 2328
+  },
+  {
+   "moves": "413417135613522331366172467544",
+   "plies": 30,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 334,
+   "leaves": 260
+  },
+  {
+   "moves": "2536143564",
+   "plies": 10,
+   "depth": 4,
+   "value": -85,
+   "move": 6,
+   "nodes": 2422,
+   "leaves": 2077
+  },
+  {
+   "moves": "67414333267113741",
+   "plies": 17,
+   "depth": 4,
+   "value": 33,
+   "move": 3,
+   "nodes": 2577,
+   "leaves": 2205
+  },
+  {
+   "moves": "6251132167313",
+   "plies": 13,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 2088,
+   "leaves": 1789
+  },
+  {
+   "moves": "376",
+   "plies": 3,
+   "depth": 4,
+   "value": -18,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "667714",
+   "plies": 6,
+   "depth": 4,
+   "value": -14,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "214226723544741376",
+   "plies": 18,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1858,
+   "leaves": 1589
+  },
+  {
+   "moves": "6161377436717455463",
+   "plies": 19,
+   "depth": 4,
+   "value": 9999,
+   "move": 0,
+   "nodes": 1524,
+   "leaves": 1304
+  },
+  {
+   "moves": "2537434576617523734",
+   "plies": 19,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 1223,
+   "leaves": 1047
+  },
+  {
+   "moves": "173",
+   "plies": 3,
+   "depth": 4,
+   "value": -8,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6",
+   "plies": 1,
+   "depth": 4,
+   "value": -5,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "11324274144133",
+   "plies": 14,
+   "depth": 4,
+   "value": -28,
+   "move": 4,
+   "nodes": 2663,
+   "leaves": 2278
+  },
+  {
+   "moves": "752112441561",
+   "plies": 12,
+   "depth": 4,
+   "value": -71,
+   "move": 5,
+   "nodes": 2718,
+   "leaves": 2328
+  },
+  {
+   "moves": "7577441737",
+   "plies": 10,
+   "depth": 4,
+   "value": 9999,
+   "move": 1,
+   "nodes": 1745,
+   "leaves": 1487
+  },
+  {
+   "moves": "27575513",
+   "plies": 8,
+   "depth": 4,
+   "value": -8,
+   "move": 2,
+   "nodes": 2799,
+   "leaves": 2400
+  },
+  {
+   "moves": "7354235612",
+   "plies": 10,
+   "depth": 4,
+   "value": -27,
+   "move": 4,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "51675721566",
+   "plies": 11,
+   "depth": 4,
+   "value": -59,
+   "move": 4,
+   "nodes": 2392,
+   "leaves": 2051
+  },
+  {
+   "moves": "663262163",
+   "plies": 9,
+   "depth": 4,
+   "value": -12,
+   "move": 3,
+   "nodes": 2732,
+   "leaves": 2340
+  },
+  {
+   "moves": "425246176",
+   "plies": 9,
+   "depth": 4,
+   "value": -24,
+   "move": 4,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "45171226",
+   "plies": 8,
+   "depth": 4,
+   "value": 18,
+   "move": 0,
+   "nodes": 2751,
+   "leaves": 2359
+  },
+  {
+   "moves": "3724536462",
+   "plies": 10,
+   "depth": 4,
+   "value": -53,
+   "move": 4,
+   "nodes": 2373,
+   "leaves": 2035
+  },
+  {
+   "moves": "2125341",
+   "plies": 7,
+   "depth": 4,
+   "value": -7,
+   "move": 2,
+   "nodes": 2716,
+   "leaves": 2329
+  },
+  {
+   "moves": "127",
+   "plies": 3,
+   "depth": 4,
+   "value": 2,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "116671426416674161343342",
+   "plies": 24,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 265,
+   "leaves": 207
+  },
+  {
+   "moves": "261",
+   "plies": 3,
+   "depth": 4,
+   "value": 3,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "2312137213",
+   "plies": 10,
+   "depth": 4,
+   "value": 9999,
+   "move": 0,
+   "nodes": 1902,
+   "leaves": 1631
+  },
+  {
+   "moves": "13525637",
+   "plies": 8,
+   "depth": 4,
+   "value": 25,
+   "move": 4,
+   "nodes": 2744,
+   "leaves": 2353
+  },
+  {
+   "moves": "75231517",
+   "plies": 8,
+   "depth": 4,
+   "value": -36,
+   "move": 0,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "725466172",
+   "plies": 9,
+   "depth": 4,
+   "value": 5,
+   "move": 4,
+   "nodes": 2716,
+   "leaves": 2329
+  },
+  {
+   "moves": "726162222677566425655514",
+   "plies": 24,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 274,
+   "leaves": 214
+  },
+  {
+   "moves": "3",
+   "plies": 1,
+   "depth": 4,
+   "value": -16,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "23745633623274437166",
+   "plies": 20,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1549,
+   "leaves": 1314
+  },
+  {
+   "moves": "57764336644",
+   "plies": 11,
+   "depth": 4,
+   "value": -41,
+   "move": 3,
+   "nodes": 2784,
+   "leaves": 2387
+  },
+  {
+   "moves": "5",
+   "plies": 1,
+   "depth": 4,
+   "value": -16,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "45744115754",
+   "plies": 11,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2125,
+   "leaves": 1820
+  },
+  {
+   "moves": "3347537712421345277",
+   "plies": 19,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 1461,
+   "leaves": 1241
+  },
+  {
+   "moves": "744614345",
+   "plies": 9,
+   "depth": 4,
+   "value": 21,
+   "move": 4,
+   "nodes": 2738,
+   "leaves": 2346
+  },
+  {
+   "moves": "3146351455216254272156544",
+   "plies": 25,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 872,
+   "leaves": 713
+  },
+  {
+   "moves": "2665411117555744611363",
+   "plies": 22,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 1060,
+   "leaves": 881
+  },
+  {
+   "moves": "71741167452",
+   "plies": 11,
+   "depth": 4,
+   "value": -18,
+   "move": 4,
+   "nodes": 2798,
+   "leaves": 2399
+  },
+  {
+   "moves": "32452164672373217",
+   "plies": 17,
+   "depth": 4,
+   "value": -37,
+   "move": 1,
+   "nodes": 2372,
+   "leaves": 2032
+  },
+  {
+   "moves": "722",
+   "plies": 3,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "12646454522",
+   "plies": 11,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 2141,
+   "leaves": 1836
+  },
+  {
+   "moves": "667532521",
+   "plies": 9,
+   "depth": 4,
+   "value": 3,
+   "move": 2,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "4561537676541",
+   "plies": 13,
+   "depth": 4,
+   "value": -14,
+   "move": 3,
+   "nodes": 2756,
+   "leaves": 2363
+  },
+  {
+   "moves": "1567",
+   "plies": 4,
+   "depth": 4,
+   "value": -5,
+   "move": 2,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "6333413134377267721172",
+   "plies": 22,
+   "depth": 4,
+   "value": -52,
+   "move": 1,
+   "nodes": 1074,
+   "leaves": 881
+  },
+  {
+   "moves": "35761765772671565576135",
+   "plies": 23,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 247,
+   "leaves": 196
+  },
+  {
+   "moves": "2173224622646574537145",
+   "plies": 22,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1351,
+   "leaves": 1146
+  },
+  {
+   "moves": "323433651353661754464",
+   "plies": 21,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 1192,
+   "leaves": 990
+  },
+  {
+   "moves": "57462",
+   "plies": 5,
+   "depth": 4,
+   "value": -28,
+   "move": 2,
+   "nodes": 2464,
+   "leaves": 2113
+  },
+  {
+   "moves": "16341234731456324",
+   "plies": 17,
+   "depth": 4,
+   "value": -8,
+   "move": 0,
+   "nodes": 2259,
+   "leaves": 1932
+  },
+  {
+   "moves": "6556163622145132614344442",
+   "plies": 25,
+   "depth": 4,
+   "value": -9998,
+   "move": 2,
+   "nodes": 841,
+   "leaves": 687
+  },
+  {
+   "moves": "17456342132756773",
+   "plies": 17,
+   "depth": 4,
+   "value": -87,
+   "move": 2,
+   "nodes": 2703,
+   "leaves": 2315
+  },
+  {
+   "moves": "514744573633451117455",
+   "plies": 21,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1182,
+   "leaves": 991
+  },
+  {
+   "moves": "526652241473",
+   "plies": 12,
+   "depth": 4,
+   "value": 19,
+   "move": 4,
+   "nodes": 2757,
+   "leaves": 2364
+  },
+  {
+   "moves": "264337771327157",
+   "plies": 15,
+   "depth": 4,
+   "value": -21,
+   "move": 3,
+   "nodes": 2214,
+   "leaves": 1883
+  },
+  {
+   "moves": "6537437731773544276",
+   "plies": 19,
+   "depth": 4,
+   "value": 9997,
+   "move": 4,
+   "nodes": 1441,
+   "leaves": 1199
+  },
+  {
+   "moves": "1236217663624311766742453523751",
+   "plies": 31,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 274,
+   "leaves": 213
+  },
+  {
+   "moves": "471163257743",
+   "plies": 12,
+   "depth": 4,
+   "value": 6,
+   "move": 3,
+   "nodes": 2673,
+   "leaves": 2292
+  },
+  {
+   "moves": "347262273555217225744616",
+   "plies": 24,
+   "depth": 4,
+   "value": 9997,
+   "move": 2,
+   "nodes": 1322,
+   "leaves": 1098
+  },
+  {
+   "moves": "22573217377",
+   "plies": 11,
+   "depth": 4,
+   "value": -31,
+   "move": 3,
+   "nodes": 2403,
+   "leaves": 2058
+  },
+  {
+   "moves": "15537673562657255141727",
+   "plies": 23,
+   "depth": 4,
+   "value": 9999,
+   "move": 5,
+   "nodes": 923,
+   "leaves": 759
+  },
+  {
+   "moves": "162654216243274513457413671",
+   "plies": 27,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 1171,
+   "leaves": 982
+  },
+  {
+   "moves": "76764412325757",
+   "plies": 14,
+   "depth": 4,
+   "value": -27,
+   "move": 4,
+   "nodes": 2732,
+   "leaves": 2340
+  },
+  {
+   "moves": "734362416642",
+   "plies": 12,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 1574,
+   "leaves": 1350
+  },
+  {
+   "moves": "51",
+   "plies": 2,
+   "depth": 4,
+   "value": 12,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "5424",
+   "plies": 4,
+   "depth": 4,
+   "value": -18,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "366223",
+   "plies": 6,
+   "depth": 4,
+   "value": -9,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "3214634",
+   "plies": 7,
+   "depth": 4,
+   "value": 13,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "46736724135661556357572522",
+   "plies": 26,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 749,
+   "leaves": 612
+  },
+  {
+   "moves": "44",
+   "plies": 2,
+   "depth": 4,
+   "value": 0,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "512",
+   "plies": 3,
+   "depth": 4,
+   "value": -18,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "434141",
+   "plies": 6,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 2149,
+   "leaves": 1843
+  },
+  {
+   "moves": "45444334",
+   "plies": 8,
+   "depth": 4,
+   "value": 50,
+   "move": 4,
+   "nodes": 2525,
+   "leaves": 2148
+  },
+  {
+   "moves": "2322",
+   "plies": 4,
+   "depth": 4,
+   "value": -6,
+   "move": 2,
+   "nodes": 2799,
+   "leaves": 2400
+  },
+  {
+   "moves": "3654641246524336431335572",
+   "plies": 25,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 966,
+   "leaves": 794
+  },
+  {
+   "moves": "62437672464672",
+   "plies": 14,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 872,
+   "leaves": 747
+  },
+  {
+   "moves": "33636643143",
+   "plies": 11,
+   "depth": 4,
+   "value": -9998,
+   "move": 3,
+   "nodes": 1904,
+   "leaves": 1619
+  },
+  {
+   "moves": "47533132574",
+   "plies": 11,
+   "depth": 4,
+   "value": -153,
+   "move": 1,
+   "nodes": 2372,
+   "leaves": 2034
+  },
+  {
+   "moves": "31232154144254323",
+   "plies": 17,
+   "depth": 4,
+   "value": 9999,
+   "move": 0,
+   "nodes": 1567,
+   "leaves": 1339
+  },
+  {
+   "moves": "65134157",
+   "plies": 8,
+   "depth": 4,
+   "value": 18,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "375",
+   "plies": 3,
+   "depth": 4,
+   "value": -24,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "323",
+   "plies": 3,
+   "depth": 4,
+   "value": -23,
+   "move": 1,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "51742714525573",
+   "plies": 14,
+   "depth": 4,
+   "value": -5,
+   "move": 3,
+   "nodes": 2773,
+   "leaves": 2375
+  },
+  {
+   "moves": "5176421135112372345432124",
+   "plies": 25,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 311,
+   "leaves": 256
+  },
+  {
+   "moves": "276",
+   "plies": 3,
+   "depth": 4,
+   "value": -9,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "75647672163",
+   "plies": 11,
+   "depth": 4,
+   "value": 6,
+   "move": 6,
+   "nodes": 2343,
+   "leaves": 2009
+  },
+  {
+   "moves": "77221415513773722447111",
+   "plies": 23,
+   "depth": 4,
+   "value": -26,
+   "move": 1,
+   "nodes": 761,
+   "leaves": 607
+  },
+  {
+   "moves": "12616444127",
+   "plies": 11,
+   "depth": 4,
+   "value": 4,
+   "move": 2,
+   "nodes": 2672,
+   "leaves": 2291
+  },
+  {
+   "moves": "441243623512665113664621",
+   "plies": 24,
+   "depth": 4,
+   "value": 9999,
+   "move": 2,
+   "nodes": 861,
+   "leaves": 704
+  },
+  {
+   "moves": "2752531112536",
+   "plies": 13,
+   "depth": 4,
+   "value": 12,
+   "move": 4,
+   "nodes": 2244,
+   "leaves": 1924
+  },
+  {
+   "moves": "332132172346",
+   "plies": 12,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 2117,
+   "leaves": 1813
+  },
+  {
+   "moves": "45462563",
+   "plies": 8,
+   "depth": 4,
+   "value": 5,
+   "move": 3,
+   "nodes": 2758,
+   "leaves": 2365
+  },
+  {
+   "moves": "11634421747117261",
+   "plies": 17,
+   "depth": 4,
+   "value": 0,
+   "move": 4,
+   "nodes": 1312,
+   "leaves": 1094
+  },
+  {
+   "moves": "45333356",
+   "plies": 8,
+   "depth": 4,
+   "value": 17,
+   "move": 0,
+   "nodes": 2690,
+   "leaves": 2304
+  },
+  {
+   "moves": "61534157237155265",
+   "plies": 17,
+   "depth": 4,
+   "value": 9999,
+   "move": 0,
+   "nodes": 1884,
+   "leaves": 1602
+  },
+  {
+   "moves": "26535176151411734535",
+   "plies": 20,
+   "depth": 4,
+   "value": -36,
+   "move": 4,
+   "nodes": 2000,
+   "leaves": 1689
+  },
+  {
+   "moves": "173717366",
+   "plies": 9,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 2065,
+   "leaves": 1771
+  },
+  {
+   "moves": "51362",
+   "plies": 5,
+   "depth": 4,
+   "value": -22,
+   "move": 3,
+   "nodes": 2464,
+   "leaves": 2113
+  },
+  {
+   "moves": "6115175743211263453213",
+   "plies": 22,
+   "depth": 4,
+   "value": 9999,
+   "move": 1,
+   "nodes": 1059,
+   "leaves": 881
+  },
+  {
+   "moves": "243426761111157",
+   "plies": 15,
+   "depth": 4,
+   "value": 9997,
+   "move": 2,
+   "nodes": 2293,
+   "leaves": 1950
+  },
+  {
+   "moves": "417422363",
+   "plies": 9,
+   "depth": 4,
+   "value": -41,
+   "move": 4,
+   "nodes": 2457,
+   "leaves": 2107
+  },
+  {
+   "moves": "5771332562617212511",
+   "plies": 19,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 1158,
+   "leaves": 983
+  },
+  {
+   "moves": "4363165154",
+   "plies": 10,
+   "depth": 4,
+   "value": 9999,
+   "move": 6,
+   "nodes": 2051,
+   "leaves": 1759
+  },
+  {
+   "moves": "2161474267374373",
+   "plies": 16,
+   "depth": 4,
+   "value": 9999,
+   "move": 3,
+   "nodes": 1266,
+   "leaves": 1084
+  },
+  {
+   "moves": "511",
+   "plies": 3,
+   "depth": 4,
+   "value": -10,
+   "move": 3,
+   "nodes": 2800,
+   "leaves": 2401
+  },
+  {
+   "moves": "1233352325431444",
+   "plies": 16,
+   "depth": 4,
+   "value": 9999,
+   "move": 4,
+   "nodes": 1288,
+   "leaves": 1092
+  },
+  {
+   "moves": "5337131362513",
+   "plies": 13,
+   "depth": 4,
+   "value": -29,
+   "move": 4,
+   "nodes": 2538,
+   "leaves": 2159
+  },
+  {
+   "moves": "6664212131476714447313",
+   "plies": 22,
+   "depth": 4,
+   "value": 23,
+   "move": 1,
+   "nodes": 1884,
+   "leaves": 1584
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 5,
+   "value": 18,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 5,
+   "value": 28,
+   "move": 2,
+   "nodes": 19575,
+   "leaves": 16776
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 2209,
+   "leaves": 1772
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 5,
+   "value": 9999,
+   "move": 1,
+   "nodes": 8858,
+   "leaves": 7505
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 4436,
+   "leaves": 3681
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 5,
+   "value": -8,
+   "move": 5,
+   "nodes": 15176,
+   "leaves": 13006
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 6863,
+   "leaves": 5857
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 5,
+   "value": 71,
+   "move": 3,
+   "nodes": 19085,
+   "leaves": 16359
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 3522,
+   "leaves": 2776
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 3607,
+   "leaves": 2939
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 5,
+   "value": 23,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 13931,
+   "leaves": 11935
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 5,
+   "value": 22,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 5,
+   "value": -8,
+   "move": 3,
+   "nodes": 15075,
+   "leaves": 12913
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 5,
+   "value": 47,
+   "move": 2,
+   "nodes": 17749,
+   "leaves": 15181
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 5,
+   "value": 35,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 5,
+   "value": 18,
+   "move": 2,
+   "nodes": 18762,
+   "leaves": 16049
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 5,
+   "value": -11,
+   "move": 2,
+   "nodes": 14753,
+   "leaves": 12637
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 18934,
+   "leaves": 16230
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 5,
+   "value": 35,
+   "move": 4,
+   "nodes": 18796,
+   "leaves": 16078
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 6574,
+   "leaves": 5472
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 5,
+   "value": 9997,
+   "move": 4,
+   "nodes": 18262,
+   "leaves": 15654
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 5,
+   "value": 18,
+   "move": 4,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 14613,
+   "leaves": 12526
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 5,
+   "value": 41,
+   "move": 0,
+   "nodes": 13507,
+   "leaves": 11319
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 5,
+   "value": 9997,
+   "move": 3,
+   "nodes": 1546,
+   "leaves": 1165
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 5,
+   "value": 9997,
+   "move": 4,
+   "nodes": 17582,
+   "leaves": 15031
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 14752,
+   "leaves": 12642
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 5,
+   "value": 18,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 5,
+   "value": 46,
+   "move": 1,
+   "nodes": 18870,
+   "leaves": 16168
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 5,
+   "value": -3,
+   "move": 5,
+   "nodes": 2541,
+   "leaves": 1843
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 5,
+   "value": 33,
+   "move": 3,
+   "nodes": 15007,
+   "leaves": 12720
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 5,
+   "value": 9997,
+   "move": 4,
+   "nodes": 1975,
+   "leaves": 1547
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 18363,
+   "leaves": 15737
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 5,
+   "value": 23,
+   "move": 4,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 10387,
+   "leaves": 8877
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 4561,
+   "leaves": 3776
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 5,
+   "value": 51,
+   "move": 3,
+   "nodes": 17721,
+   "leaves": 15157
+  },
+  {
+   "moves": "2324256",
+   "plies": 7,
+   "depth": 5,
+   "value": 8,
+   "move": 1,
+   "nodes": 15675,
+   "leaves": 13434
+  },
+  {
+   "moves": "63154656552",
+   "plies": 11,
+   "depth": 5,
+   "value": 35,
+   "move": 3,
+   "nodes": 18829,
+   "leaves": 16104
+  },
+  {
+   "moves": "1341256",
+   "plies": 7,
+   "depth": 5,
+   "value": 28,
+   "move": 3,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "642",
+   "plies": 3,
+   "depth": 5,
+   "value": 10,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "47",
+   "plies": 2,
+   "depth": 5,
+   "value": 35,
+   "move": 2,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "32517471666656577345175563",
+   "plies": 26,
+   "depth": 5,
+   "value": -9996,
+   "move": 3,
+   "nodes": 1743,
+   "leaves": 1348
+  },
+  {
+   "moves": "5214224",
+   "plies": 7,
+   "depth": 5,
+   "value": 2,
+   "move": 3,
+   "nodes": 19329,
+   "leaves": 16565
+  },
+  {
+   "moves": "2556262277765",
+   "plies": 13,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 13528,
+   "leaves": 11561
+  },
+  {
+   "moves": "7671",
+   "plies": 4,
+   "depth": 5,
+   "value": 17,
+   "move": 2,
+   "nodes": 19270,
+   "leaves": 16518
+  },
+  {
+   "moves": "737223563242261727",
+   "plies": 18,
+   "depth": 5,
+   "value": 36,
+   "move": 3,
+   "nodes": 8450,
+   "leaves": 7016
+  },
+  {
+   "moves": "4654513253",
+   "plies": 10,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 14083,
+   "leaves": 12071
+  },
+  {
+   "moves": "466423",
+   "plies": 6,
+   "depth": 5,
+   "value": 15,
+   "move": 1,
+   "nodes": 19605,
+   "leaves": 16805
+  },
+  {
+   "moves": "6514111357",
+   "plies": 10,
+   "depth": 5,
+   "value": 6,
+   "move": 1,
+   "nodes": 15330,
+   "leaves": 13112
+  },
+  {
+   "moves": "37125277146427722",
+   "plies": 17,
+   "depth": 5,
+   "value": 53,
+   "move": 3,
+   "nodes": 13012,
+   "leaves": 10905
+  },
+  {
+   "moves": "642325746447362",
+   "plies": 15,
+   "depth": 5,
+   "value": -39,
+   "move": 1,
+   "nodes": 12979,
+   "leaves": 11092
+  },
+  {
+   "moves": "66455412621713665621",
+   "plies": 20,
+   "depth": 5,
+   "value": 9995,
+   "move": 3,
+   "nodes": 8563,
+   "leaves": 7103
+  },
+  {
+   "moves": "264241526673",
+   "plies": 12,
+   "depth": 5,
+   "value": 9997,
+   "move": 4,
+   "nodes": 17575,
+   "leaves": 15058
+  },
+  {
+   "moves": "172523445",
+   "plies": 9,
+   "depth": 5,
+   "value": 31,
+   "move": 4,
+   "nodes": 19338,
+   "leaves": 16576
+  },
+  {
+   "moves": "6653",
+   "plies": 4,
+   "depth": 5,
+   "value": 19,
+   "move": 3,
+   "nodes": 18934,
+   "leaves": 16230
+  },
+  {
+   "moves": "61443577575173311",
+   "plies": 17,
+   "depth": 5,
+   "value": -28,
+   "move": 1,
+   "nodes": 16143,
+   "leaves": 13766
+  },
+  {
+   "moves": "154",
+   "plies": 3,
+   "depth": 5,
+   "value": 10,
+   "move": 3,
+   "nodes": 19187,
+   "leaves": 16447
+  },
+  {
+   "moves": "4767545",
+   "plies": 7,
+   "depth": 5,
+   "value": -12,
+   "move": 2,
+   "nodes": 15194,
+   "leaves": 13024
+  },
+  {
+   "moves": "7154544514246",
+   "plies": 13,
+   "depth": 5,
+   "value": 56,
+   "move": 4,
+   "nodes": 16639,
+   "leaves": 14119
+  },
+  {
+   "moves": "547",
+   "plies": 3,
+   "depth": 5,
+   "value": 23,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "327533747",
+   "plies": 9,
+   "depth": 5,
+   "value": 8,
+   "move": 6,
+   "nodes": 15645,
+   "leaves": 13405
+  },
+  {
+   "moves": "35",
+   "plies": 2,
+   "depth": 5,
+   "value": 19,
+   "move": 4,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "44717174412",
+   "plies": 11,
+   "depth": 5,
+   "value": 9999,
+   "move": 0,
+   "nodes": 11038,
+   "leaves": 9435
+  },
+  {
+   "moves": "1377253313212",
+   "plies": 13,
+   "depth": 5,
+   "value": -9996,
+   "move": 1,
+   "nodes": 13237,
+   "leaves": 11317
+  },
+  {
+   "moves": "45613647",
+   "plies": 8,
+   "depth": 5,
+   "value": 41,
+   "move": 2,
+   "nodes": 19255,
+   "leaves": 16505
+  },
+  {
+   "moves": "63",
+   "plies": 2,
+   "depth": 5,
+   "value": 15,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "4314532466",
+   "plies": 10,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 11317,
+   "leaves": 9698
+  },
+  {
+   "moves": "4",
+   "plies": 1,
+   "depth": 5,
+   "value": 0,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "12734717",
+   "plies": 8,
+   "depth": 5,
+   "value": 32,
+   "move": 3,
+   "nodes": 18335,
+   "leaves": 15713
+  },
+  {
+   "moves": "22",
+   "plies": 2,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "6742766327124253654",
+   "plies": 19,
+   "depth": 5,
+   "value": -9,
+   "move": 3,
+   "nodes": 13100,
+   "leaves": 11176
+  },
+  {
+   "moves": "55355463374225",
+   "plies": 14,
+   "depth": 5,
+   "value": 31,
+   "move": 6,
+   "nodes": 15956,
+   "leaves": 13537
+  },
+  {
+   "moves": "16572327465244646153",
+   "plies": 20,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 11297,
+   "leaves": 9635
+  },
+  {
+   "moves": "755",
+   "plies": 3,
+   "depth": 5,
+   "value": 10,
+   "move": 4,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "5214544537725543767711222",
+   "plies": 25,
+   "depth": 5,
+   "value": 18,
+   "move": 3,
+   "nodes": 9857,
+   "leaves": 8084
+  },
+  {
+   "moves": "65614233111736246416136",
+   "plies": 23,
+   "depth": 5,
+   "value": 100,
+   "move": 3,
+   "nodes": 3538,
+   "leaves": 2807
+  },
+  {
+   "moves": "6237146",
+   "plies": 7,
+   "depth": 5,
+   "value": 18,
+   "move": 2,
+   "nodes": 19354,
+   "leaves": 16590
+  },
+  {
+   "moves": "575334",
+   "plies": 6,
+   "depth": 5,
+   "value": 68,
+   "move": 3,
+   "nodes": 18758,
+   "leaves": 16079
+  },
+  {
+   "moves": "26765423753331752",
+   "plies": 17,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 10438,
+   "leaves": 8917
+  },
+  {
+   "moves": "2",
+   "plies": 1,
+   "depth": 5,
+   "value": 10,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "3774764",
+   "plies": 7,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 14585,
+   "leaves": 12499
+  },
+  {
+   "moves": "5571173434376312211",
+   "plies": 19,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 11154,
+   "leaves": 9428
+  },
+  {
+   "moves": "216375541655565",
+   "plies": 15,
+   "depth": 5,
+   "value": 42,
+   "move": 3,
+   "nodes": 9097,
+   "leaves": 7579
+  },
+  {
+   "moves": "3217",
+   "plies": 4,
+   "depth": 5,
+   "value": 26,
+   "move": 2,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "4323",
+   "plies": 4,
+   "depth": 5,
+   "value": 13,
+   "move": 2,
+   "nodes": 19354,
+   "leaves": 16590
+  },
+  {
+   "moves": "2327763112",
+   "plies": 10,
+   "depth": 5,
+   "value": 31,
+   "move": 4,
+   "nodes": 18515,
+   "leaves": 15867
+  },
+  {
+   "moves": "413417135613522331366172467544",
+   "plies": 30,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 1100,
+   "leaves": 841
+  },
+  {
+   "moves": "2536143564",
+   "plies": 10,
+   "depth": 5,
+   "value": -40,
+   "move": 6,
+   "nodes": 14787,
+   "leaves": 12675
+  },
+  {
+   "moves": "67414333267113741",
+   "plies": 17,
+   "depth": 5,
+   "value": 81,
+   "move": 2,
+   "nodes": 16235,
+   "leaves": 13855
+  },
+  {
+   "moves": "6251132167313",
+   "plies": 13,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 13559,
+   "leaves": 11597
+  },
+  {
+   "moves": "376",
+   "plies": 3,
+   "depth": 5,
+   "value": -2,
+   "move": 3,
+   "nodes": 19187,
+   "leaves": 16447
+  },
+  {
+   "moves": "667714",
+   "plies": 6,
+   "depth": 5,
+   "value": 1,
+   "move": 3,
+   "nodes": 19486,
+   "leaves": 16703
+  },
+  {
+   "moves": "214226723544741376",
+   "plies": 18,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 10900,
+   "leaves": 9298
+  },
+  {
+   "moves": "6161377436717455463",
+   "plies": 19,
+   "depth": 5,
+   "value": 9999,
+   "move": 0,
+   "nodes": 8153,
+   "leaves": 6952
+  },
+  {
+   "moves": "2537434576617523734",
+   "plies": 19,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 6625,
+   "leaves": 5655
+  },
+  {
+   "moves": "173",
+   "plies": 3,
+   "depth": 5,
+   "value": 7,
+   "move": 3,
+   "nodes": 19187,
+   "leaves": 16447
+  },
+  {
+   "moves": "6",
+   "plies": 1,
+   "depth": 5,
+   "value": 10,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "11324274144133",
+   "plies": 14,
+   "depth": 5,
+   "value": 8,
+   "move": 4,
+   "nodes": 17592,
+   "leaves": 15010
+  },
+  {
+   "moves": "752112441561",
+   "plies": 12,
+   "depth": 5,
+   "value": -31,
+   "move": 5,
+   "nodes": 17367,
+   "leaves": 14854
+  },
+  {
+   "moves": "7577441737",
+   "plies": 10,
+   "depth": 5,
+   "value": 9999,
+   "move": 1,
+   "nodes": 10450,
+   "leaves": 8896
+  },
+  {
+   "moves": "27575513",
+   "plies": 8,
+   "depth": 5,
+   "value": 22,
+   "move": 2,
+   "nodes": 19322,
+   "leaves": 16559
+  },
+  {
+   "moves": "7354235612",
+   "plies": 10,
+   "depth": 5,
+   "value": 8,
+   "move": 3,
+   "nodes": 18610,
+   "leaves": 15952
+  },
+  {
+   "moves": "51675721566",
+   "plies": 11,
+   "depth": 5,
+   "value": -35,
+   "move": 4,
+   "nodes": 14635,
+   "leaves": 12539
+  },
+  {
+   "moves": "663262163",
+   "plies": 9,
+   "depth": 5,
+   "value": 11,
+   "move": 2,
+   "nodes": 18205,
+   "leaves": 15572
+  },
+  {
+   "moves": "425246176",
+   "plies": 9,
+   "depth": 5,
+   "value": -6,
+   "move": 4,
+   "nodes": 18498,
+   "leaves": 15856
+  },
+  {
+   "moves": "45171226",
+   "plies": 8,
+   "depth": 5,
+   "value": 50,
+   "move": 3,
+   "nodes": 19213,
+   "leaves": 16469
+  },
+  {
+   "moves": "3724536462",
+   "plies": 10,
+   "depth": 5,
+   "value": -17,
+   "move": 4,
+   "nodes": 14178,
+   "leaves": 12153
+  },
+  {
+   "moves": "2125341",
+   "plies": 7,
+   "depth": 5,
+   "value": 24,
+   "move": 3,
+   "nodes": 18303,
+   "leaves": 15689
+  },
+  {
+   "moves": "127",
+   "plies": 3,
+   "depth": 5,
+   "value": 20,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "116671426416674161343342",
+   "plies": 24,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 983,
+   "leaves": 759
+  },
+  {
+   "moves": "261",
+   "plies": 3,
+   "depth": 5,
+   "value": 19,
+   "move": 3,
+   "nodes": 19187,
+   "leaves": 16447
+  },
+  {
+   "moves": "2312137213",
+   "plies": 10,
+   "depth": 5,
+   "value": 9999,
+   "move": 0,
+   "nodes": 11323,
+   "leaves": 9700
+  },
+  {
+   "moves": "13525637",
+   "plies": 8,
+   "depth": 5,
+   "value": 56,
+   "move": 2,
+   "nodes": 19157,
+   "leaves": 16421
+  },
+  {
+   "moves": "75231517",
+   "plies": 8,
+   "depth": 5,
+   "value": -4,
+   "move": 4,
+   "nodes": 18603,
+   "leaves": 15946
+  },
+  {
+   "moves": "725466172",
+   "plies": 9,
+   "depth": 5,
+   "value": 25,
+   "move": 4,
+   "nodes": 18932,
+   "leaves": 16228
+  },
+  {
+   "moves": "726162222677566425655514",
+   "plies": 24,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 659,
+   "leaves": 510
+  },
+  {
+   "moves": "3",
+   "plies": 1,
+   "depth": 5,
+   "value": 3,
+   "move": 4,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "23745633623274437166",
+   "plies": 20,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 8213,
+   "leaves": 6932
+  },
+  {
+   "moves": "57764336644",
+   "plies": 11,
+   "depth": 5,
+   "value": -2,
+   "move": 3,
+   "nodes": 19065,
+   "leaves": 16335
+  },
+  {
+   "moves": "5",
+   "plies": 1,
+   "depth": 5,
+   "value": 3,
+   "move": 2,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "45744115754",
+   "plies": 11,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 14092,
+   "leaves": 12054
+  },
+  {
+   "moves": "3347537712421345277",
+   "plies": 19,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 7511,
+   "leaves": 6354
+  },
+  {
+   "moves": "744614345",
+   "plies": 9,
+   "depth": 5,
+   "value": 54,
+   "move": 4,
+   "nodes": 18938,
+   "leaves": 16206
+  },
+  {
+   "moves": "3146351455216254272156544",
+   "plies": 25,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 4177,
+   "leaves": 3379
+  },
+  {
+   "moves": "2665411117555744611363",
+   "plies": 22,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 5691,
+   "leaves": 4709
+  },
+  {
+   "moves": "71741167452",
+   "plies": 11,
+   "depth": 5,
+   "value": 3,
+   "move": 4,
+   "nodes": 19003,
+   "leaves": 16282
+  },
+  {
+   "moves": "32452164672373217",
+   "plies": 17,
+   "depth": 5,
+   "value": -3,
+   "move": 1,
+   "nodes": 14382,
+   "leaves": 12300
+  },
+  {
+   "moves": "722",
+   "plies": 3,
+   "depth": 5,
+   "value": 16,
+   "move": 3,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "12646454522",
+   "plies": 11,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 14347,
+   "leaves": 12294
+  },
+  {
+   "moves": "667532521",
+   "plies": 9,
+   "depth": 5,
+   "value": 26,
+   "move": 2,
+   "nodes": 19268,
+   "leaves": 16516
+  },
+  {
+   "moves": "4561537676541",
+   "plies": 13,
+   "depth": 5,
+   "value": 25,
+   "move": 4,
+   "nodes": 18713,
+   "leaves": 16034
+  },
+  {
+   "moves": "1567",
+   "plies": 4,
+   "depth": 5,
+   "value": 15,
+   "move": 4,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "6333413134377267721172",
+   "plies": 22,
+   "depth": 5,
+   "value": 36,
+   "move": 1,
+   "nodes": 4844,
+   "leaves": 3944
+  },
+  {
+   "moves": "35761765772671565576135",
+   "plies": 23,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 852,
+   "leaves": 667
+  },
+  {
+   "moves": "2173224622646574537145",
+   "plies": 22,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 6618,
+   "leaves": 5586
+  },
+  {
+   "moves": "323433651353661754464",
+   "plies": 21,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 5190,
+   "leaves": 4289
+  },
+  {
+   "moves": "57462",
+   "plies": 5,
+   "depth": 5,
+   "value": -6,
+   "move": 2,
+   "nodes": 15701,
+   "leaves": 13459
+  },
+  {
+   "moves": "16341234731456324",
+   "plies": 17,
+   "depth": 5,
+   "value": 35,
+   "move": 0,
+   "nodes": 13492,
+   "leaves": 11507
+  },
+  {
+   "moves": "6556163622145132614344442",
+   "plies": 25,
+   "depth": 5,
+   "value": -9998,
+   "move": 2,
+   "nodes": 3325,
+   "leaves": 2683
+  },
+  {
+   "moves": "17456342132756773",
+   "plies": 17,
+   "depth": 5,
+   "value": -10,
+   "move": 2,
+   "nodes": 17236,
+   "leaves": 14738
+  },
+  {
+   "moves": "514744573633451117455",
+   "plies": 21,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 5103,
+   "leaves": 4237
+  },
+  {
+   "moves": "526652241473",
+   "plies": 12,
+   "depth": 5,
+   "value": 42,
+   "move": 4,
+   "nodes": 18466,
+   "leaves": 15825
+  },
+  {
+   "moves": "264337771327157",
+   "plies": 15,
+   "depth": 5,
+   "value": 25,
+   "move": 3,
+   "nodes": 12644,
+   "leaves": 10724
+  },
+  {
+   "moves": "6537437731773544276",
+   "plies": 19,
+   "depth": 5,
+   "value": 9997,
+   "move": 4,
+   "nodes": 8039,
+   "leaves": 6673
+  },
+  {
+   "moves": "1236217663624311766742453523751",
+   "plies": 31,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 704,
+   "leaves": 528
+  },
+  {
+   "moves": "471163257743",
+   "plies": 12,
+   "depth": 5,
+   "value": 53,
+   "move": 4,
+   "nodes": 18333,
+   "leaves": 15711
+  },
+  {
+   "moves": "347262273555217225744616",
+   "plies": 24,
+   "depth": 5,
+   "value": 9997,
+   "move": 2,
+   "nodes": 6413,
+   "leaves": 5297
+  },
+  {
+   "moves": "22573217377",
+   "plies": 11,
+   "depth": 5,
+   "value": -4,
+   "move": 3,
+   "nodes": 14817,
+   "leaves": 12670
+  },
+  {
+   "moves": "15537673562657255141727",
+   "plies": 23,
+   "depth": 5,
+   "value": 9999,
+   "move": 5,
+   "nodes": 4678,
+   "leaves": 3826
+  },
+  {
+   "moves": "162654216243274513457413671",
+   "plies": 27,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 4760,
+   "leaves": 3952
+  },
+  {
+   "moves": "76764412325757",
+   "plies": 14,
+   "depth": 5,
+   "value": 5,
+   "move": 3,
+   "nodes": 17749,
+   "leaves": 15186
+  },
+  {
+   "moves": "734362416642",
+   "plies": 12,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 10052,
+   "leaves": 8613
+  },
+  {
+   "moves": "51",
+   "plies": 2,
+   "depth": 5,
+   "value": 35,
+   "move": 3,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "5424",
+   "plies": 4,
+   "depth": 5,
+   "value": 2,
+   "move": 3,
+   "nodes": 19354,
+   "leaves": 16590
+  },
+  {
+   "moves": "366223",
+   "plies": 6,
+   "depth": 5,
+   "value": 19,
+   "move": 2,
+   "nodes": 19604,
+   "leaves": 16804
+  },
+  {
+   "moves": "3214634",
+   "plies": 7,
+   "depth": 5,
+   "value": 34,
+   "move": 3,
+   "nodes": 19605,
+   "leaves": 16805
+  },
+  {
+   "moves": "46736724135661556357572522",
+   "plies": 26,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 2625,
+   "leaves": 2120
+  },
+  {
+   "moves": "44",
+   "plies": 2,
+   "depth": 5,
+   "value": 19,
+   "move": 3,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "512",
+   "plies": 3,
+   "depth": 5,
+   "value": -2,
+   "move": 3,
+   "nodes": 19187,
+   "leaves": 16447
+  },
+  {
+   "moves": "434141",
+   "plies": 6,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 14609,
+   "leaves": 12522
+  },
+  {
+   "moves": "45444334",
+   "plies": 8,
+   "depth": 5,
+   "value": 65,
+   "move": 4,
+   "nodes": 16684,
+   "leaves": 14161
+  },
+  {
+   "moves": "2322",
+   "plies": 4,
+   "depth": 5,
+   "value": 15,
+   "move": 2,
+   "nodes": 19575,
+   "leaves": 16776
+  },
+  {
+   "moves": "3654641246524336431335572",
+   "plies": 25,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 4077,
+   "leaves": 3328
+  },
+  {
+   "moves": "62437672464672",
+   "plies": 14,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 4773,
+   "leaves": 4077
+  },
+  {
+   "moves": "33636643143",
+   "plies": 11,
+   "depth": 5,
+   "value": -9998,
+   "move": 3,
+   "nodes": 10198,
+   "leaves": 8648
+  },
+  {
+   "moves": "47533132574",
+   "plies": 11,
+   "depth": 5,
+   "value": -116,
+   "move": 1,
+   "nodes": 13575,
+   "leaves": 11633
+  },
+  {
+   "moves": "31232154144254323",
+   "plies": 17,
+   "depth": 5,
+   "value": 9999,
+   "move": 0,
+   "nodes": 8171,
+   "leaves": 6955
+  },
+  {
+   "moves": "65134157",
+   "plies": 8,
+   "depth": 5,
+   "value": 54,
+   "move": 3,
+   "nodes": 19605,
+   "leaves": 16805
+  },
+  {
+   "moves": "375",
+   "plies": 3,
+   "depth": 5,
+   "value": -5,
+   "move": 3,
+   "nodes": 18767,
+   "leaves": 16087
+  },
+  {
+   "moves": "323",
+   "plies": 3,
+   "depth": 5,
+   "value": -2,
+   "move": 2,
+   "nodes": 19354,
+   "leaves": 16590
+  },
+  {
+   "moves": "51742714525573",
+   "plies": 14,
+   "depth": 5,
+   "value": 21,
+   "move": 3,
+   "nodes": 18890,
+   "leaves": 16155
+  },
+  {
+   "moves": "5176421135112372345432124",
+   "plies": 25,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 1049,
+   "leaves": 852
+  },
+  {
+   "moves": "276",
+   "plies": 3,
+   "depth": 5,
+   "value": 5,
+   "move": 6,
+   "nodes": 19607,
+   "leaves": 16807
+  },
+  {
+   "moves": "75647672163",
+   "plies": 11,
+   "depth": 5,
+   "value": 29,
+   "move": 6,
+   "nodes": 14734,
+   "leaves": 12625
+  },
+  {
+   "moves": "77221415513773722447111",
+   "plies": 23,
+   "depth": 5,
+   "value": 0,
+   "move": 1,
+   "nodes": 3518,
+   "leaves": 2790
+  },
+  {
+   "moves": "12616444127",
+   "plies": 11,
+   "depth": 5,
+   "value": 57,
+   "move": 2,
+   "nodes": 18197,
+   "leaves": 15591
+  },
+  {
+   "moves": "441243623512665113664621",
+   "plies": 24,
+   "depth": 5,
+   "value": 9999,
+   "move": 2,
+   "nodes": 4297,
+   "leaves": 3477
+  },
+  {
+   "moves": "2752531112536",
+   "plies": 13,
+   "depth": 5,
+   "value": 61,
+   "move": 4,
+   "nodes": 14094,
+   "leaves": 12073
+  },
+  {
+   "moves": "332132172346",
+   "plies": 12,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 14337,
+   "leaves": 12258
+  },
+  {
+   "moves": "45462563",
+   "plies": 8,
+   "depth": 5,
+   "value": 43,
+   "move": 3,
+   "nodes": 19016,
+   "leaves": 16300
+  },
+  {
+   "moves": "11634421747117261",
+   "plies": 17,
+   "depth": 5,
+   "value": 38,
+   "move": 4,
+   "nodes": 6834,
+   "leaves": 5690
+  },
+  {
+   "moves": "45333356",
+   "plies": 8,
+   "depth": 5,
+   "value": 43,
+   "move": 3,
+   "nodes": 18519,
+   "leaves": 15841
+  },
+  {
+   "moves": "61534157237155265",
+   "plies": 17,
+   "depth": 5,
+   "value": 9999,
+   "move": 0,
+   "nodes": 11865,
+   "leaves": 10063
+  },
+  {
+   "moves": "26535176151411734535",
+   "plies": 20,
+   "depth": 5,
+   "value": -8,
+   "move": 4,
+   "nodes": 11085,
+   "leaves": 9327
+  },
+  {
+   "moves": "173717366",
+   "plies": 9,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 13494,
+   "leaves": 11566
+  },
+  {
+   "moves": "51362",
+   "plies": 5,
+   "depth": 5,
+   "value": -4,
+   "move": 3,
+   "nodes": 15701,
+   "leaves": 13459
+  },
+  {
+   "moves": "6115175743211263453213",
+   "plies": 22,
+   "depth": 5,
+   "value": 9999,
+   "move": 1,
+   "nodes": 5673,
+   "leaves": 4702
+  },
+  {
+   "moves": "243426761111157",
+   "plies": 15,
+   "depth": 5,
+   "value": 9997,
+   "move": 2,
+   "nodes": 14475,
+   "leaves": 12280
+  },
+  {
+   "moves": "417422363",
+   "plies": 9,
+   "depth": 5,
+   "value": -21,
+   "move": 4,
+   "nodes": 15390,
+   "leaves": 13192
+  },
+  {
+   "moves": "5771332562617212511",
+   "plies": 19,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 5980,
+   "leaves": 5053
+  },
+  {
+   "moves": "4363165154",
+   "plies": 10,
+   "depth": 5,
+   "value": 9999,
+   "move": 6,
+   "nodes": 13190,
+   "leaves": 11306
+  },
+  {
+   "moves": "2161474267374373",
+   "plies": 16,
+   "depth": 5,
+   "value": 9999,
+   "move": 3,
+   "nodes": 6992,
+   "leaves": 5972
+  },
+  {
+   "moves": "511",
+   "plies": 3,
+   "depth": 5,
+   "value": 6,
+   "move": 2,
+   "nodes": 19606,
+   "leaves": 16806
+  },
+  {
+   "moves": "1233352325431444",
+   "plies": 16,
+   "depth": 5,
+   "value": 9999,
+   "move": 4,
+   "nodes": 7285,
+   "leaves": 6147
+  },
+  {
+   "moves": "5337131362513",
+   "plies": 13,
+   "depth": 5,
+   "value": 6,
+   "move": 4,
+   "nodes": 16295,
+   "leaves": 13826
+  },
+  {
+   "moves": "6664212131476714447313",
+   "plies": 22,
+   "depth": 5,
+   "value": 58,
+   "move": 1,
+   "nodes": 9988,
+   "leaves": 8331
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 6,
+   "value": 0,
+   "move": 3,
+   "nodes": 137256,
+   "leaves": 117649
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 6,
+   "value": -1,
+   "move": 2,
+   "nodes": 135158,
+   "leaves": 115795
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 6,
+   "value": -9998,
+   "move": 3,
+   "nodes": 8648,
+   "leaves": 6839
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 6,
+   "value": 9999,
+   "move": 1,
+   "nodes": 48231,
+   "leaves": 40744
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 6,
+   "value": 9999,
+   "move": 5,
+   "nodes": 17274,
+   "leaves": 14186
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 6,
+   "value": -35,
+   "move": 5,
+   "nodes": 99921,
+   "leaves": 85602
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 6,
+   "value": 9999,
+   "move": 5,
+   "nodes": 34356,
+   "leaves": 29235
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 6,
+   "value": -1,
+   "move": 3,
+   "nodes": 137255,
+   "leaves": 117648
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 6,
+   "value": 25,
+   "move": 3,
+   "nodes": 128675,
+   "leaves": 110277
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 6,
+   "value": 9999,
+   "move": 2,
+   "nodes": 12895,
+   "leaves": 9983
+  },
+  {
+   "moves": "43144557225524534527",
+   "plies": 20,
+   "depth": 6,
+   "value": 9999,
+   "move": 2,
+   "nodes": 14761,
+   "leaves": 11960
+  },
+  {
+   "moves": "54126",
+   "plies": 5,
+   "depth": 6,
+   "value": 0,
+   "move": 3,
+   "nodes": 136747,
+   "leaves": 117212
+  },
+  {
+   "moves": "165714776246",
+   "plies": 12,
+   "depth": 6,
+   "value": 9999,
+   "move": 4,
+   "nodes": 82929,
+   "leaves": 70987
+  },
+  {
+   "moves": "26",
+   "plies": 2,
+   "depth": 6,
+   "value": 2,
+   "move": 3,
+   "nodes": 134482,
+   "leaves": 115271
+  },
+  {
+   "moves": "75226724345471",
+   "plies": 14,
+   "depth": 6,
+   "value": -38,
+   "move": 3,
+   "nodes": 100518,
+   "leaves": 86027
+  },
+  {
+   "moves": "21146345777762",
+   "plies": 14,
+   "depth": 6,
+   "value": 6,
+   "move": 2,
+   "nodes": 112228,
+   "leaves": 95862
+  },
+  {
+   "moves": "37",
+   "plies": 2,
+   "depth": 6,
+   "value": 12,
+   "move": 3,
+   "nodes": 133222,
+   "leaves": 114191
+  },
+  {
+   "moves": "35657521563",
+   "plies": 11,
+   "depth": 6,
+   "value": -16,
+   "move": 2,
+   "nodes": 126336,
+   "leaves": 107942
+  },
+  {
+   "moves": "53536521731421",
+   "plies": 14,
+   "depth": 6,
+   "value": -51,
+   "move": 2,
+   "nodes": 95238,
+   "leaves": 81497
+  },
+  {
+   "moves": "7367",
+   "plies": 4,
+   "depth": 6,
+   "value": 0,
+   "move": 3,
+   "nodes": 127052,
+   "leaves": 108898
+  },
+  {
+   "moves": "661533571332",
+   "plies": 12,
+   "depth": 6,
+   "value": -7,
+   "move": 4,
+   "nodes": 124307,
+   "leaves": 106203
+  },
+  {
+   "moves": "31147734111214227",
+   "plies": 17,
+   "depth": 6,
+   "value": 9999,
+   "move": 3,
+   "nodes": 33785,
+   "leaves": 28071
+  },
+  {
+   "moves": "6641",
+   "plies": 4,
+   "depth": 6,
+   "value": 9997,
+   "move": 4,
+   "nodes": 118400,
+   "leaves": 101482
+  },
+  {
+   "moves": "6125",
+   "plies": 4,
+   "depth": 6,
+   "value": -2,
+   "move": 5,
+   "nodes": 136748,
+   "leaves": 117213
+  },
+  {
+   "moves": "11253566",
+   "plies": 8,
+   "depth": 6,
+   "value": 9999,
+   "move": 3,
+   "nodes": 92377,
+   "leaves": 79169
+  },
+  {
+   "moves": "14523444274627225166",
+   "plies": 20,
+   "depth": 6,
+   "value": 17,
+   "move": 4,
+   "nodes": 76100,
+   "leaves": 63444
+  },
+  {
+   "moves": "332651725167757336576316716",
+   "plies": 27,
+   "depth": 6,
+   "value": 9997,
+   "move": 3,
+   "nodes": 4518,
+   "leaves": 3305
+  },
+  {
+   "moves": "4126572674637257",
+   "plies": 16,
+   "depth": 6,
+   "value": 9997,
+   "move": 4,
+   "nodes": 111578,
+   "leaves": 95213
+  },
+  {
+   "moves": "64241377564",
+   "plies": 11,
+   "depth": 6,
+   "value": 9999,
+   "move": 4,
+   "nodes": 91359,
+   "leaves": 78255
+  },
+  {
+   "moves": "621",
+   "plies": 3,
+   "depth": 6,
+   "value": -5,
+   "move": 3,
+   "nodes": 135741,
+   "leaves": 116350
+  },
+  {
+   "moves": "51126435331",
+   "plies": 11,
+   "depth": 6,
+   "value": 18,
+   "move": 3,
+   "nodes": 129211,
+   "leaves": 110649
+  },
+  {
+   "moves": "7",
+   "plies": 1,
+   "depth": 6,
+   "value": -1,
+   "move": 3,
+   "nodes": 137255,
+   "leaves": 117648
+  },
+  {
+   "moves": "4377752651235221156667173133252",
+   "plies": 31,
+   "depth": 6,
+   "value": -20,
+   "move": 5,
+   "nodes": 7174,
+   "leaves": 4835
+  },
+  {
+   "moves": "61344155273674531171",
+   "plies": 20,
+   "depth": 6,
+   "value": 1,
+   "move": 3,
+   "nodes": 88163,
+   "leaves": 74467
+  },
+  {
+   "moves": "32274276377347754224656625",
+   "plies": 26,
+   "depth": 6,
+   "value": 9997,
+   "move": 4,
+   "nodes": 6340,
+   "leaves": 4887
+  },
+  {
+   "moves": "5713354644",
+   "plies": 10,
+   "depth": 6,
+   "value": -18,
+   "move": 4,
+   "nodes": 124908,
+   "leaves": 107004
+  },
+  {
+   "moves": "56",
+   "plies": 2,
+   "depth": 6,
+   "value": 2,
+   "move": 3,
+   "nodes": 135742,
+   "leaves": 116351
+  },
+  {
+   "moves": "43631462135632",
+   "plies": 14,
+   "depth": 6,
+   "value": 9999,
+   "move": 6,
+   "nodes": 57015,
+   "leaves": 48628
+  },
+  {
+   "moves": "5654777474311726167331",
+   "plies": 22,
+   "depth": 6,
+   "value": -9998,
+   "move": 3,
+   "nodes": 23612,
+   "leaves": 19457
+  },
+  {
+   "moves": "74535631562571",
+   "plies": 14,
+   "depth": 6,
+   "value": 9,
+   "move": 3,
+   "nodes": 112433,
+   "leaves": 96038
+  },
+  {
+   "moves": "",
+   "plies": 0,
+   "depth": 7,
+   "value": 19,
+   "move": 3,
+   "nodes": 960792,
+   "leaves": 823536
+  },
+  {
+   "moves": "35567125",
+   "plies": 8,
+   "depth": 7,
+   "value": 19,
+   "move": 2,
+   "nodes": 935483,
+   "leaves": 801176
+  },
+  {
+   "moves": "755767747754215113141646324",
+   "plies": 27,
+   "depth": 7,
+   "value": -9998,
+   "move": 3,
+   "nodes": 26337,
+   "leaves": 20546
+  },
+  {
+   "moves": "33746561631553342",
+   "plies": 17,
+   "depth": 7,
+   "value": 9999,
+   "move": 1,
+   "nodes": 250531,
+   "leaves": 210963
+  },
+  {
+   "moves": "17633441455471457775",
+   "plies": 20,
+   "depth": 7,
+   "value": 9999,
+   "move": 5,
+   "nodes": 62019,
+   "leaves": 50469
+  },
+  {
+   "moves": "716561654",
+   "plies": 9,
+   "depth": 7,
+   "value": 0,
+   "move": 5,
+   "nodes": 635212,
+   "leaves": 543911
+  },
+  {
+   "moves": "54635765647442373",
+   "plies": 17,
+   "depth": 7,
+   "value": 9999,
+   "move": 5,
+   "nodes": 164534,
+   "leaves": 139441
+  },
+  {
+   "moves": "1",
+   "plies": 1,
+   "depth": 7,
+   "value": 17,
+   "move": 3,
+   "nodes": 954197,
+   "leaves": 817878
+  },
+  {
+   "moves": "6547543236",
+   "plies": 10,
+   "depth": 7,
+   "value": 82,
+   "move": 3,
+   "nodes": 872035,
+   "leaves": 747156
+  },
+  {
+   "moves": "241114557157221516477432476",
+   "plies": 27,
+   "depth": 7,
+   "value": 9999,
+   "move": 2,
+   "nodes": 49222,
+   "leaves": 37259
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+agent,depth,evaluation,games,opening_plies,score_first,error_first,score_second,error_second,score_overall,wins,draws,losses,nodes_per_move,mean_plies,seconds,digest
+minimax-d1,1,full,2000,4,0.418,0.0153,0.292,0.0142,0.355,683,54,1263,5.8,22.41,3.5,aed5ec8c
+minimax-d2,2,full,2000,4,0.718,0.0134,0.744,0.013,0.731,1374,176,450,33.7,29.65,21.2,3f800f2e
+minimax-d3,3,full,2000,4,0.689,0.0141,0.6495,0.0143,0.6693,1256,165,579,233.1,26.08,119.5,3cfe8f7e
+minimax-d4,4,full,600,4,0.73,0.0236,0.74,0.0222,0.735,396,90,114,1243.0,28.99,219.5,86b0e31e
+minimax-d5,5,full,200,4,0.875,0.0305,0.845,0.0353,0.86,167,10,23,9042.1,24.97,441.2,7c19462c
+minimax-d2-zero,2,zero,2000,4,0.5305,0.009,0.4695,0.009,0.5,327,1346,327,26.4,36.38,5.1,b2ab09fa
+minimax-d4-zero,4,zero,600,4,0.6517,0.0168,0.5333,0.0161,0.5925,167,377,56,902.8,34.3,21.0,279a0a3e

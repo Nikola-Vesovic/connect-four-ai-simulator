@@ -19,16 +19,22 @@ import argparse
 import hashlib
 import random
 from dataclasses import dataclass, field
+from typing import Sequence
 
 from agents.base import Agent
 from agents.greedy_agent import GreedyAgent
+from agents.minimax import MinimaxAgent
 from agents.random_agent import RandomAgent
 from core.bitboard import Bitboard
 from core.board_naive import NaiveBoard
-from core.types import GameResult
+from core.types import GameResult, Move
 from search.stats import UNLIMITED, Budget
 
-AGENTS = {"random": RandomAgent, "greedy": GreedyAgent}
+AGENTS = {
+    "random": RandomAgent,
+    "greedy": GreedyAgent,
+    "minimax": MinimaxAgent,
+}
 BOARDS = {"bitboard": Bitboard, "naive": NaiveBoard}
 
 
@@ -36,6 +42,8 @@ BOARDS = {"bitboard": Bitboard, "naive": NaiveBoard}
 class GameRecord:
     result: GameResult  # ONE_WINS means the agent that moved first won
     plies: int
+    first_moves: int  # plies the agent actually chose; an opening belongs to neither
+    second_moves: int
     first_nodes: int
     second_nodes: int
     first_seconds: float
@@ -130,21 +138,31 @@ def play_game(
     *,
     board_class=Bitboard,
     budget: Budget = UNLIMITED,
+    opening: Sequence[Move] = (),
 ) -> GameRecord:
-    """One game. `first` gets Player.ONE, which on a fresh board is whoever moves first."""
+    """One game. `first` gets Player.ONE, which on a fresh board is whoever moves first.
+
+    `opening` is played before either agent is consulted, and counts towards the game's
+    length. It is how two deterministic agents can be measured against each other at all
+    (see `play_match`); with the default empty opening nothing about a game changes.
+    """
     board = board_class()
+    for col in opening:
+        board.play(col)
     seats = (first, second)
+    moves = [0, 0]
     nodes = [0, 0]
     seconds = [0.0, 0.0]
 
     while not board.is_terminal():
         seat = board.moves_played % 2
         move, stats = seats[seat].choose_move(board, budget)
+        moves[seat] += 1
         nodes[seat] += stats.nodes
         seconds[seat] += stats.elapsed
         board.play(move)
 
-    return GameRecord(board.result(), board.moves_played, nodes[0], nodes[1], *seconds)
+    return GameRecord(board.result(), board.moves_played, *moves, *nodes, *seconds)
 
 
 def game_seeds(seed: int, games: int) -> list[tuple[int, int]]:
@@ -152,6 +170,19 @@ def game_seeds(seed: int, games: int) -> list[tuple[int, int]]:
     outcome never depends on which games ran before it."""
     rng = random.Random(seed)
     return [(rng.randrange(2**63), rng.randrange(2**63)) for _ in range(games)]
+
+
+def random_opening(seed: int, plies: int, board_class=Bitboard) -> tuple[Move, ...]:
+    """A uniformly random legal opening of `plies` moves that does not end the game."""
+    rng = random.Random(f"opening-{seed}")
+    while True:
+        board = board_class()
+        for _ in range(plies):
+            board.play(rng.choice(board.legal_moves()))
+            if board.is_terminal():
+                break
+        if not board.is_terminal():
+            return tuple(board.history)
 
 
 def play_match(
@@ -162,16 +193,33 @@ def play_match(
     *,
     board_class=Bitboard,
     budget: Budget = UNLIMITED,
+    opening_plies: int = 0,
 ) -> MatchResult:
-    """Play `games` games, swapping seats every game, and tally them from A's side."""
-    match = MatchResult(agent_a.name, agent_b.name, seed)
+    """Play `games` games, swapping seats every game, and tally them from A's side.
 
-    for index, (seed_a, seed_b) in enumerate(game_seeds(seed, games)):
+    `opening_plies` exists because two deterministic agents play the same game every
+    time: without it, a thousand games between minimax and greedy are one game reported
+    a thousand times. A few random plies before either agent is consulted turn the match
+    back into a sample. Consecutive games share their opening, so the two agents meet
+    each position once from each seat and the seat split stays a paired comparison
+    rather than two independent ones.
+    """
+    match = MatchResult(agent_a.name, agent_b.name, seed)
+    seeds = game_seeds(seed, games)
+
+    for index, (seed_a, seed_b) in enumerate(seeds):
         agent_a.new_game(seed_a)
         agent_b.new_game(seed_b)
         a_first = index % 2 == 0
         first, second = (agent_a, agent_b) if a_first else (agent_b, agent_a)
-        game = play_game(first, second, board_class=board_class, budget=budget)
+        opening = (
+            random_opening(seeds[index - index % 2][0], opening_plies, board_class)
+            if opening_plies
+            else ()
+        )
+        game = play_game(
+            first, second, board_class=board_class, budget=budget, opening=opening
+        )
 
         tally = match.a_first if a_first else match.b_first
         if game.result is GameResult.DRAW:
@@ -181,18 +229,17 @@ def play_match(
         else:
             tally.losses += 1
 
-        first_moves = (game.plies + 1) // 2
         match.plies += game.plies
         if a_first:
-            match.moves_a += first_moves
-            match.moves_b += game.plies - first_moves
+            match.moves_a += game.first_moves
+            match.moves_b += game.second_moves
             match.nodes_a += game.first_nodes
             match.nodes_b += game.second_nodes
             match.seconds_a += game.first_seconds
             match.seconds_b += game.second_seconds
         else:
-            match.moves_b += first_moves
-            match.moves_a += game.plies - first_moves
+            match.moves_b += game.first_moves
+            match.moves_a += game.second_moves
             match.nodes_b += game.first_nodes
             match.nodes_a += game.second_nodes
             match.seconds_b += game.first_seconds
@@ -239,6 +286,7 @@ def main() -> None:
     parser.add_argument("--games", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--board", default="bitboard", choices=sorted(BOARDS))
+    parser.add_argument("--opening-plies", type=int, default=0)
     args = parser.parse_args()
 
     match = play_match(
@@ -247,6 +295,7 @@ def main() -> None:
         games=args.games,
         seed=args.seed,
         board_class=BOARDS[args.board],
+        opening_plies=args.opening_plies,
     )
     print(format_report(match))
 

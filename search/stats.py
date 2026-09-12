@@ -56,8 +56,9 @@ class SearchStats:
     """
 
     nodes: int = 0
+    leaves: int = 0  # nodes the search stopped at: terminal, or out of depth
     depth: int = 0
     cutoffs: int = 0
     elapsed: float = 0.0  # seconds, filled in by Agent.choose_move
     move: Move | None = None
-    value: int | None = None  # root score, once Phase 5 defines a scale
+    value: int | None = None  # root score on the core.types.Score scale

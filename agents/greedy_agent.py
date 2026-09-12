@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from agents.base import Agent
 from core.rules import Board
-from core.types import Move
+from core.types import Move, Score
 from search.ordering import CENTER_FIRST
 from search.stats import Budget, SearchStats
 
@@ -49,6 +49,7 @@ class GreedyAgent(Agent):
             won = board.winner() is me
             board.undo()
             if won:
+                stats.value = Score.win_in(1)
                 return col
 
         for col in candidates:
@@ -57,9 +58,13 @@ class GreedyAgent(Agent):
             safe = not self._opponent_wins_next(board, stats)
             board.undo()
             if safe:
-                return col
+                return col  # value stays None: surviving one reply is not an assessment
 
-        return candidates[0]  # every move loses; go down in the centre
+        # Every move hands over an immediate win. Within its two-ply horizon this is the
+        # one other thing greedy knows for certain, and before Phase 5 it had no way to
+        # say so -- it reported the same blank value here as in a winning position.
+        stats.value = Score.loss_in(2)
+        return candidates[0]  # go down in the centre
 
     @staticmethod
     def _opponent_wins_next(board: Board, stats: SearchStats) -> bool:
