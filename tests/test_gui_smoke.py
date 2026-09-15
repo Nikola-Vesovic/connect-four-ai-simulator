@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import time
+from dataclasses import replace
 
 import pytest
 
@@ -112,19 +113,43 @@ def test_the_panel_controls_change_the_session(game: Game):
     """Clicking a widget must change the game's configuration and nothing else."""
     place = config.seat_layout(1)
 
-    controller = next(w for w in game.widgets if getattr(w, "label", None) == "kontrola"
-                      and w.rect.x == place.inner_x)
+    def widget(label: str):
+        return next(w for w in game.widgets
+                    if getattr(w, "label", None) == label and w.rect.x == place.inner_x)
+
+    controller = widget("kontrola")
     controller.click(controller.rect.center)
     assert game.session.seats[1].controller is Controller.MACHINE
     assert game.session.agents[1] is not None
 
-    pruning = next(w for w in game.widgets
-                   if getattr(w, "label", None) == "alfa-beta odsecanje"
-                   and w.rect.x == place.inner_x)
+    ordering = widget("sortiranje poteza")
+    assert game.session.seats[1].move_ordering is True
+    ordering.click(ordering.rect.center)
+    assert game.session.seats[1].move_ordering is False
+    # Turning ordering off lowers the depth cap, and the seat must come down with it.
+    assert game.session.seats[1].depth <= game.session.seats[1].max_depth
+
+    pruning = widget("alfa-beta odsecanje")
     assert game.session.seats[1].pruning is True
     pruning.click(pruning.rect.center)
     assert game.session.seats[1].pruning is False
     assert game.session.board.moves_played == 0
+
+
+def test_the_ordering_checkbox_is_dead_while_pruning_is_off(game: Game):
+    """There is nothing for a better move order to cut earlier when nothing is being cut,
+    so the panel greys it out rather than offering a switch that does nothing."""
+    place = config.seat_layout(1)
+    game.session.set_seat(1, replace(game.session.seats[1], controller=Controller.MACHINE))
+    ordering = next(w for w in game.widgets
+                    if getattr(w, "label", None) == "sortiranje poteza"
+                    and w.rect.x == place.inner_x)
+
+    assert ordering.click(ordering.rect.center) is True  # pruning is on: it works
+    game.session.set_seat(1, replace(game.session.seats[1], pruning=False))
+    before = game.session.seats[1].move_ordering
+    assert ordering.click(ordering.rect.center) is False
+    assert game.session.seats[1].move_ordering == before
 
 
 def test_a_disabled_control_ignores_its_click(game: Game):

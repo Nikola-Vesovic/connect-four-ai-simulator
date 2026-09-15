@@ -30,9 +30,11 @@ from core.types import EMPTY, GameResult, Player
 from session import (
     ALGORITHM_KEYS,
     ALGORITHMS,
+    MAX_DEPTH_ORDERED,
     MAX_DEPTH_PRUNED,
     MAX_DEPTH_UNPRUNED,
     MODES,
+    ORDERED_WORST_SECONDS,
     PRUNED_WORST_SECONDS,
     UNPRUNED_WORST_SECONDS,
     Controller,
@@ -96,24 +98,42 @@ def test_every_algorithm_in_the_picker_can_actually_play():
 
 
 def test_the_depth_offered_is_exactly_the_depth_that_was_measured():
-    """The cap and the cost table are the same object, so they cannot drift apart."""
+    """The cap and the cost table are the same object, so they cannot drift apart.
+
+    The ordering of the three caps is itself a result: each optimisation lengthens its own
+    table, so pruning is worth two plies of reachable depth and move ordering another two.
+    """
     assert MAX_DEPTH_UNPRUNED == len(UNPRUNED_WORST_SECONDS)
     assert MAX_DEPTH_PRUNED == len(PRUNED_WORST_SECONDS)
-    assert MAX_DEPTH_PRUNED > MAX_DEPTH_UNPRUNED  # pruning is what buys the extra plies
+    assert MAX_DEPTH_ORDERED == len(ORDERED_WORST_SECONDS)
+    assert MAX_DEPTH_ORDERED > MAX_DEPTH_PRUNED > MAX_DEPTH_UNPRUNED
     for spec, table in (
-        (machine(pruning=True), PRUNED_WORST_SECONDS),
+        (machine(pruning=True, move_ordering=True), ORDERED_WORST_SECONDS),
+        (machine(pruning=True, move_ordering=False), PRUNED_WORST_SECONDS),
         (machine(pruning=False), UNPRUNED_WORST_SECONDS),
     ):
         for depth in range(1, spec.max_depth + 1):
             assert replace(spec, depth=depth).estimated_seconds == table[depth - 1]
 
 
+def test_the_estimate_falls_when_an_optimisation_is_switched_on():
+    """What the panel promises the user: the number next to the slider is the cost of the
+    settings actually chosen, so ticking a box visibly buys something."""
+    for depth in range(1, MAX_DEPTH_PRUNED + 1):
+        ordered = machine(depth=depth, pruning=True, move_ordering=True).estimated_seconds
+        plain = machine(depth=depth, pruning=True, move_ordering=False).estimated_seconds
+        assert ordered <= plain, depth
+
+
 def test_depth_is_clamped_to_what_has_been_measured():
     session = Session((HUMAN, machine(depth=99)))
     stored = session.set_seat(1, machine(depth=99))
-    assert stored.depth == MAX_DEPTH_PRUNED
+    assert stored.depth == MAX_DEPTH_ORDERED
 
-    # Turning pruning off lowers the ceiling, so a depth that was legal must come down.
+    # Turning an optimisation off lowers the ceiling, so a depth that was legal a moment
+    # ago has to come down with it -- twice, once per switch.
+    stored = session.set_seat(1, replace(stored, move_ordering=False))
+    assert stored.depth == MAX_DEPTH_PRUNED
     stored = session.set_seat(1, replace(stored, pruning=False))
     assert stored.depth == MAX_DEPTH_UNPRUNED
     assert session.set_seat(1, machine(depth=0)).depth == 1
@@ -124,7 +144,17 @@ def test_switches_only_apply_where_they_mean_something():
     assert not ALGORITHMS["greedy"].uses_depth
     assert not ALGORITHMS["greedy"].uses_evaluation
     assert not ALGORITHMS["minimax"].uses_pruning  # Phase 5's search has nothing to prune
+    assert not ALGORITHMS["minimax"].uses_ordering  # and so nothing for ordering to steer
     assert ALGORITHMS["negamax"].uses_pruning
+    assert ALGORITHMS["negamax"].uses_ordering
+
+    # Ordering needs cutoffs to bring forward, so it is dead while pruning is off.
+    assert not machine("negamax", pruning=False, move_ordering=True).orders
+    assert not machine("negamax", pruning=False, move_ordering=True).can_order
+    assert machine("negamax", pruning=True, move_ordering=True).orders
+    # But the switch stays clickable when it is off, or it could never be turned back on.
+    assert machine("negamax", pruning=True, move_ordering=False).can_order
+    assert not machine("negamax", pruning=True, move_ordering=False).orders
 
     # A pruning flag set on an algorithm that cannot prune must not raise the depth cap.
     assert not machine("minimax", pruning=True).prunes
@@ -256,6 +286,37 @@ def test_the_pruning_switch_changes_the_search_and_not_the_answer():
     assert pruned[2] == plain[2]  # same value
     assert pruned[1] * 10 < plain[1]  # at least an order of magnitude fewer nodes
     assert pruned[3] > 0 and plain[3] == 0  # and cutoffs are what did it
+
+
+def test_the_ordering_switch_changes_the_search_and_not_the_answer():
+    """Phase 7's checkbox, held to exactly the same standard as Phase 6's.
+
+    The bar is lower than pruning's on purpose: pruning removes orders of magnitude,
+    ordering removes a factor. What must be identical is more than pruning guarantees --
+    not only the value but the column, because the killer and history tables are still
+    empty when the root picks its order.
+    """
+    opening = (3, 3, 4, 4, 2, 5)
+    counts = {}
+    for ordering in (True, False):
+        session = Session((machine(depth=6, move_ordering=ordering), HUMAN))
+        for col in opening:
+            session.commit(col, None)
+        move, stats = session.plan()
+        counts[ordering] = (move, stats.value, stats.nodes, stats.first_cutoff_rate)
+
+    ordered, plain = counts[True], counts[False]
+    assert ordered[0] == plain[0]  # same move
+    assert ordered[1] == plain[1]  # same value
+    assert ordered[2] < plain[2]  # fewer positions examined
+    assert ordered[3] > plain[3]  # and the ordering quality is what improved
+
+
+def test_the_ordering_switch_reaches_the_agent_and_is_named_there():
+    assert machine(move_ordering=True).build().ordering.killers
+    assert not machine(move_ordering=False).build().ordering.killers
+    assert machine(move_ordering=False).build().name.endswith("center_first")
+    assert not machine(move_ordering=True).build().name.endswith("center_first")
 
 
 def test_switching_the_evaluation_off_changes_what_alpha_beta_examines():

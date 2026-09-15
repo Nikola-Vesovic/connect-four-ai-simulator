@@ -54,9 +54,13 @@ transposition table they do not differ in the nodes they visit either (measured 
 **From this phase on, a node count is meaningless without saying which evaluation and
 which move ordering produced it.** Minimax has no cutoffs, so its tree cannot depend on
 either; alpha-beta's tree depends on both, because what it can prune depends on what it
-has already found and on the order it found it in. The ordering here is
-`search.ordering.CENTER_FIRST`, held fixed for the whole phase so that Phase 7 has
-something to compare against.
+has already found and on the order it found it in.
+
+**Phase 7 turns the ordering into a parameter.** It was `search.ordering.CENTER_FIRST`,
+a module constant, for the whole of Phase 6 so that phase had one thing to vary; it is now
+a `search.ordering.Ordering` value on the agent, exactly as the evaluation already was.
+The search asks it for the columns at every node and tells it about every cutoff. Nothing
+else here changes -- the ordering cannot see a score, so it cannot affect one.
 """
 
 from __future__ import annotations
@@ -65,7 +69,7 @@ from agents.base import Agent
 from core.rules import Board
 from core.types import Move, Score
 from search.evaluation import DEFAULT, Evaluation
-from search.ordering import CENTER_FIRST
+from search.ordering import DYNAMIC, MoveOrder, Ordering
 from search.stats import Budget, SearchStats
 
 # One step outside the score scale in both directions. As a search window this is one no
@@ -81,6 +85,7 @@ class NegamaxAgent(Agent):
         *,
         pruning: bool = True,
         evaluation: Evaluation = DEFAULT,
+        ordering: Ordering = DYNAMIC,
         seed: int | None = None,
     ) -> None:
         if depth < 1:
@@ -89,7 +94,13 @@ class NegamaxAgent(Agent):
         self.depth = depth
         self.pruning = pruning
         self.evaluation = evaluation
+        self.ordering = ordering
+        # Only a random base order consumes it, and it is kept rather than drawn from
+        # `self._rng` so that the same position always produces the same tree.
+        self._ordering_seed = seed
         suffix = "" if evaluation is DEFAULT else f"-{evaluation.name}"
+        if ordering != DYNAMIC:
+            suffix += f"-{ordering.name}"
         self.name = f"{'alphabeta' if pruning else 'negamax'}-d{depth}{suffix}"
 
     def _select_move(self, board: Board, budget: Budget, stats: SearchStats) -> Move:
@@ -97,16 +108,17 @@ class NegamaxAgent(Agent):
         # shallower. It cannot make it zero, because a move still has to come back.
         depth = self.depth if budget.depth is None else max(1, min(self.depth, budget.depth))
         stats.depth = depth
+        order = self.ordering.start(depth, self._ordering_seed)
 
         alpha, beta = _BEYOND_LOSS, _BEYOND_WIN
         best_value = _BEYOND_LOSS
         best_move = None
-        for col in CENTER_FIRST:
-            if not board.can_play(col):
-                continue
+        # The killer and history tables are still empty here, so this is the base order
+        # whatever the flags say -- which is why ordering never changes the move played.
+        for col in order.columns(board, 0):
             board.play(col)
             stats.nodes += 1
-            value = -self._negamax(board, depth - 1, 1, -beta, -alpha, stats)
+            value = -self._negamax(board, order, depth - 1, 1, -beta, -alpha, stats)
             board.undo()
             if value > best_value:
                 best_value, best_move = value, col
@@ -117,7 +129,14 @@ class NegamaxAgent(Agent):
         return best_move
 
     def _negamax(
-        self, board: Board, depth: int, ply: int, alpha: int, beta: int, stats: SearchStats
+        self,
+        board: Board,
+        order: MoveOrder,
+        depth: int,
+        ply: int,
+        alpha: int,
+        beta: int,
+        stats: SearchStats,
     ) -> int:
         """Value of this position to the player to move, with `depth` plies left.
 
@@ -136,12 +155,12 @@ class NegamaxAgent(Agent):
             return self.evaluation(board, board.player_to_move)
 
         best = _BEYOND_LOSS
-        for col in CENTER_FIRST:
-            if not board.can_play(col):
-                continue
+        columns = order.columns(board, ply)
+        promoted = order.promoted  # bound now: recursing will overwrite it
+        for index, col in enumerate(columns):
             board.play(col)
             stats.nodes += 1
-            value = -self._negamax(board, depth - 1, ply + 1, -beta, -alpha, stats)
+            value = -self._negamax(board, order, depth - 1, ply + 1, -beta, -alpha, stats)
             board.undo()
             if value > best:
                 best = value
@@ -150,5 +169,11 @@ class NegamaxAgent(Agent):
                     if alpha >= beta:
                         # One per node that stopped early, not one per move skipped.
                         stats.cutoffs += 1
+                        stats.cut_index_total += index + 1
+                        if index == 0:
+                            stats.first_cutoffs += 1
+                        if index < promoted:
+                            stats.killer_cutoffs += 1
+                        order.cutoff(board, col, ply, depth)
                         break
         return best

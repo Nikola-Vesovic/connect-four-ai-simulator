@@ -23,12 +23,16 @@ Three things live here that the window needs and the experiment harness does not
 * **the measured cost tables** -- see below. They bound the depth slider.
 
 **Why the depth is capped, and how the cap was chosen.** A depth-8 plain minimax move
-takes over two minutes, which in a window is indistinguishable from a crash. The tables
-`UNPRUNED_WORST_SECONDS` and `PRUNED_WORST_SECONDS` hold the *measured* worst case of a
-single move over sixteen real positions, and the cap is simply the length of the table:
-**the interface offers exactly the depths that have been measured, and no others.** That
-way the cap cannot quietly drift away from the evidence for it. The numbers are also shown
-next to the slider, so the cost of a setting is visible before it is paid.
+takes over two minutes, which in a window is indistinguishable from a crash. The three
+tables below hold the *measured* worst case of a single move, one table per optimisation
+level, and each cap is simply the length of its table: **the interface offers exactly the
+depths that have been measured, and no others.** That way the cap cannot quietly drift
+away from the evidence for it. The numbers are also shown next to the slider, so the cost
+of a setting is visible before it is paid.
+
+One consequence is the clearest thing the panel says about this project: **each
+optimisation lengthens its own table.** Pruning takes the reachable depth from 7 to 9 and
+move ordering takes it from 9 to 11, and those are measurements rather than claims.
 """
 
 from __future__ import annotations
@@ -46,21 +50,34 @@ from core.bitboard import Bitboard
 from core.rules import Board, winning_line
 from core.types import GameResult, Move, Player
 from search.evaluation import DEFAULT, ZERO, Evaluation
+from search.ordering import DYNAMIC, STATIC, Ordering
 from search.stats import UNLIMITED, Budget, SearchStats
 
-# Worst case of ONE move in seconds, depth 1 upwards, measured 2026-09-15 over sixteen
-# positions (empty board plus random 2/4/6/8-ply openings) with the full evaluation, on
-# the development machine. The empty board alone would be misleading in both directions:
-# it is the *worst* case for an unpruned search, which has the most legal moves there, and
-# the *best* case for alpha-beta, whose centre-first ordering is close to ideal on a
-# symmetric position. Depth 8 pruned costs 2.3s here against 0.13s on the empty board.
+# Worst case of ONE move in seconds, depth 1 upwards, re-measured 2026-09-15 over a stated
+# sample -- the empty board plus four random openings at each of 2, 4, 6, 8, 10 and 12
+# plies, seed 2026 -- with the full evaluation, on the development machine.
+#
+# The sample matters and Phase 7 found out why. Phase 3 measured sixteen positions it did
+# not record and got 30.9s for a pruned depth-9 move; twenty-five positions find 45.5s.
+# **A worst case estimated over too few positions is an under-estimate**, which is the
+# same lesson as thesis point P11 at a different scale, so the sample is written down here
+# rather than described.
+#
+# The empty board is included deliberately and is never the worst case except for the
+# unpruned search: it is the *best* case for alpha-beta, whose centre-first ordering is
+# close to ideal on a symmetric position, and the worst for a search with no cutoffs,
+# which has the most legal moves there.
 UNPRUNED_WORST_SECONDS: tuple[float, ...] = (0.001, 0.001, 0.009, 0.064, 0.442, 3.13, 20.9)
 PRUNED_WORST_SECONDS: tuple[float, ...] = (
-    0.001, 0.001, 0.004, 0.011, 0.057, 0.150, 1.36, 2.32, 30.9,
+    0.001, 0.001, 0.003, 0.011, 0.068, 0.222, 1.754, 3.934, 45.527,
+)
+ORDERED_WORST_SECONDS: tuple[float, ...] = (
+    0.001, 0.001, 0.003, 0.008, 0.029, 0.082, 0.222, 0.598, 2.533, 6.346, 18.665,
 )
 
 MAX_DEPTH_UNPRUNED = len(UNPRUNED_WORST_SECONDS)
 MAX_DEPTH_PRUNED = len(PRUNED_WORST_SECONDS)
+MAX_DEPTH_ORDERED = len(ORDERED_WORST_SECONDS)
 
 
 class Controller(str, Enum):
@@ -79,6 +96,7 @@ class AlgorithmSpec:
     factory: Callable[["SeatSpec", int | None], Agent]
     uses_depth: bool = False
     uses_pruning: bool = False
+    uses_ordering: bool = False
     uses_evaluation: bool = False
 
 
@@ -97,10 +115,15 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
         "negamax",
         "Negamax",
         lambda spec, seed: NegamaxAgent(
-            spec.depth, pruning=spec.pruning, evaluation=spec.evaluation, seed=seed
+            spec.depth,
+            pruning=spec.pruning,
+            evaluation=spec.evaluation,
+            ordering=spec.ordering,
+            seed=seed,
         ),
         uses_depth=True,
         uses_pruning=True,
+        uses_ordering=True,
         uses_evaluation=True,
     ),
 }
@@ -116,6 +139,7 @@ class SeatSpec:
     algorithm: str = "negamax"
     depth: int = 6
     pruning: bool = True
+    move_ordering: bool = True
     threats: bool = True
     center: bool = True
     parity: bool = True
@@ -131,8 +155,40 @@ class SeatSpec:
         return self.spec.uses_pruning and self.pruning
 
     @property
+    def can_order(self) -> bool:
+        """Whether the ordering switch means anything here -- regardless of its value.
+
+        It needs pruning as well as an algorithm that prunes: with no cutoffs there is
+        nothing for a better move order to cut earlier, and nothing for the killer table
+        to learn. Phase 5 proved that direction for minimax and Phase 6 proved the
+        opposite for alpha-beta, so the panel can grey the switch out on solid ground.
+
+        Deliberately independent of `move_ordering` itself: a checkbox that switched
+        itself off permanently would be a trap.
+        """
+        return self.spec.uses_ordering and self.prunes
+
+    @property
+    def orders(self) -> bool:
+        """Whether the learned ordering is actually in effect. This is what the depth cap
+        and the cost estimate depend on."""
+        return self.can_order and self.move_ordering
+
+    @property
+    def ordering(self) -> Ordering:
+        """Killer moves and the history heuristic, or Phase 6's plain centre-first order.
+
+        Shared instances, for the same reason the evaluation hands back shared ones: an
+        agent configured in the window must report the same name as the same agent
+        configured in an experiment.
+        """
+        return DYNAMIC if self.move_ordering else STATIC
+
+    @property
     def max_depth(self) -> int:
-        return MAX_DEPTH_PRUNED if self.prunes else MAX_DEPTH_UNPRUNED
+        if not self.prunes:
+            return MAX_DEPTH_UNPRUNED
+        return MAX_DEPTH_ORDERED if self.orders else MAX_DEPTH_PRUNED
 
     @property
     def evaluation(self) -> Evaluation:
@@ -151,15 +207,18 @@ class SeatSpec:
         """Measured worst case for one move at this setting, or None if it does not search."""
         if not self.spec.uses_depth:
             return 0.0 if self.controller is Controller.MACHINE else None
-        table = PRUNED_WORST_SECONDS if self.prunes else UNPRUNED_WORST_SECONDS
+        if not self.prunes:
+            table = UNPRUNED_WORST_SECONDS
+        else:
+            table = ORDERED_WORST_SECONDS if self.orders else PRUNED_WORST_SECONDS
         return table[min(self.depth, len(table)) - 1]
 
     def normalised(self) -> SeatSpec:
         """The same spec with the depth inside the range that has been measured.
 
-        Turning pruning off lowers the cap from 9 to 7, so a depth that was fine a moment
-        ago may not be; clamping here means no caller can end up with a setting whose cost
-        is unknown.
+        Turning an optimisation off lowers the cap -- 11 with ordering, 9 without it, 7
+        with no pruning at all -- so a depth that was fine a moment ago may not be;
+        clamping here means no caller can end up with a setting whose cost is unknown.
         """
         depth = max(1, min(self.depth, self.max_depth))
         return self if depth == self.depth else replace(self, depth=depth)

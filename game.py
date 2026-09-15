@@ -136,6 +136,11 @@ class Game:
             ),
             switch("pruning", "alfa-beta odsecanje", place.optimisation_y[0],
                    uses("uses_pruning")),
+            # Ordering only bites where there are cutoffs to bring forward, so this one is
+            # greyed out whenever pruning is off rather than merely when the algorithm
+            # cannot prune.
+            switch("move_ordering", "sortiranje poteza", place.optimisation_y[1],
+                   lambda: machine() and seats[index].can_order),
             switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation")),
             switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation")),
             switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation")),

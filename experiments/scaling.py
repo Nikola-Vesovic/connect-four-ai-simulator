@@ -26,10 +26,19 @@ and on the move ordering, so no node count is quotable without naming both. Plai
 was exempt -- with no cutoffs there is nothing for either to steer -- which is exactly why
 the baseline above could be taken with the cheap evaluation.
 
+**Phase 7 adds the ordering sweep.** Phase 6 held the ordering at centre-first so it had
+one thing to vary; this one varies it, against exactly those numbers. Three measurements,
+because any one of them alone would mislead: the empty board (which Phase 3 showed is
+alpha-beta's best case), the 200 reference positions, and complete games. Node counts and
+seconds are both reported, because killers and history add per-node bookkeeping and the
+two need not move together.
+
     python -m experiments.scaling --nodes
     python -m experiments.scaling --curve
     python -m experiments.scaling --pruning
     python -m experiments.scaling --positions
+    python -m experiments.scaling --ordering
+    python -m experiments.scaling --ordering-games
 """
 
 from __future__ import annotations
@@ -37,6 +46,7 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import random
 import time
 from pathlib import Path
 
@@ -47,17 +57,34 @@ from core.bitboard import Bitboard
 from experiments import reference
 from experiments.match import Tally, play_match
 from search.evaluation import DEFAULT, ZERO
-from search.ordering import CENTER_FIRST
+from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC, Ordering
 
 RESULTS = Path(__file__).resolve().parent.parent / "data" / "results"
 NODES_CSV = RESULTS / "minimax_nodes_by_depth.csv"
 CURVE_CSV = RESULTS / "minimax_vs_greedy.csv"
 PRUNING_CSV = RESULTS / "alphabeta_nodes_by_depth.csv"
 POSITIONS_CSV = RESULTS / "alphabeta_by_position.csv"
+ORDERING_CSV = RESULTS / "ordering_by_position.csv"
+ORDERING_EMPTY_CSV = RESULTS / "ordering_on_empty_board.csv"
+ORDERING_GAMES_CSV = RESULTS / "ordering_by_game.csv"
 
-# The ordering every node count in this phase was measured under. Phase 7 varies it, and
-# compares against these numbers, so it is recorded in the output rather than assumed.
-ORDERING = "center_first" if CENTER_FIRST == (3, 2, 4, 1, 5, 0, 6) else str(CENTER_FIRST)
+# The orderings compared. The first is Phase 6's and every gain is quoted against it; the
+# last two are the failure modes slide 148 warns about, measured rather than repeated,
+# each also shown with the learned parts switched on to see how much they win back.
+ORDERINGS: tuple[Ordering, ...] = (
+    STATIC,
+    Ordering(killers=True, history=False),
+    Ordering(killers=False, history=True),
+    DYNAMIC,
+    LEFT,
+    Ordering(base="left_to_right", killers=True, history=True),
+    RANDOM,
+    Ordering(base="random", killers=True, history=True),
+)
+
+# The ordering every Phase 6 node count was measured under, kept as the CSV label it was
+# written with so old and new result files line up.
+ORDERING = STATIC.name
 
 
 def standard_error(tally: Tally) -> float:
@@ -296,12 +323,186 @@ def pruning_by_position(max_depth: int) -> list[dict]:
     return rows
 
 
+def ordering_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
+    """The same sweep on the one position everybody benchmarks, for the contrast.
+
+    Kept separate from the position sweep and never quoted on its own. The empty board is
+    symmetric and centre-first ordering is nearly perfect on it -- thesis point P11 -- so
+    it is where a *learned* ordering has the least to add, and it is the one place in this
+    phase where the numbers can come out worse.
+    """
+    rows = []
+    for depth in depths:
+        baseline = None
+        for spec in ORDERINGS:
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=2026)
+            started = time.perf_counter()
+            _, stats = agent.choose_move(Bitboard())
+            seconds = time.perf_counter() - started
+            if baseline is None:
+                baseline = stats.nodes
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": spec.name,
+                    "nodes": stats.nodes,
+                    "leaves": stats.leaves,
+                    "cutoffs": stats.cutoffs,
+                    "gain": round(baseline / stats.nodes, 3),
+                    "first_cutoff_rate": round(stats.first_cutoff_rate, 4),
+                    "mean_cut_index": round(stats.mean_cut_index, 3),
+                    "killer_cutoff_rate": round(
+                        stats.killer_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    "value": stats.value,
+                    "seconds": round(seconds, 3),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth:>2}  {spec.name:<30} {stats.nodes:>10,} nodes  "
+                f"{row['gain']:>5}x  first-cut {row['first_cutoff_rate']:>6.1%}  "
+                f"{seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def ordering_by_position(depths: tuple[int, ...]) -> list[dict]:
+    """The gate of Phase 7: the same sweep over the 200 frozen reference positions.
+
+    Every value is checked against the stored one as it goes, so the run is simultaneously
+    the measurement and a correctness check -- an ordering that changed an answer would
+    stop the sweep rather than quietly produce a better-looking number.
+    """
+    data = reference.load()
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        baseline = None
+        for spec in ORDERINGS:
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=2026)
+            nodes = leaves = cutoffs = first = index_total = killer = 0
+            seconds = 0.0
+            for record in records:
+                board = Bitboard.from_move_string(record["moves"])
+                started = time.perf_counter()
+                _, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                assert stats.value == record["value"], (
+                    f"{spec.name} at depth {depth} changed the value of {record['moves']!r}"
+                )
+                nodes += stats.nodes
+                leaves += stats.leaves
+                cutoffs += stats.cutoffs
+                first += stats.first_cutoffs
+                index_total += stats.cut_index_total
+                killer += stats.killer_cutoffs
+            if baseline is None:
+                baseline = nodes
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": spec.name,
+                    "positions": len(records),
+                    "nodes": nodes,
+                    "leaves": leaves,
+                    "cutoffs": cutoffs,
+                    "gain": round(baseline / nodes, 3),
+                    "ebf": round(nodes ** (1 / depth) / len(records) ** (1 / depth), 4),
+                    "first_cutoff_rate": round(first / cutoffs, 4) if cutoffs else "",
+                    "mean_cut_index": round(index_total / cutoffs, 3) if cutoffs else "",
+                    "killer_cutoff_rate": round(killer / cutoffs, 4) if cutoffs else "",
+                    "seconds": round(seconds, 2),
+                    "nodes_per_second": round(nodes / seconds) if seconds else "",
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth}  {spec.name:<30} {nodes:>10,} nodes  {row['gain']:>5}x  "
+                f"first-cut {row['first_cutoff_rate']:>6.1%}  "
+                f"mean idx {row['mean_cut_index']:>5}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def ordering_by_game(depth: int, games: int, seed: int, opening_plies: int) -> list[dict]:
+    """What a whole game costs, which is what somebody using the window actually pays.
+
+    Both seats use the same ordering and everything both of them spend is counted. A game
+    is not a sample of one position: it walks from an opening, where alpha-beta does well,
+    into an endgame where there is hardly any tree left to prune, so the average over a
+    game is a different number from the average over a set of positions and both are worth
+    having.
+    """
+    rng = random.Random(seed)
+    openings = [
+        [rng.randrange(7) for _ in range(opening_plies)] for _ in range(games)
+    ]
+    rows = []
+    baseline = None
+    for spec in ORDERINGS:
+        agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=seed)
+        nodes = cutoffs = first = index_total = plies = 0
+        seconds = 0.0
+        for opening in openings:
+            board = Bitboard()
+            for col in opening:
+                if board.is_terminal() or not board.can_play(col):
+                    break
+                board.play(col)
+            while not board.is_terminal():
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                nodes += stats.nodes
+                cutoffs += stats.cutoffs
+                first += stats.first_cutoffs
+                index_total += stats.cut_index_total
+                plies += 1
+                board.play(move)
+        if baseline is None:
+            baseline = nodes
+        rows.append(
+            {
+                "depth": depth,
+                "evaluation": DEFAULT.name,
+                "ordering": spec.name,
+                "games": games,
+                "opening_plies": opening_plies,
+                "moves": plies,
+                "nodes": nodes,
+                "nodes_per_move": round(nodes / plies, 1),
+                "cutoffs": cutoffs,
+                "gain": round(baseline / nodes, 3),
+                "first_cutoff_rate": round(first / cutoffs, 4) if cutoffs else "",
+                "mean_cut_index": round(index_total / cutoffs, 3) if cutoffs else "",
+                "seconds": round(seconds, 2),
+                "seconds_per_move": round(seconds / plies, 4),
+            }
+        )
+        row = rows[-1]
+        print(
+            f"{spec.name:<30} {nodes:>10,} nodes over {plies} moves  {row['gain']:>5}x  "
+            f"first-cut {row['first_cutoff_rate']:>6.1%}  {seconds:7.2f}s",
+            flush=True,
+        )
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--nodes", action="store_true")
     parser.add_argument("--curve", action="store_true")
     parser.add_argument("--pruning", action="store_true")
     parser.add_argument("--positions", action="store_true")
+    parser.add_argument("--ordering", action="store_true")
+    parser.add_argument("--ordering-games", action="store_true")
     parser.add_argument("--max-depth", type=int, default=8)
     parser.add_argument("--timed-depth", type=int, default=6)
     parser.add_argument("--unpruned-depth", type=int, default=8)
@@ -334,6 +535,14 @@ def main() -> None:
         )
     if args.positions:
         write(pruning_by_position(args.max_depth), POSITIONS_CSV)
+    if args.ordering:
+        write(ordering_on_empty_board((4, 5, 6, 7, 8, 9, 10)), ORDERING_EMPTY_CSV)
+        write(ordering_by_position((4, 5, 6, 7)), ORDERING_CSV)
+    if args.ordering_games:
+        write(
+            ordering_by_game(6, games=10, seed=args.seed, opening_plies=args.opening_plies),
+            ORDERING_GAMES_CSV,
+        )
 
 
 if __name__ == "__main__":

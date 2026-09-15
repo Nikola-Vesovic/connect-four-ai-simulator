@@ -64,9 +64,9 @@ PANEL_INSET = 14
 GROUP_GAP = 6
 
 SPINNERS = 3  # kontrola, algoritam, dubina
-OPTIMISATIONS = 1  # alpha-beta pruning. Phases 7-11 add one each; the panel has room.
+OPTIMISATIONS = 2  # alpha-beta pruning, move ordering. Phases 8-11 add one each.
 EVAL_SWITCHES = 3  # threats, center, parity
-LAST_MOVE_LINES = 6
+LAST_MOVE_LINES = 7
 TOTAL_LINES = 4
 
 

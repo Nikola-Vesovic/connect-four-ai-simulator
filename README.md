@@ -16,23 +16,27 @@ Nema nijednog argumenta komandne linije — sve se bira u prozoru:
 
 - **režim igre**: čovek vs mašina, mašina vs mašina, čovek vs čovek;
 - **algoritam po sedištu**: Random, Greedy, Minimax, Negamax (kasnije NegaScout i MCTS);
-- **optimizacije po sedištu**: alfa-beta odsecanje, i svaka komponenta funkcije procene
-  (pretnje, centar, parnost) nezavisno;
+- **optimizacije po sedištu**: alfa-beta odsecanje i sortiranje poteza (killer potezi +
+  istorijska heuristika), i svaka komponenta funkcije procene (pretnje, centar, parnost)
+  nezavisno;
 - **dubina pretrage**, sa izmerenom cenom najgoreg poteza uz klizač.
 
-Ispod svakog sedišta stoji šta je poslednja pretraga koštala: čvorova, odsecanja, dubina,
-vrednost i vreme, plus zbir za celu partiju. To je ono što čini prekidače čitljivim —
-ista pozicija, ista dubina, isti algoritam, samo jedno čekirano polje razlike:
+Ispod svakog sedišta stoji šta je poslednja pretraga koštala: čvorova, odsecanja, kvalitet
+redosleda poteza, dubina, vrednost i vreme, plus zbir za celu partiju. To je ono što čini
+prekidače čitljivim — ista pozicija, ista dubina, isti algoritam, samo jedno čekirano
+polje razlike:
 
 | sedište | agent | čvorova | odsecanja | vreme |
 |---|---|---|---|---|
 | alfa-beta uključena | `alphabeta-d6` | 3.425 | 820 | 0,063 s |
 | alfa-beta isključena | `negamax-d6` | 136.609 | 0 | 3,000 s |
 
-**Dubina je ograničena na ono što je izmereno.** Tabele `UNPRUNED_WORST_SECONDS` i
-`PRUNED_WORST_SECONDS` u `session.py` drže najgore izmereno vreme jednog poteza po dubini,
-a granica klizača je dužina te tabele. Najgori slučaj koji aplikacija dopušta je oko 31 s
-(alfa-beta, dubina 9). Pretraga se izvršava u zasebnoj niti, pa prozor i tada crta 60
+**Dubina je ograničena na ono što je izmereno.** Tabele `UNPRUNED_WORST_SECONDS`,
+`PRUNED_WORST_SECONDS` i `ORDERED_WORST_SECONDS` u `session.py` drže najgore izmereno
+vreme jednog poteza po dubini, jednu tabelu po nivou optimizacije, a granica klizača je
+dužina te tabele. Zato je **granica dubine sama po sebi rezultat**: 7 bez odsecanja, 9 sa
+odsecanjem, 11 sa odsecanjem i sortiranjem poteza. Najgori slučaj koji aplikacija dopušta
+je oko 19 s (dubina 11). Pretraga se izvršava u zasebnoj niti, pa prozor i tada crta 60
 slika u sekundi i može da se zatvori.
 
 ## Struktura
@@ -48,7 +52,8 @@ connect4/
                  minimax.py (MAX/MIN, ogranicen dubinom)                                  [5]
                  alphabeta.py (negamax; alfa-beta koja se iskljucuje)                     [6]
                  negascout, mcts, oracle                                                  [10-11, 13]
-  search/        stats.py (Budget + SearchStats), ordering.py (centar-prvo)               [4]
+  search/        stats.py (Budget + SearchStats)                                          [4]
+                 ordering.py (centar-prvo [4]; killer potezi + istorija, ukljucivi)       [7]
                  evaluation.py (pretnje, centar, parnost -- svaka iskljuciva)             [5]
                  transpoziciona tabela, tajmer                                            [8-9]
   gui/           renderer.py (crtanje), widgets.py (kontrole), sprites.py (diskovi)       [3]
@@ -71,13 +76,17 @@ python -m experiments.scaling --nodes      # cvorovi po dubini, obican minimax
 python -m experiments.scaling --curve      # rezultat protiv greedyja po dubini
 python -m experiments.scaling --pruning    # alfa-beta po dubini, prazna tabla
 python -m experiments.scaling --positions  # isti odnos nad 200 realnih pozicija
+python -m experiments.scaling --ordering        # redosled poteza: prazna tabla + 200 pozicija
+python -m experiments.scaling --ordering-games  # isto, ali kroz cele partije
 python -m experiments.reference --generate # zamrzni vrednosti obicnog minimaxa
 python -m experiments.reference --verify --agent alphabeta   # gate za faze 6-10
+python -m experiments.reference --verify --agent alphabeta --ordering center_first
 ```
 
 Svaka optimizacija u fazama 6-10 mora da vrati **istu vrednost** kao obican minimax.
 `--verify` je ta provera; broj cvorova sme da se menja, vrednost ne sme. `--agent negamax`
 poredi i broj cvorova, jer taj rezim nema odsecanja pa mu je stablo isto kao minimaxu.
+Sve cetiri imenovane strategije redosleda daju 0 neslaganja nad svih 1.050 zapisa.
 
 **Od faze 6 nadalje broj cvorova nije uporediv bez funkcije procene i redosleda poteza.**
 Obican minimax nema odsecanja, pa ga ni jedno ni drugo ne moze skrenuti; alfa-beta odseca

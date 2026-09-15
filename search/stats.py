@@ -62,3 +62,29 @@ class SearchStats:
     elapsed: float = 0.0  # seconds, filled in by Agent.choose_move
     move: Move | None = None
     value: int | None = None  # root score on the core.types.Score scale
+
+    # --------------------------------------------------------------- ordering quality
+    #
+    # Phase 7. A node count says how much work the search did; these say how well it was
+    # steered, which is a different question and the one move ordering is actually about.
+    # A cutoff found on the first move tried is a node where the ordering was perfect --
+    # every other move in it was skipped. The share of those is the standard measure of
+    # ordering quality, and `cut_index_total` gives the mean rank of the move that cut,
+    # which is the same statistic without the all-or-nothing rounding.
+    #
+    # They are reported separately from the node count on purpose: the two are correlated
+    # but not the same thing, and Phase 7 found positions where the ordering quality rises
+    # and the node count rises with it.
+    first_cutoffs: int = 0  # cutoffs that happened on the first move tried
+    cut_index_total: int = 0  # sum of the 1-based rank of every cutting move
+    killer_cutoffs: int = 0  # cutoffs caused by a move the killer table had promoted
+
+    @property
+    def first_cutoff_rate(self) -> float:
+        """Share of cut nodes that cut immediately. 1.0 would be a perfect ordering."""
+        return self.first_cutoffs / self.cutoffs if self.cutoffs else 0.0
+
+    @property
+    def mean_cut_index(self) -> float:
+        """Average rank of the move that caused a cutoff. 1.0 would be perfect."""
+        return self.cut_index_total / self.cutoffs if self.cutoffs else 0.0

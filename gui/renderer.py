@@ -269,6 +269,12 @@ class Renderer:
         y = self.stat("čvorova", thousands(stats.nodes), x, y, width, config.TEXT)
         y = self.stat("odsecanja", thousands(stats.cutoffs), x, y, width,
                       config.GOOD if stats.cutoffs else config.TEXT_MUTED)
+        # How good the move ordering was: the share of cut nodes that cut on the first
+        # move tried. 100% would be a perfect ordering.
+        y = self.stat("red poteza",
+                      f"{stats.first_cutoff_rate:.0%}" if stats.cutoffs else "—",
+                      x, y, width,
+                      config.GOOD if stats.first_cutoff_rate >= 0.8 else config.TEXT_MUTED)
         self.stat("vreme", seconds(stats.elapsed), x, y, width)
 
     def draw_totals(self, totals: SeatTotals, place) -> None:

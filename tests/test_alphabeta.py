@@ -32,7 +32,7 @@ from core.types import Score
 from experiments import reference
 from helpers import random_position, safe_columns, winning_columns
 from search.evaluation import DEFAULT, ZERO
-from search.ordering import CENTER_FIRST
+from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC
 from search.stats import Budget
 from test_minimax import EVERY_MOVE_LOSES, WIN_IN_ONE_OR_THREE
 
@@ -117,19 +117,17 @@ def test_alpha_beta_chooses_the_same_column_as_minimax_and_not_only_the_same_val
             assert pruned.choose_move(board)[0] == plain.choose_move(board)[0]
 
 
-def test_the_value_survives_even_a_deliberately_bad_ordering(monkeypatch):
-    """Soundness does not depend on the ordering; only speed does. Reversing centre order
-    is the worst static order available, and the answer has to be identical anyway."""
-    import agents.alphabeta as module
-
+def test_the_value_survives_even_a_deliberately_bad_ordering():
+    """Soundness does not depend on the ordering; only speed does. Left-to-right and a
+    per-node shuffle are the two orders slide 148 warns about, and the answer has to be
+    identical under both anyway."""
     board = NaiveBoard.from_move_string("4455")
-    _, good = NegamaxAgent(5).choose_move(board)
+    _, good = NegamaxAgent(5, ordering=STATIC).choose_move(board)
 
-    monkeypatch.setattr(module, "CENTER_FIRST", tuple(reversed(CENTER_FIRST)))
-    _, bad = NegamaxAgent(5).choose_move(board)
-
-    assert bad.value == good.value
-    assert bad.nodes != good.nodes  # it really did search a different tree
+    for bad in (LEFT, RANDOM):
+        _, worse = NegamaxAgent(5, ordering=bad, seed=1).choose_move(board)
+        assert worse.value == good.value, bad.name
+        assert worse.nodes != good.nodes, bad.name  # it really did search another tree
 
 
 # ------------------------------------------------------------------------ and cuts nodes
@@ -151,16 +149,28 @@ def test_alpha_beta_visits_far_fewer_nodes_and_says_how_many_times_it_cut():
 
 
 def test_the_empty_board_tree_is_the_size_it_was_measured_to_be():
-    """Pinned exactly, from `data/results/alphabeta_nodes_by_depth.csv`, with the full
-    evaluation and centre-first ordering -- both of which the numbers depend on now.
+    """Pinned exactly, with the full evaluation -- and now with the ordering named too,
+    because from Phase 7 the ordering is a setting rather than a constant.
 
-    Phase 7 changes the ordering and must change these numbers with it. That is the point
-    of pinning them: the next phase's benefit is the difference from here.
+    The two rows are kept side by side on purpose. The `STATIC` column is Phase 6's
+    measurement, unchanged to the node, which is what proves that making the ordering a
+    parameter did not disturb the search it was measured with. The `DYNAMIC` column is
+    Phase 7's, and the difference between them is the phase's result on this position --
+    including at depth 5, where it is *worse*. The empty board is alpha-beta's best case
+    (thesis point P11) and there is little left there for a learned ordering to win; the
+    gain shows up over the reference positions, which is where the gate is measured.
     """
-    expected = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (181, 59), 5: (819, 139), 6: (1526, 491)}
-    for depth, (nodes, cutoffs) in expected.items():
-        _, stats = NegamaxAgent(depth, evaluation=DEFAULT).choose_move(Bitboard())
-        assert (stats.nodes, stats.cutoffs) == (nodes, cutoffs), f"depth {depth}"
+    phase6 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (181, 59), 5: (819, 139), 6: (1526, 491)}
+    phase7 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (180, 59), 5: (850, 148), 6: (1514, 468)}
+
+    for ordering, expected in ((STATIC, phase6), (DYNAMIC, phase7)):
+        for depth, (nodes, cutoffs) in expected.items():
+            _, stats = NegamaxAgent(depth, evaluation=DEFAULT, ordering=ordering).choose_move(
+                Bitboard()
+            )
+            assert (stats.nodes, stats.cutoffs) == (nodes, cutoffs), (
+                f"{ordering.name} at depth {depth}"
+            )
 
 
 # ---------------------------------------------- the property that flips in this phase
@@ -178,24 +188,23 @@ def test_the_pruned_node_count_does_depend_on_the_evaluation_function():
     assert differed > 20, f"only {differed} of 40 positions differed"
 
 
-def test_the_pruned_node_count_does_depend_on_move_ordering(monkeypatch):
+def test_the_pruned_node_count_does_depend_on_move_ordering():
     """The mirror of `test_the_node_count_does_not_depend_on_move_ordering`. Phase 5's
     version of this test asserted equality; here the same experiment has to come out
     unequal, which is the entire justification for Phase 7 existing.
 
-    The direction is measured on this position rather than claimed in general: reversing
-    centre order costs 6,016 nodes against 4,602 here, a 31% surcharge for the same answer.
+    The direction is measured on this position rather than claimed in general: the naive
+    left-to-right order costs 7,281 nodes against centre-first's 4,602 here, 58% more for
+    the same answer -- and Phase 7's killers and history bring the same answer down to
+    1,923, which is 2.4x below the static centre order rather than above it.
     """
-    import agents.alphabeta as module
-
     board = NaiveBoard.from_move_string("4455")
-    _, forward = NegamaxAgent(6).choose_move(board)
+    _, centre = NegamaxAgent(6, ordering=STATIC).choose_move(board)
+    _, naive = NegamaxAgent(6, ordering=LEFT).choose_move(board)
+    _, learned = NegamaxAgent(6, ordering=DYNAMIC).choose_move(board)
 
-    monkeypatch.setattr(module, "CENTER_FIRST", tuple(reversed(CENTER_FIRST)))
-    _, backward = NegamaxAgent(6).choose_move(board)
-
-    assert backward.value == forward.value
-    assert backward.nodes > forward.nodes
+    assert naive.value == centre.value == learned.value
+    assert naive.nodes > centre.nodes > learned.nodes
 
 
 # ------------------------------------------------ the policy, unchanged from Phase 5
