@@ -67,3 +67,27 @@ def render(board: Board) -> str:
     ]
     rows.append(" ".join(str(col + 1) for col in range(COLS)))
     return "\n".join(rows)
+
+
+def winning_line(board: Board) -> tuple[tuple[int, int], ...] | None:
+    """The four cells that won the game, as (row, col), or None if nobody has won.
+
+    For display only. A search asks `board.winner()`, which is incremental and far
+    cheaper; the cells themselves are not part of the contract, because one
+    implementation knows them and the other would have to reconstruct them. Reading the
+    board through `cell()` keeps this working on both without either having to change.
+    """
+    for col in range(COLS):
+        for row in range(ROWS):
+            occupant = board.cell(row, col)
+            if occupant == EMPTY:
+                continue
+            for d_row, d_col in DIRECTIONS:
+                cells = tuple(
+                    (row + step * d_row, col + step * d_col) for step in range(CONNECT)
+                )
+                if all(0 <= r < ROWS and 0 <= c < COLS for r, c in cells) and all(
+                    board.cell(r, c) == occupant for r, c in cells
+                ):
+                    return cells
+    return None

@@ -1,0 +1,368 @@
+"""Phase 3: the game flow, tested without a window.
+
+The reason this file can exist at all is the split the phase is built on: *what should
+happen* lives in `session.py` and *what is drawn* lives in `gui/`. Everything below is the
+first half -- turns, legality, terminal positions, mode switching, and whether the
+switches in the panel reach the agent they claim to configure.
+
+Two of these tests are worth more than the rest and are worth naming:
+
+* `test_the_pruning_switch_changes_the_search_and_not_the_answer` is the mentor's request
+  turned into an assertion. The checkbox is only meaningful if flipping it changes the
+  number of positions examined by orders of magnitude *and* leaves the chosen move alone.
+* `test_nothing_headless_imports_pygame` guards BUILD_PLAN 2.3. If the measurement harness
+  ever picks up a pygame import it can no longer be run under PyPy, and that is the
+  project's escape hatch for speed.
+"""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+from dataclasses import replace
+from pathlib import Path
+
+import pytest
+
+from core.board_naive import NaiveBoard
+from core.rules import COLS, ROWS, winning_line
+from core.types import EMPTY, GameResult, Player
+from session import (
+    ALGORITHM_KEYS,
+    ALGORITHMS,
+    MAX_DEPTH_PRUNED,
+    MAX_DEPTH_UNPRUNED,
+    MODES,
+    PRUNED_WORST_SECONDS,
+    UNPRUNED_WORST_SECONDS,
+    Controller,
+    SeatSpec,
+    Session,
+)
+
+HUMAN = SeatSpec(controller=Controller.HUMAN)
+RANDOM = SeatSpec(controller=Controller.MACHINE, algorithm="random")
+GREEDY = SeatSpec(controller=Controller.MACHINE, algorithm="greedy")
+
+
+def machine(algorithm: str = "negamax", **changes) -> SeatSpec:
+    return replace(
+        SeatSpec(controller=Controller.MACHINE, algorithm=algorithm, depth=4), **changes
+    )
+
+
+def play_out(session: Session, limit: int = 42) -> None:
+    """Run a machine-versus-machine game to its end, the way the window would."""
+    for _ in range(limit):
+        if session.is_over:
+            return
+        move, stats = session.plan()
+        session.commit(move, stats)
+
+
+# --------------------------------------------------------------------------- the split
+
+
+def test_nothing_headless_imports_pygame():
+    """`session` and the whole of `experiments/` must stay runnable without a display.
+
+    Checked in a fresh interpreter, because inside the test suite pygame may already have
+    been imported by the smoke test and `sys.modules` would no longer prove anything.
+    """
+    root = Path(__file__).resolve().parent.parent
+    program = (
+        "import sys;"
+        "import session, experiments.match, experiments.scaling, experiments.reference;"
+        "assert 'pygame' not in sys.modules, sorted(m for m in sys.modules if 'pygame' in m);"
+        "print('clean')"
+    )
+    done = subprocess.run(
+        [sys.executable, "-c", program], cwd=root, capture_output=True, text=True
+    )
+    assert done.returncode == 0, done.stderr
+    assert "clean" in done.stdout
+
+
+# ------------------------------------------------------------------------ configuration
+
+
+def test_every_algorithm_in_the_picker_can_actually_play():
+    """The picker is a promise: whatever it offers has to produce a legal move."""
+    for key in ALGORITHM_KEYS:
+        session = Session((machine(key), machine(key)))
+        move, stats = session.plan()
+        assert move in session.board.legal_moves(), key
+        assert stats.move == move
+
+
+def test_the_depth_offered_is_exactly_the_depth_that_was_measured():
+    """The cap and the cost table are the same object, so they cannot drift apart."""
+    assert MAX_DEPTH_UNPRUNED == len(UNPRUNED_WORST_SECONDS)
+    assert MAX_DEPTH_PRUNED == len(PRUNED_WORST_SECONDS)
+    assert MAX_DEPTH_PRUNED > MAX_DEPTH_UNPRUNED  # pruning is what buys the extra plies
+    for spec, table in (
+        (machine(pruning=True), PRUNED_WORST_SECONDS),
+        (machine(pruning=False), UNPRUNED_WORST_SECONDS),
+    ):
+        for depth in range(1, spec.max_depth + 1):
+            assert replace(spec, depth=depth).estimated_seconds == table[depth - 1]
+
+
+def test_depth_is_clamped_to_what_has_been_measured():
+    session = Session((HUMAN, machine(depth=99)))
+    stored = session.set_seat(1, machine(depth=99))
+    assert stored.depth == MAX_DEPTH_PRUNED
+
+    # Turning pruning off lowers the ceiling, so a depth that was legal must come down.
+    stored = session.set_seat(1, replace(stored, pruning=False))
+    assert stored.depth == MAX_DEPTH_UNPRUNED
+    assert session.set_seat(1, machine(depth=0)).depth == 1
+
+
+def test_switches_only_apply_where_they_mean_something():
+    """Greedy has no depth and no evaluation; the panel greys them out on this basis."""
+    assert not ALGORITHMS["greedy"].uses_depth
+    assert not ALGORITHMS["greedy"].uses_evaluation
+    assert not ALGORITHMS["minimax"].uses_pruning  # Phase 5's search has nothing to prune
+    assert ALGORITHMS["negamax"].uses_pruning
+
+    # A pruning flag set on an algorithm that cannot prune must not raise the depth cap.
+    assert not machine("minimax", pruning=True).prunes
+    assert machine("minimax", pruning=True).max_depth == MAX_DEPTH_UNPRUNED
+
+
+def test_the_evaluation_switches_reach_the_agent():
+    for changes, expected in (
+        ({}, "full"),
+        ({"threats": False, "center": False, "parity": False}, "zero"),
+        ({"center": False}, "threats+parity"),
+    ):
+        agent = machine(**changes).build()
+        assert agent.evaluation.name == expected
+        assert agent.evaluation == machine(**changes).evaluation
+
+
+def test_a_human_seat_has_no_agent():
+    session = Session((HUMAN, RANDOM))
+    assert HUMAN.build() is None
+    assert session.agents[0] is None
+    assert session.agents[1] is not None
+
+
+# ------------------------------------------------------------------------------- turns
+
+
+def test_seat_zero_moves_first_and_the_turn_alternates():
+    session = Session((HUMAN, HUMAN))
+    assert session.seat_to_move == 0
+    assert session.board.player_to_move is Player.ONE
+    session.drop(3)
+    assert session.seat_to_move == 1
+    assert session.board.player_to_move is Player.TWO
+    session.drop(3)
+    assert session.seat_to_move == 0
+
+
+def test_a_human_move_is_refused_when_it_is_not_allowed():
+    session = Session((HUMAN, RANDOM))
+
+    assert session.drop(3) is True
+    assert session.board.moves_played == 1
+
+    # Seat 1 is a machine: a click must not move for it.
+    assert session.drop(4) is False
+    assert session.board.moves_played == 1
+
+
+def test_a_full_column_is_refused():
+    session = Session((HUMAN, HUMAN))
+    for _ in range(ROWS):
+        assert session.drop(0) is True
+    assert not session.board.can_play(0)
+    assert not session.is_over  # one column cannot hold four of the same colour
+
+    before = session.board.moves_played
+    assert session.drop(0) is False
+    assert session.board.moves_played == before
+
+
+def test_a_finished_game_accepts_nothing_further():
+    session = Session((HUMAN, HUMAN))
+    for col in (0, 1, 0, 1, 0, 1, 0):  # seat 0 wins vertically in column 0
+        session.drop(col)
+
+    assert session.is_over
+    assert session.result is GameResult.ONE_WINS
+    assert session.awaiting_human is False
+    assert session.drop(5) is False
+    with pytest.raises(ValueError):
+        session.plan()
+    with pytest.raises(ValueError):
+        session.commit(5, None)
+
+
+def test_the_winning_four_are_found_in_every_direction():
+    for moves, expected in (
+        ((0, 1, 0, 1, 0, 1, 0), ((0, 0), (1, 0), (2, 0), (3, 0))),  # vertical
+        ((0, 0, 1, 1, 2, 2, 3), ((0, 0), (0, 1), (0, 2), (0, 3))),  # horizontal
+        ((0, 1, 1, 2, 2, 3, 2, 3, 3, 6, 3), ((0, 0), (1, 1), (2, 2), (3, 3))),  # diagonal
+    ):
+        board = NaiveBoard.from_moves(moves)
+        assert board.winner() is Player.ONE
+        assert set(winning_line(board)) == set(expected)
+
+    assert winning_line(NaiveBoard.from_moves((0, 1, 0, 1))) is None
+
+
+def test_plan_reads_the_position_and_changes_nothing():
+    """The property the worker thread depends on: planning a move is not playing it."""
+    session = Session((machine("minimax", depth=4), HUMAN))
+    before = [
+        [session.board.cell(row, col) for col in range(COLS)] for row in range(ROWS)
+    ]
+    moves_before = session.board.moves_played
+
+    move, stats = session.plan()
+
+    assert session.board.moves_played == moves_before
+    assert [[session.board.cell(r, c) for c in range(COLS)] for r in range(ROWS)] == before
+    assert all(cell == EMPTY for row in before for cell in row)
+
+    session.commit(move, stats)
+    assert session.board.moves_played == moves_before + 1
+
+
+# ----------------------------------------------------------------------------- the toggles
+
+
+def test_the_pruning_switch_changes_the_search_and_not_the_answer():
+    """The mentor's request as an assertion, and the demonstration for the defence.
+
+    Same algorithm, same depth, same evaluation, same position. Only the checkbox moves.
+    Alpha-beta must visit dramatically fewer positions and must still choose the same
+    column -- BUILD_PLAN design principle 3.
+    """
+    opening = (3, 3, 4, 4)
+    counts = {}
+    for pruning in (True, False):
+        session = Session((machine(depth=6, pruning=pruning), HUMAN))
+        for col in opening:
+            session.commit(col, None)
+        move, stats = session.plan()
+        counts[pruning] = (move, stats.nodes, stats.value, stats.cutoffs)
+
+    pruned, plain = counts[True], counts[False]
+    assert pruned[0] == plain[0]  # same move
+    assert pruned[2] == plain[2]  # same value
+    assert pruned[1] * 10 < plain[1]  # at least an order of magnitude fewer nodes
+    assert pruned[3] > 0 and plain[3] == 0  # and cutoffs are what did it
+
+
+def test_switching_the_evaluation_off_changes_what_alpha_beta_examines():
+    """Phase 6's rule, visible in the panel: a pruned search's node count depends on the
+    evaluation, because what can be cut depends on what has been found so far."""
+    nodes = {}
+    for name, changes in (("full", {}), ("zero", dict(threats=False, center=False, parity=False))):
+        session = Session((machine(depth=5, **changes), HUMAN))
+        for col in (3, 3, 4, 2):  # an even number of plies, so seat 0 is the one to move
+            session.commit(col, None)
+        nodes[name] = session.plan()[1].nodes
+    assert nodes["full"] != nodes["zero"]
+
+
+# ------------------------------------------------------------------------------- modes
+
+
+def test_the_three_modes_set_both_seats():
+    session = Session((HUMAN, HUMAN))
+    for label, controllers in MODES:
+        session.set_mode(controllers)
+        assert tuple(seat.controller for seat in session.seats) == controllers
+        assert session.mode_label == label
+    assert session.mode_label == "Čovek vs čovek"
+
+    session.set_mode((Controller.MACHINE, Controller.HUMAN))
+    assert session.mode_label == "Mašina vs čovek"
+
+
+def test_a_seat_can_be_reconfigured_in_the_middle_of_a_game():
+    session = Session((HUMAN, RANDOM))
+    session.drop(3)
+    session.commit(*session.plan())
+    position = [[session.board.cell(r, c) for c in range(COLS)] for r in range(ROWS)]
+
+    session.set_seat(1, GREEDY)
+
+    assert [[session.board.cell(r, c) for c in range(COLS)] for r in range(ROWS)] == position
+    assert session.board.moves_played == 2
+    assert session.agents[1].name == "greedy"
+    assert len(session.history) == 2
+
+
+def test_machine_versus_machine_plays_a_whole_game_by_itself():
+    session = Session((GREEDY, RANDOM))
+    play_out(session)
+    assert session.is_over
+    assert session.result is not GameResult.IN_PROGRESS
+    assert session.totals[0].moves + session.totals[1].moves == session.board.moves_played
+    assert session.totals[0].nodes > 0  # greedy looks ahead one reply
+    assert session.totals[1].nodes == 0  # the random agent does not look at anything
+
+
+# ------------------------------------------------------------------------- bookkeeping
+
+
+def test_statistics_accumulate_per_seat_and_a_human_costs_nothing():
+    session = Session((HUMAN, GREEDY))
+    session.drop(3)
+    session.commit(*session.plan())
+    session.drop(2)
+    session.commit(*session.plan())
+
+    assert session.totals[0].moves == 2
+    assert session.totals[0].nodes == 0
+    assert session.totals[0].seconds == 0.0
+    assert session.last_stats(0) is None
+
+    assert session.totals[1].moves == 2
+    assert session.totals[1].nodes > 0
+    assert session.totals[1].nodes_per_move == session.totals[1].nodes / 2
+    assert session.last_stats(1) is session.history[-1].stats
+
+
+def test_a_new_game_clears_the_board_but_keeps_the_configuration():
+    session = Session((HUMAN, GREEDY))
+    session.drop(3)
+    session.commit(*session.plan())
+    specs = list(session.seats)
+
+    session.new_game()
+
+    assert session.board.moves_played == 0
+    assert session.history == []
+    assert session.totals[0].moves == session.totals[1].moves == 0
+    assert list(session.seats) == specs
+    assert session.agents[1] is not None
+
+
+def test_the_same_seed_replays_the_same_game():
+    """Two random agents are the only thing here with any randomness in it. If a rerun
+    from the same seed diverges, nothing measured through this object can be trusted."""
+    def transcript() -> list[int]:
+        session = Session((RANDOM, RANDOM), seed=99)
+        play_out(session)
+        return [record.column for record in session.history]
+
+    first = transcript()
+    assert len(first) > 6
+    assert transcript() == first
+
+
+def test_consecutive_games_in_one_session_are_not_identical():
+    """The per-game seed moves on, or machine-versus-machine would replay one game."""
+    session = Session((RANDOM, RANDOM), seed=7)
+    play_out(session)
+    first = [record.column for record in session.history]
+    session.new_game()
+    play_out(session)
+    assert [record.column for record in session.history] != first
