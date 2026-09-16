@@ -24,6 +24,11 @@ CELLS = ROWS * COLS
 # diagonal up-left. Each is checked in both directions, so the opposites are redundant.
 DIRECTIONS: tuple[tuple[int, int], ...] = ((1, 0), (0, 1), (1, 1), (1, -1))
 
+# Bits per column in `Board.key`. One more than ROWS, so that the carry a full column
+# produces has somewhere to land -- the same sentinel row that stops the bitboard's
+# shifts from running out of one column into the next.
+KEY_STRIDE = ROWS + 1
+
 
 @runtime_checkable
 class Board(Protocol):
@@ -56,6 +61,26 @@ class Board(Protocol):
     def result(self) -> GameResult: ...
 
     def copy(self) -> Board: ...
+
+    def key(self) -> int:
+        """A number that identifies this position, including whose turn it is.
+
+        Deferred from Phase 1 to Phase 8, where it is first needed: a transposition
+        table is a dictionary from positions to search results, so it needs a name for a
+        position. The name has to distinguish everything a search result depends on --
+        the discs of both colours *and* the side to move -- and nothing else.
+
+        The scheme is the bitboard's, and both implementations produce the same number
+        (there is a differential test). Per column, `key = own_discs + (2**height - 1)`,
+        laid out `KEY_STRIDE` bits apart. **It is collision-free, not a hash**, which is
+        worth stating because it is unusual: chess engines use Zobrist hashing and live
+        with collisions. The argument is short. A column of height h contributes a value
+        in `[2**h - 1, 2**(h+1) - 2]`, and those ranges are disjoint for h = 0..6, so the
+        contribution determines both the height and the discs; the widest of them,
+        126 for a full column, still fits in the seven bits the column owns, so no carry
+        ever crosses into its neighbour. Two positions with the same key are therefore
+        the same position.
+        """
 
 
 def render(board: Board) -> str:

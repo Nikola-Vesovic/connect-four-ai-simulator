@@ -1,0 +1,7 @@
+depth,evaluation,ordering,transposition,games,opening_plies,moves,same_games,nodes,nodes_per_move,cutoffs,gain,time_gain,first_cutoff_rate,killer_cutoff_rate,tt_move_cutoff_rate,tt_probes,tt_hits,tt_hit_rate,tt_returns,tt_return_rate,tt_stores,tt_rewrites,tt_collisions,tt_refused,tt_entries,tt_peak,tt_capacity,tt_fill,seconds,seconds_per_move
+6,full,center_first+killers+history,no_table,10,4,354,True,508690,1437.0,141063,1.0,1.0,0.8201,0.8961,0.0,0,0,0.0,0,0.0,0,0,0,0,0,0,,,9.15,0.0258
+6,full,center_first+killers+history,dict,10,4,354,True,397715,1123.5,96329,1.279,1.313,0.7825,0.8634,0.0055,168312,30708,0.1824,28199,0.1675,140113,2509,0,0,1444,1444,1048576,0.00138,6.97,0.0197
+6,full,center_first+killers+history,array,10,4,354,True,397715,1123.5,96329,1.279,1.204,0.7825,0.8634,0.0055,168312,30708,0.1824,28199,0.1675,140113,2509,32,10,1444,1444,1048576,0.00138,7.6,0.0215
+6,full,center_first+killers+history,array4k,10,4,354,True,400272,1130.7,97535,1.271,1.226,0.7839,0.8646,0.0052,168678,29580,0.1754,27187,0.1612,141491,2393,8672,4144,1239,1239,4096,0.30249,7.46,0.0211
+6,full,center_first+killers+history,dict+write_only,10,4,354,True,508690,1437.0,141063,1.0,0.927,0.8201,0.8961,0.0,194274,51543,0.2653,0,0.0,194274,51543,0,0,1529,1529,1048576,0.00146,9.87,0.0279
+6,full,center_first+killers+history,dict+persistent,10,4,354,True,289886,818.9,72648,1.755,1.715,0.8321,0.6886,0.217,121272,47117,0.3885,16453,0.1357,104819,30664,0,0,10420,10420,1048576,0.00994,5.33,0.0151

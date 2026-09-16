@@ -132,6 +132,17 @@ class Bitboard:
             return GameResult.win_for(self._winner)
         return GameResult.DRAW if self.is_full() else GameResult.IN_PROGRESS
 
+    # ------------------------------------------------------------------ identity
+
+    def key(self) -> int:
+        """Collision-free name for this position -- see `core.rules.Board.key`.
+
+        One addition. `_mask` is a run of ones from the bottom of every column, so adding
+        it to `_position` sets the first free cell of each column and leaves the discs of
+        the side to move below it, which is the whole state in one integer.
+        """
+        return self._position + self._mask
+
     # ------------------------------------------------------------------ win detection
 
     @staticmethod

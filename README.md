@@ -16,9 +16,9 @@ Nema nijednog argumenta komandne linije — sve se bira u prozoru:
 
 - **režim igre**: čovek vs mašina, mašina vs mašina, čovek vs čovek;
 - **algoritam po sedištu**: Random, Greedy, Minimax, Negamax (kasnije NegaScout i MCTS);
-- **optimizacije po sedištu**: alfa-beta odsecanje i sortiranje poteza (killer potezi +
-  istorijska heuristika), i svaka komponenta funkcije procene (pretnje, centar, parnost)
-  nezavisno;
+- **optimizacije po sedištu**: alfa-beta odsecanje, sortiranje poteza (killer potezi +
+  istorijska heuristika) i tabela transpozicija, i svaka komponenta funkcije procene
+  (pretnje, centar, parnost) nezavisno;
 - **dubina pretrage**, sa izmerenom cenom najgoreg poteza uz klizač.
 
 Ispod svakog sedišta stoji šta je poslednja pretraga koštala: čvorova, odsecanja, kvalitet
@@ -55,7 +55,8 @@ connect4/
   search/        stats.py (Budget + SearchStats)                                          [4]
                  ordering.py (centar-prvo [4]; killer potezi + istorija, ukljucivi)       [7]
                  evaluation.py (pretnje, centar, parnost -- svaka iskljuciva)             [5]
-                 transpoziciona tabela, tajmer                                            [8-9]
+                 transposition.py (position+mask kljuc, EXACT/LOWER/UPPER, dict i niz)    [8]
+                 tajmer                                                                   [9]
   gui/           renderer.py (crtanje), widgets.py (kontrole), sprites.py (diskovi)       [3]
   experiments/   match.py (mec izmedju dva agenta, sa semenom)                            [4]
                  reference.py (zamrznute vrednosti), scaling.py (cvorovi i kriva)         [5-6]
@@ -78,9 +79,14 @@ python -m experiments.scaling --pruning    # alfa-beta po dubini, prazna tabla
 python -m experiments.scaling --positions  # isti odnos nad 200 realnih pozicija
 python -m experiments.scaling --ordering        # redosled poteza: prazna tabla + 200 pozicija
 python -m experiments.scaling --ordering-games  # isto, ali kroz cele partije
+python -m experiments.scaling --density         # koliko stabla su uopste ponovljene pozicije
+python -m experiments.scaling --table           # tabela transpozicija nad 200 pozicija
+python -m experiments.scaling --table-empty     # isto, prazna tabla, do dubine 12
+python -m experiments.scaling --table-games     # isto, kroz cele partije (+ trajna tabela)
 python -m experiments.reference --generate # zamrzni vrednosti obicnog minimaxa
 python -m experiments.reference --verify --agent alphabeta   # gate za faze 6-10
 python -m experiments.reference --verify --agent alphabeta --ordering center_first
+python -m experiments.reference --verify --agent alphabeta --table no_table
 ```
 
 Svaka optimizacija u fazama 6-10 mora da vrati **istu vrednost** kao obican minimax.
@@ -90,8 +96,9 @@ Sve cetiri imenovane strategije redosleda daju 0 neslaganja nad svih 1.050 zapis
 
 **Od faze 6 nadalje broj cvorova nije uporediv bez funkcije procene i redosleda poteza.**
 Obican minimax nema odsecanja, pa ga ni jedno ni drugo ne moze skrenuti; alfa-beta odseca
-na osnovu onoga sto je vec nasla, pa zavisi od oba. Zato svaki CSV u `data/results/` nosi
-kolone `evaluation` i `ordering`.
+na osnovu onoga sto je vec nasla, pa zavisi od oba. Od faze 8 tome se dodaje i tabela
+transpozicija. Zato svaki CSV u `data/results/` nosi kolone `evaluation`, `ordering` i
+`transposition`.
 
 ## Pokretanje meca
 

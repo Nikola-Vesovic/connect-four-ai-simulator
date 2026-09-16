@@ -32,15 +32,18 @@ from session import (
     ALGORITHMS,
     MAX_DEPTH_ORDERED,
     MAX_DEPTH_PRUNED,
+    MAX_DEPTH_TABLE,
     MAX_DEPTH_UNPRUNED,
     MODES,
     ORDERED_WORST_SECONDS,
     PRUNED_WORST_SECONDS,
+    TABLE_WORST_SECONDS,
     UNPRUNED_WORST_SECONDS,
     Controller,
     SeatSpec,
     Session,
 )
+from search.transposition import NO_TABLE, TABLE
 
 HUMAN = SeatSpec(controller=Controller.HUMAN)
 RANDOM = SeatSpec(controller=Controller.MACHINE, algorithm="random")
@@ -100,20 +103,39 @@ def test_every_algorithm_in_the_picker_can_actually_play():
 def test_the_depth_offered_is_exactly_the_depth_that_was_measured():
     """The cap and the cost table are the same object, so they cannot drift apart.
 
-    The ordering of the three caps is itself a result: each optimisation lengthens its own
-    table, so pruning is worth two plies of reachable depth and move ordering another two.
+    The ordering of the four caps is itself a result: each optimisation lengthens its own
+    table, so pruning is worth two plies of reachable depth, move ordering another two,
+    and the transposition table one more.
     """
     assert MAX_DEPTH_UNPRUNED == len(UNPRUNED_WORST_SECONDS)
     assert MAX_DEPTH_PRUNED == len(PRUNED_WORST_SECONDS)
     assert MAX_DEPTH_ORDERED == len(ORDERED_WORST_SECONDS)
-    assert MAX_DEPTH_ORDERED > MAX_DEPTH_PRUNED > MAX_DEPTH_UNPRUNED
+    assert MAX_DEPTH_TABLE == len(TABLE_WORST_SECONDS)
+    assert MAX_DEPTH_TABLE >= MAX_DEPTH_ORDERED > MAX_DEPTH_PRUNED > MAX_DEPTH_UNPRUNED
     for spec, table in (
-        (machine(pruning=True, move_ordering=True), ORDERED_WORST_SECONDS),
+        (machine(pruning=True, move_ordering=True, transposition=True), TABLE_WORST_SECONDS),
+        (machine(pruning=True, move_ordering=True, transposition=False), ORDERED_WORST_SECONDS),
         (machine(pruning=True, move_ordering=False), PRUNED_WORST_SECONDS),
         (machine(pruning=False), UNPRUNED_WORST_SECONDS),
     ):
         for depth in range(1, spec.max_depth + 1):
             assert replace(spec, depth=depth).estimated_seconds == table[depth - 1]
+
+
+def test_the_cost_ladder_never_over_promises():
+    """The four tables are a ladder, and a configuration that skips a rung is costed by
+    the last rung it completed -- a table without move ordering is priced as if it had
+    neither. That is an approximation, and the direction of it is the thing that matters:
+    it must never quote a cost lower than the configuration can actually incur.
+
+    Checked here rather than assumed, because the alternative -- one measured table per
+    combination of switches -- is six sweeps to keep honest instead of four.
+    """
+    for depth in range(1, MAX_DEPTH_PRUNED + 1):
+        quoted = machine(depth=depth, move_ordering=False, transposition=True)
+        fallback = machine(depth=depth, move_ordering=False, transposition=False)
+        assert quoted.estimated_seconds == fallback.estimated_seconds
+        assert quoted.max_depth == fallback.max_depth
 
 
 def test_the_estimate_falls_when_an_optimisation_is_switched_on():
@@ -123,15 +145,21 @@ def test_the_estimate_falls_when_an_optimisation_is_switched_on():
         ordered = machine(depth=depth, pruning=True, move_ordering=True).estimated_seconds
         plain = machine(depth=depth, pruning=True, move_ordering=False).estimated_seconds
         assert ordered <= plain, depth
+    for depth in range(1, MAX_DEPTH_ORDERED + 1):
+        with_table = machine(depth=depth, transposition=True).estimated_seconds
+        without = machine(depth=depth, transposition=False).estimated_seconds
+        assert with_table <= without, depth
 
 
 def test_depth_is_clamped_to_what_has_been_measured():
     session = Session((HUMAN, machine(depth=99)))
     stored = session.set_seat(1, machine(depth=99))
-    assert stored.depth == MAX_DEPTH_ORDERED
+    assert stored.depth == MAX_DEPTH_TABLE
 
     # Turning an optimisation off lowers the ceiling, so a depth that was legal a moment
-    # ago has to come down with it -- twice, once per switch.
+    # ago has to come down with it -- three times now, once per switch.
+    stored = session.set_seat(1, replace(stored, transposition=False))
+    assert stored.depth == MAX_DEPTH_ORDERED
     stored = session.set_seat(1, replace(stored, move_ordering=False))
     assert stored.depth == MAX_DEPTH_PRUNED
     stored = session.set_seat(1, replace(stored, pruning=False))
@@ -147,6 +175,7 @@ def test_switches_only_apply_where_they_mean_something():
     assert not ALGORITHMS["minimax"].uses_ordering  # and so nothing for ordering to steer
     assert ALGORITHMS["negamax"].uses_pruning
     assert ALGORITHMS["negamax"].uses_ordering
+    assert ALGORITHMS["negamax"].uses_transposition
 
     # Ordering needs cutoffs to bring forward, so it is dead while pruning is off.
     assert not machine("negamax", pruning=False, move_ordering=True).orders
@@ -156,9 +185,24 @@ def test_switches_only_apply_where_they_mean_something():
     assert machine("negamax", pruning=True, move_ordering=False).can_order
     assert not machine("negamax", pruning=True, move_ordering=False).orders
 
+    # The table is the one optimisation that does NOT need pruning, because it needs only
+    # that a position turn up twice. With pruning off it is at its most effective.
+    assert machine("negamax", pruning=False, transposition=True).can_transpose
+    assert machine("negamax", pruning=False, transposition=True).transposition_active
+    assert machine("negamax", pruning=True, transposition=False).can_transpose
+    assert not machine("negamax", pruning=True, transposition=False).transposition_active
+    assert not machine("minimax").can_transpose
+
     # A pruning flag set on an algorithm that cannot prune must not raise the depth cap.
     assert not machine("minimax", pruning=True).prunes
     assert machine("minimax", pruning=True).max_depth == MAX_DEPTH_UNPRUNED
+
+
+def test_the_transposition_switch_reaches_the_agent_and_is_named_there():
+    assert machine(transposition=True).build().transposition is TABLE
+    assert machine(transposition=False).build().transposition is NO_TABLE
+    assert machine(transposition=False).build().name.endswith("-no_table")
+    assert "no_table" not in machine(transposition=True).build().name
 
 
 def test_the_evaluation_switches_reach_the_agent():

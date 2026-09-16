@@ -33,12 +33,21 @@ alpha-beta's best case), the 200 reference positions, and complete games. Node c
 seconds are both reported, because killers and history add per-node bookkeeping and the
 two need not move together.
 
+**Phase 8 adds the transposition table**, measured the same three ways and with one extra
+measurement in front of them: how many of the positions in the tree are repeats at all,
+counted directly, before any search is involved. That number is the ceiling, and quoting a
+gain without it would leave the reader unable to tell a good result from a poor one.
+
     python -m experiments.scaling --nodes
     python -m experiments.scaling --curve
     python -m experiments.scaling --pruning
     python -m experiments.scaling --positions
     python -m experiments.scaling --ordering
     python -m experiments.scaling --ordering-games
+    python -m experiments.scaling --density
+    python -m experiments.scaling --table
+    python -m experiments.scaling --table-empty
+    python -m experiments.scaling --table-games
 """
 
 from __future__ import annotations
@@ -58,6 +67,7 @@ from experiments import reference
 from experiments.match import Tally, play_match
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC, Ordering
+from search.transposition import ARRAY, NO_TABLE, PERSISTENT, TABLE, WRITE_ONLY, Transposition
 
 RESULTS = Path(__file__).resolve().parent.parent / "data" / "results"
 NODES_CSV = RESULTS / "minimax_nodes_by_depth.csv"
@@ -67,6 +77,30 @@ POSITIONS_CSV = RESULTS / "alphabeta_by_position.csv"
 ORDERING_CSV = RESULTS / "ordering_by_position.csv"
 ORDERING_EMPTY_CSV = RESULTS / "ordering_on_empty_board.csv"
 ORDERING_GAMES_CSV = RESULTS / "ordering_by_game.csv"
+DENSITY_CSV = RESULTS / "transposition_density.csv"
+TABLE_CSV = RESULTS / "transposition_by_position.csv"
+TABLE_EMPTY_CSV = RESULTS / "transposition_on_empty_board.csv"
+TABLE_GAMES_CSV = RESULTS / "transposition_by_game.csv"
+
+# The tables compared. The first is Phase 7's search and every gain is quoted against it.
+# `write_only` is the controlled experiment: it keeps the table exactly as the real one
+# does but never reads an answer out of it, so it provably searches the same tree and
+# every second of difference between it and `no_table` is bookkeeping and nothing else.
+# The small array is in to show what a table too small for the job costs.
+SMALL_ARRAY = Transposition(kind="array", capacity=1 << 12)
+TRANSPOSITIONS: tuple[Transposition, ...] = (
+    NO_TABLE,
+    TABLE,
+    ARRAY,
+    SMALL_ARRAY,
+    WRITE_ONLY,
+)
+
+# The transposition setting every Phase 6 and Phase 7 node count was measured under, kept
+# as the CSV label so that old and new result files line up (BUILD_PLAN thesis point P10:
+# a node count is not a measurement unless the evaluation, the ordering and the table that
+# produced it are named beside it).
+TABLE_OFF = NO_TABLE.name
 
 # The orderings compared. The first is Phase 6's and every gain is quoted against it; the
 # last two are the failure modes slide 148 warns about, measured rather than repeated,
@@ -212,7 +246,7 @@ def pruning_by_depth(max_depth: int, unpruned_depth: int, max_seconds: float) ->
         unpruned_nodes = unpruned_seconds = None
         if depth <= unpruned_depth:
             started = time.perf_counter()
-            _, plain = NegamaxAgent(depth, pruning=False, evaluation=ZERO).choose_move(Bitboard())
+            _, plain = NegamaxAgent(depth, pruning=False, evaluation=ZERO, transposition=NO_TABLE).choose_move(Bitboard())
             unpruned_seconds = time.perf_counter() - started
             unpruned_nodes = plain.nodes
             if depth in baseline:
@@ -225,7 +259,7 @@ def pruning_by_depth(max_depth: int, unpruned_depth: int, max_seconds: float) ->
         slowest = 0.0
         for evaluation in (ZERO, DEFAULT):
             started = time.perf_counter()
-            _, stats = NegamaxAgent(depth, pruning=True, evaluation=evaluation).choose_move(
+            _, stats = NegamaxAgent(depth, pruning=True, evaluation=evaluation, transposition=NO_TABLE).choose_move(
                 Bitboard()
             )
             seconds = time.perf_counter() - started
@@ -286,7 +320,7 @@ def pruning_by_position(max_depth: int) -> list[dict]:
     for record in data["records"]:
         if record["depth"] > max_depth:
             continue
-        agent = NegamaxAgent(record["depth"], pruning=True, evaluation=DEFAULT)
+        agent = NegamaxAgent(record["depth"], pruning=True, evaluation=DEFAULT, transposition=NO_TABLE)
         _, stats = agent.choose_move(Bitboard.from_move_string(record["moves"]))
         assert stats.value == record["value"], f"value moved on {record['moves']}"
         by_depth.setdefault(record["depth"], []).append((record["nodes"], stats.nodes))
@@ -301,6 +335,7 @@ def pruning_by_position(max_depth: int) -> list[dict]:
                 "depth": depth,
                 "evaluation": DEFAULT.name,
                 "ordering": ORDERING,
+                "transposition": TABLE_OFF,
                 "positions": len(pairs),
                 "minimax_nodes": plain,
                 "alphabeta_nodes": pruned,
@@ -335,7 +370,7 @@ def ordering_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
     for depth in depths:
         baseline = None
         for spec in ORDERINGS:
-            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=2026)
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026)
             started = time.perf_counter()
             _, stats = agent.choose_move(Bitboard())
             seconds = time.perf_counter() - started
@@ -346,6 +381,7 @@ def ordering_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
                     "depth": depth,
                     "evaluation": DEFAULT.name,
                     "ordering": spec.name,
+                    "transposition": TABLE_OFF,
                     "nodes": stats.nodes,
                     "leaves": stats.leaves,
                     "cutoffs": stats.cutoffs,
@@ -383,7 +419,7 @@ def ordering_by_position(depths: tuple[int, ...]) -> list[dict]:
         records = [record for record in data["records"] if record["depth"] == depth]
         baseline = None
         for spec in ORDERINGS:
-            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=2026)
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026)
             nodes = leaves = cutoffs = first = index_total = killer = 0
             seconds = 0.0
             for record in records:
@@ -407,6 +443,7 @@ def ordering_by_position(depths: tuple[int, ...]) -> list[dict]:
                     "depth": depth,
                     "evaluation": DEFAULT.name,
                     "ordering": spec.name,
+                    "transposition": TABLE_OFF,
                     "positions": len(records),
                     "nodes": nodes,
                     "leaves": leaves,
@@ -447,7 +484,7 @@ def ordering_by_game(depth: int, games: int, seed: int, opening_plies: int) -> l
     rows = []
     baseline = None
     for spec in ORDERINGS:
-        agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, seed=seed)
+        agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=seed)
         nodes = cutoffs = first = index_total = plies = 0
         seconds = 0.0
         for opening in openings:
@@ -473,6 +510,7 @@ def ordering_by_game(depth: int, games: int, seed: int, opening_plies: int) -> l
                 "depth": depth,
                 "evaluation": DEFAULT.name,
                 "ordering": spec.name,
+                "transposition": TABLE_OFF,
                 "games": games,
                 "opening_plies": opening_plies,
                 "moves": plies,
@@ -495,6 +533,328 @@ def ordering_by_game(depth: int, games: int, seed: int, opening_plies: int) -> l
     return rows
 
 
+# ------------------------------------------------------------------ Phase 8: the table
+
+
+def transposition_density(depths: tuple[int, ...], positions: int) -> list[dict]:
+    """The ceiling, measured before any search is involved.
+
+    Walks the full fixed-depth tree -- the shape plain minimax visits -- and counts nodes
+    against DISTINCT positions. A transposition table can never save more than the gap,
+    and knowing the gap is what turns the phase's result into a number that can be judged
+    rather than merely reported.
+
+    Two honest qualifications go with every figure here. It is the ceiling on a *minimax*
+    tree, and alpha-beta already declines to visit most of that tree, so the repeats
+    actually available in a pruned search are far fewer. And a repeat still costs one node
+    visit even when its whole subtree is skipped, so the ratio is an upper bound that even
+    a perfect table cannot reach.
+    """
+    data = reference.load()
+    samples = [record["moves"] for record in data["records"] if record["depth"] == 1]
+    samples = samples[:positions]
+    rows = []
+    for depth in depths:
+        for label, chosen in (("empty board", [""]), (f"{len(samples)} positions", samples)):
+            nodes = distinct = 0
+            started = time.perf_counter()
+            for start in chosen:
+                board = Bitboard.from_move_string(start)
+                seen: set[int] = set()
+                nodes += _walk(board, depth, seen)
+                distinct += len(seen)
+            rows.append(
+                {
+                    "depth": depth,
+                    "sample": label,
+                    "positions": len(chosen),
+                    "nodes": nodes,
+                    "distinct": distinct,
+                    "repeats": nodes - distinct,
+                    "ceiling": round(nodes / distinct, 3),
+                    "seconds": round(time.perf_counter() - started, 2),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth:>2}  {label:<14} {nodes:>12,} nodes  "
+                f"{distinct:>11,} distinct  ceiling {row['ceiling']:>7.2f}x",
+                flush=True,
+            )
+    return rows
+
+
+def _walk(board, depth: int, seen: set) -> int:
+    """Every node of the full tree below `board`, collecting distinct position keys."""
+    nodes = 0
+    for col in board.legal_moves():
+        board.play(col)
+        nodes += 1
+        seen.add(board.key())
+        if depth > 1 and not board.is_terminal():
+            nodes += _walk(board, depth - 1, seen)
+        board.undo()
+    return nodes
+
+
+def _table_row(stats, spec: Transposition) -> dict:
+    """The transposition counters, as their own measurement rather than a node count.
+
+    `hit` and `return` are deliberately separate. A probe that finds the position is not
+    yet a saving: the entry may be a bound that does not settle this node's window, in
+    which case all it supplies is a move to try first. A *return* is a whole subtree never
+    searched. The gap between the two rates is how often the table was consulted usefully
+    but could not finish the job.
+    """
+    return {
+        "tt_probes": stats.tt_probes,
+        "tt_hits": stats.tt_hits,
+        "tt_hit_rate": round(stats.tt_hit_rate, 4),
+        "tt_returns": stats.tt_returns,
+        "tt_return_rate": round(stats.tt_return_rate, 4),
+        "tt_stores": stats.tt_stores,
+        "tt_rewrites": stats.tt_rewrites,
+        "tt_collisions": stats.tt_collisions,
+        "tt_refused": stats.tt_refused,
+        "tt_entries": stats.tt_entries,
+        "tt_peak": stats.tt_peak,
+        "tt_capacity": stats.tt_capacity if spec.enabled else "",
+        "tt_fill": round(stats.tt_fill, 5) if spec.enabled else "",
+    }
+
+
+def _accumulate(total: dict, stats) -> None:
+    for field in (
+        "nodes", "leaves", "cutoffs", "first_cutoffs", "cut_index_total", "killer_cutoffs",
+        "tt_move_cutoffs", "tt_probes", "tt_hits", "tt_returns", "tt_stores", "tt_rewrites",
+        "tt_collisions", "tt_refused",
+    ):
+        total[field] = total.get(field, 0) + getattr(stats, field)
+    for field in ("tt_entries", "tt_peak"):
+        total[field] = max(total.get(field, 0), getattr(stats, field))
+    total["tt_capacity"] = stats.tt_capacity
+
+
+def transposition_by_position(depths: tuple[int, ...]) -> list[dict]:
+    """The gate of Phase 8: the same sweep over the 200 frozen reference positions.
+
+    Every value is checked against the stored one as it goes, so the run is simultaneously
+    the measurement and a correctness check. A table that changed an answer would stop the
+    sweep rather than quietly produce a better-looking number, which matters more here
+    than it did in Phase 7: move ordering structurally *cannot* change a value, while a
+    transposition table very much can if the bound logic is wrong.
+    """
+    data = reference.load()
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        baseline = baseline_seconds = None
+        for spec in TRANSPOSITIONS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=2026
+            )
+            total: dict = {}
+            seconds = 0.0
+            for record in records:
+                board = Bitboard.from_move_string(record["moves"])
+                started = time.perf_counter()
+                _, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                assert stats.value == record["value"], (
+                    f"{spec.name} at depth {depth} changed the value of {record['moves']!r}"
+                )
+                _accumulate(total, stats)
+            nodes, cutoffs = total["nodes"], total["cutoffs"]
+            if baseline is None:
+                baseline, baseline_seconds = nodes, seconds
+            if spec is WRITE_ONLY:
+                # The control. It maintains the table and never acts on it, so it must
+                # search exactly the tree the baseline searched -- asserted, not hoped.
+                assert nodes == baseline, f"write_only changed the tree at depth {depth}"
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": spec.name,
+                    "positions": len(records),
+                    "nodes": nodes,
+                    "leaves": total["leaves"],
+                    "cutoffs": cutoffs,
+                    "gain": round(baseline / nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "ebf": round((nodes / len(records)) ** (1 / depth), 4),
+                    "first_cutoff_rate": round(total["first_cutoffs"] / cutoffs, 4),
+                    "mean_cut_index": round(total["cut_index_total"] / cutoffs, 3),
+                    "killer_cutoff_rate": round(total["killer_cutoffs"] / cutoffs, 4),
+                    "tt_move_cutoff_rate": round(total["tt_move_cutoffs"] / cutoffs, 4),
+                    **_table_row(_Totals(total), spec),
+                    "seconds": round(seconds, 2),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth}  {spec.name:<22} {nodes:>10,} nodes  {row['gain']:>5}x  "
+                f"hit {row['tt_hit_rate']:>6.1%}  ret {row['tt_return_rate']:>6.1%}  "
+                f"killer-cut {row['killer_cutoff_rate']:>6.1%}  "
+                f"tt-cut {row['tt_move_cutoff_rate']:>5.1%}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+class _Totals:
+    """Reads like a `SearchStats` so `_table_row` can be shared between one search and a
+    sweep over two hundred of them."""
+
+    def __init__(self, total: dict) -> None:
+        self.__dict__.update(total)
+
+    @property
+    def tt_hit_rate(self) -> float:
+        return self.tt_hits / self.tt_probes if self.tt_probes else 0.0
+
+    @property
+    def tt_return_rate(self) -> float:
+        return self.tt_returns / self.tt_probes if self.tt_probes else 0.0
+
+    @property
+    def tt_fill(self) -> float:
+        return self.tt_entries / self.tt_capacity if self.tt_capacity else 0.0
+
+
+def transposition_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
+    """The position Phase 7 lost on, which is the one this phase expects to win on.
+
+    The reasoning was written down before the measurement: the empty board is the most
+    symmetric position there is, so it is where the same arrangement of discs is reachable
+    by the most different move orders, and therefore where a table has the most to find.
+    It is also the position everybody benchmarks, so quoting only this one would repeat
+    Phase 6's mistake in the other direction -- it is reported beside the position sweep,
+    never instead of it.
+    """
+    rows = []
+    for depth in depths:
+        baseline = baseline_seconds = None
+        for spec in TRANSPOSITIONS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=2026
+            )
+            started = time.perf_counter()
+            _, stats = agent.choose_move(Bitboard())
+            seconds = time.perf_counter() - started
+            if baseline is None:
+                baseline, baseline_seconds = stats.nodes, seconds
+                baseline_value = stats.value
+            assert stats.value == baseline_value, f"{spec.name} changed the value at {depth}"
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": spec.name,
+                    "nodes": stats.nodes,
+                    "leaves": stats.leaves,
+                    "cutoffs": stats.cutoffs,
+                    "gain": round(baseline / stats.nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "first_cutoff_rate": round(stats.first_cutoff_rate, 4),
+                    "mean_cut_index": round(stats.mean_cut_index, 3),
+                    "killer_cutoff_rate": round(
+                        stats.killer_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    "tt_move_cutoff_rate": round(
+                        stats.tt_move_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    **_table_row(stats, spec),
+                    "value": stats.value,
+                    "seconds": round(seconds, 3),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth:>2}  {spec.name:<22} {stats.nodes:>10,} nodes  "
+                f"{row['gain']:>5}x  hit {row['tt_hit_rate']:>6.1%}  "
+                f"ret {row['tt_return_rate']:>6.1%}  entries {stats.tt_entries:>9,}  "
+                f"{seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def transposition_by_game(depth: int, games: int, seed: int, opening_plies: int) -> list[dict]:
+    """What a whole game costs, and the only view in which persistence means anything.
+
+    A table that survives between moves is measured here and nowhere else, because
+    "between moves" does not exist in a sweep over independent positions. It is measured
+    rather than adopted: carrying state from one search into the next is exactly what
+    makes a search stop being a function of the position it is given.
+    """
+    rng = random.Random(seed)
+    openings = [[rng.randrange(7) for _ in range(opening_plies)] for _ in range(games)]
+    rows = []
+    baseline = baseline_seconds = None
+    for spec in TRANSPOSITIONS + (PERSISTENT,):
+        agent = NegamaxAgent(
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=seed
+        )
+        total: dict = {}
+        seconds = 0.0
+        plies = 0
+        played = []
+        for game, opening in enumerate(openings):
+            agent.new_game(seed + game)
+            board = Bitboard()
+            for col in opening:
+                if board.is_terminal() or not board.can_play(col):
+                    break
+                board.play(col)
+            while not board.is_terminal():
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                _accumulate(total, stats)
+                plies += 1
+                board.play(move)
+            played.append("".join(str(col + 1) for col in board.history))
+        nodes, cutoffs = total["nodes"], total["cutoffs"]
+        if baseline is None:
+            baseline, baseline_seconds, baseline_games = nodes, seconds, played
+        rows.append(
+            {
+                "depth": depth,
+                "evaluation": DEFAULT.name,
+                "ordering": DYNAMIC.name,
+                "transposition": spec.name,
+                "games": games,
+                "opening_plies": opening_plies,
+                "moves": plies,
+                "same_games": played == baseline_games,
+                "nodes": nodes,
+                "nodes_per_move": round(nodes / plies, 1),
+                "cutoffs": cutoffs,
+                "gain": round(baseline / nodes, 3),
+                "time_gain": round(baseline_seconds / seconds, 3),
+                "first_cutoff_rate": round(total["first_cutoffs"] / cutoffs, 4),
+                "killer_cutoff_rate": round(total["killer_cutoffs"] / cutoffs, 4),
+                "tt_move_cutoff_rate": round(total["tt_move_cutoffs"] / cutoffs, 4),
+                **_table_row(_Totals(total), spec),
+                "seconds": round(seconds, 2),
+                "seconds_per_move": round(seconds / plies, 4),
+            }
+        )
+        row = rows[-1]
+        print(
+            f"{spec.name:<22} {nodes:>11,} nodes over {plies} moves  {row['gain']:>5}x  "
+            f"hit {row['tt_hit_rate']:>6.1%}  same games {str(row['same_games']):<5}  "
+            f"{seconds:7.2f}s",
+            flush=True,
+        )
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--nodes", action="store_true")
@@ -503,6 +863,10 @@ def main() -> None:
     parser.add_argument("--positions", action="store_true")
     parser.add_argument("--ordering", action="store_true")
     parser.add_argument("--ordering-games", action="store_true")
+    parser.add_argument("--density", action="store_true")
+    parser.add_argument("--table", action="store_true")
+    parser.add_argument("--table-empty", action="store_true")
+    parser.add_argument("--table-games", action="store_true")
     parser.add_argument("--max-depth", type=int, default=8)
     parser.add_argument("--timed-depth", type=int, default=6)
     parser.add_argument("--unpruned-depth", type=int, default=8)
@@ -542,6 +906,22 @@ def main() -> None:
         write(
             ordering_by_game(6, games=10, seed=args.seed, opening_plies=args.opening_plies),
             ORDERING_GAMES_CSV,
+        )
+    if args.density:
+        write(transposition_density((2, 3, 4, 5, 6, 7), positions=40), DENSITY_CSV)
+    if args.table:
+        write(transposition_by_position((4, 5, 6, 7)), TABLE_CSV)
+    if args.table_empty:
+        write(
+            transposition_on_empty_board((4, 5, 6, 7, 8, 9, 10, 11, 12)),
+            TABLE_EMPTY_CSV,
+        )
+    if args.table_games:
+        write(
+            transposition_by_game(
+                6, games=10, seed=args.seed, opening_plies=args.opening_plies
+            ),
+            TABLE_GAMES_CSV,
         )
 
 

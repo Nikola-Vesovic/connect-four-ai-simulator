@@ -275,6 +275,12 @@ class Renderer:
                       f"{stats.first_cutoff_rate:.0%}" if stats.cutoffs else "—",
                       x, y, width,
                       config.GOOD if stats.first_cutoff_rate >= 0.8 else config.TEXT_MUTED)
+        # How much of the tree was answered out of the transposition table instead of
+        # being searched: the share of probes that ended the node there and then.
+        y = self.stat("transpozicije",
+                      f"{stats.tt_return_rate:.0%}" if stats.tt_probes else "—",
+                      x, y, width,
+                      config.GOOD if stats.tt_returns else config.TEXT_MUTED)
         self.stat("vreme", seconds(stats.elapsed), x, y, width)
 
     def draw_totals(self, totals: SeatTotals, place) -> None:

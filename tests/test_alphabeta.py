@@ -34,6 +34,7 @@ from helpers import random_position, safe_columns, winning_columns
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC
 from search.stats import Budget
+from search.transposition import NO_TABLE, TABLE
 from test_minimax import EVERY_MOVE_LOSES, WIN_IN_ONE_OR_THREE
 
 
@@ -70,8 +71,12 @@ def test_switching_pruning_off_is_a_window_no_value_can_escape():
 
 @pytest.mark.parametrize("depth", [1, 2, 3, 4])
 def test_negamax_without_pruning_is_the_phase_five_minimax_node_for_node(depth):
+    """`NO_TABLE` is not incidental. From Phase 8 the transposition table is on by
+    default, and it removes nodes even with pruning off -- that is the whole point of it,
+    and it is measured elsewhere. This test is about the negamax *refactor*, so it holds
+    every later optimisation at its Phase 6 setting."""
     plain = MinimaxAgent(depth, evaluation=DEFAULT)
-    folded = NegamaxAgent(depth, pruning=False, evaluation=DEFAULT)
+    folded = NegamaxAgent(depth, pruning=False, evaluation=DEFAULT, transposition=NO_TABLE)
     for board in positions(seed=101 + depth, count=30):
         before_move, before = plain.choose_move(board)
         after_move, after = folded.choose_move(board)
@@ -122,10 +127,12 @@ def test_the_value_survives_even_a_deliberately_bad_ordering():
     per-node shuffle are the two orders slide 148 warns about, and the answer has to be
     identical under both anyway."""
     board = NaiveBoard.from_move_string("4455")
-    _, good = NegamaxAgent(5, ordering=STATIC).choose_move(board)
+    _, good = NegamaxAgent(5, ordering=STATIC, transposition=NO_TABLE).choose_move(board)
 
     for bad in (LEFT, RANDOM):
-        _, worse = NegamaxAgent(5, ordering=bad, seed=1).choose_move(board)
+        _, worse = NegamaxAgent(
+            5, ordering=bad, transposition=NO_TABLE, seed=1
+        ).choose_move(board)
         assert worse.value == good.value, bad.name
         assert worse.nodes != good.nodes, bad.name  # it really did search another tree
 
@@ -149,27 +156,37 @@ def test_alpha_beta_visits_far_fewer_nodes_and_says_how_many_times_it_cut():
 
 
 def test_the_empty_board_tree_is_the_size_it_was_measured_to_be():
-    """Pinned exactly, with the full evaluation -- and now with the ordering named too,
-    because from Phase 7 the ordering is a setting rather than a constant.
+    """Pinned exactly, with the full evaluation -- and now with the ordering and the
+    transposition setting named too, because from Phase 7 the ordering is a setting and
+    from Phase 8 so is the table.
 
-    The two rows are kept side by side on purpose. The `STATIC` column is Phase 6's
-    measurement, unchanged to the node, which is what proves that making the ordering a
-    parameter did not disturb the search it was measured with. The `DYNAMIC` column is
-    Phase 7's, and the difference between them is the phase's result on this position --
-    including at depth 5, where it is *worse*. The empty board is alpha-beta's best case
-    (thesis point P11) and there is little left there for a learned ordering to win; the
-    gain shows up over the reference positions, which is where the gate is measured.
+    The three rows are kept side by side on purpose, and none of them is ever loosened.
+    `STATIC/NO_TABLE` is Phase 6's measurement, unchanged to the node, which is what
+    proves that making the ordering and the table into parameters did not disturb the
+    search they were measured with. `DYNAMIC/NO_TABLE` is Phase 7's -- including at depth
+    5, where it is *worse*, because the empty board is alpha-beta's best case (thesis
+    point P11) and a learned ordering has little to add there.
+
+    The third row is the phase's result on this position and it goes the other way: the
+    empty board is the most symmetric position on the board, which is exactly where the
+    same position is reachable by the most different move orders, so it is where a
+    transposition table has the most to find. It wins at every depth from 4.
     """
     phase6 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (181, 59), 5: (819, 139), 6: (1526, 491)}
     phase7 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (180, 59), 5: (850, 148), 6: (1514, 468)}
+    phase8 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (170, 49), 5: (695, 121), 6: (1127, 277)}
 
-    for ordering, expected in ((STATIC, phase6), (DYNAMIC, phase7)):
+    for ordering, table, expected in (
+        (STATIC, NO_TABLE, phase6),
+        (DYNAMIC, NO_TABLE, phase7),
+        (DYNAMIC, TABLE, phase8),
+    ):
         for depth, (nodes, cutoffs) in expected.items():
-            _, stats = NegamaxAgent(depth, evaluation=DEFAULT, ordering=ordering).choose_move(
-                Bitboard()
-            )
+            _, stats = NegamaxAgent(
+                depth, evaluation=DEFAULT, ordering=ordering, transposition=table
+            ).choose_move(Bitboard())
             assert (stats.nodes, stats.cutoffs) == (nodes, cutoffs), (
-                f"{ordering.name} at depth {depth}"
+                f"{ordering.name}/{table.name} at depth {depth}"
             )
 
 
@@ -187,7 +204,6 @@ def test_the_pruned_node_count_does_depend_on_the_evaluation_function():
         differed += full.nodes != zero.nodes
     assert differed > 20, f"only {differed} of 40 positions differed"
 
-
 def test_the_pruned_node_count_does_depend_on_move_ordering():
     """The mirror of `test_the_node_count_does_not_depend_on_move_ordering`. Phase 5's
     version of this test asserted equality; here the same experiment has to come out
@@ -199,9 +215,9 @@ def test_the_pruned_node_count_does_depend_on_move_ordering():
     1,923, which is 2.4x below the static centre order rather than above it.
     """
     board = NaiveBoard.from_move_string("4455")
-    _, centre = NegamaxAgent(6, ordering=STATIC).choose_move(board)
-    _, naive = NegamaxAgent(6, ordering=LEFT).choose_move(board)
-    _, learned = NegamaxAgent(6, ordering=DYNAMIC).choose_move(board)
+    _, centre = NegamaxAgent(6, ordering=STATIC, transposition=NO_TABLE).choose_move(board)
+    _, naive = NegamaxAgent(6, ordering=LEFT, transposition=NO_TABLE).choose_move(board)
+    _, learned = NegamaxAgent(6, ordering=DYNAMIC, transposition=NO_TABLE).choose_move(board)
 
     assert naive.value == centre.value == learned.value
     assert naive.nodes > centre.nodes > learned.nodes

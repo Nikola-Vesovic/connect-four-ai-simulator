@@ -141,6 +141,10 @@ class Game:
             # cannot prune.
             switch("move_ordering", "sortiranje poteza", place.optimisation_y[1],
                    lambda: machine() and seats[index].can_order),
+            # The table, unlike the ordering, does not need pruning to mean something --
+            # it needs only that the same position occur twice, which any tree does.
+            switch("transposition", "tabela transpozicija", place.optimisation_y[2],
+                   uses("uses_transposition")),
             switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation")),
             switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation")),
             switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation")),

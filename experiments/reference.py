@@ -19,6 +19,7 @@ leaving a stale file that quietly fails a Phase 6 gate for the wrong reason.
     python -m experiments.reference --verify
     python -m experiments.reference --verify --agent alphabeta
     python -m experiments.reference --verify --agent alphabeta --ordering center_first
+    python -m experiments.reference --verify --agent alphabeta --table no_table
 """
 
 from __future__ import annotations
@@ -36,16 +37,23 @@ from agents.base import Agent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
 from core.types import Score
-from search import evaluation, ordering
+from search import evaluation, ordering, transposition
 from search.evaluation import DEFAULT
+from search.transposition import NO_TABLE
 
 PATH = Path(__file__).resolve().parent.parent / "data" / "testsets" / "minimax_reference.json"
 
 # Which search to replay the file with. The value is under contract for all of them; the
 # node count only for the two that have no cutoffs, which is why it is carried alongside.
+#
+# `negamax` pins the transposition table OFF. Its contract includes the node count, and
+# from Phase 8 the table removes nodes even with pruning switched off -- that is exactly
+# what a table does, and it is measured in `experiments.scaling`, but it would destroy the
+# leaf-for-leaf comparison this entry exists for. Passing `--table` explicitly overrides
+# it and drops back to comparing values only.
 SEARCHES: dict[str, tuple[Callable[..., Agent], bool]] = {
     "minimax": (MinimaxAgent, True),
-    "negamax": (functools.partial(NegamaxAgent, pruning=False), True),
+    "negamax": (functools.partial(NegamaxAgent, pruning=False, transposition=NO_TABLE), True),
     "alphabeta": (functools.partial(NegamaxAgent, pruning=True), False),
 }
 
@@ -54,6 +62,19 @@ SEARCHES: dict[str, tuple[Callable[..., Agent], bool]] = {
 ORDERINGS: dict[str, ordering.Ordering] = {
     spec.name: spec
     for spec in (ordering.DYNAMIC, ordering.STATIC, ordering.LEFT, ordering.RANDOM)
+}
+
+# Same idea for Phase 8. `no_table` is Phase 7's search, and every one of these has to
+# come back with the same 1,050 values as the others.
+TABLES: dict[str, transposition.Transposition] = {
+    spec.name: spec
+    for spec in (
+        transposition.TABLE,
+        transposition.NO_TABLE,
+        transposition.ARRAY,
+        transposition.WRITE_ONLY,
+        transposition.PERSISTENT,
+    )
 }
 
 # 200 positions get the cheap depths; the expensive ones go to a prefix of the same list,
@@ -202,6 +223,7 @@ def main() -> None:
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--agent", default="minimax", choices=sorted(SEARCHES))
     parser.add_argument("--ordering", default=None, choices=sorted(ORDERINGS))
+    parser.add_argument("--table", default=None, choices=sorted(TABLES))
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--max-depth", type=int, default=None)
     args = parser.parse_args()
@@ -223,6 +245,12 @@ def main() -> None:
             factory = functools.partial(
                 factory, ordering=ORDERINGS[args.ordering], seed=args.seed
             )
+        if args.table is not None:
+            if args.agent == "minimax":
+                parser.error("minimax is the baseline the table is measured against.")
+            factory = functools.partial(factory, transposition=TABLES[args.table])
+            # A table changes which nodes are visited, so only the value stays comparable.
+            check_nodes = check_nodes and not TABLES[args.table].enabled
         started = time.perf_counter()
         checked, wrong = verify(
             data,
@@ -231,7 +259,11 @@ def main() -> None:
             check_nodes=check_nodes,
         )
         contract = "value and nodes" if check_nodes else "value only"
-        label = args.agent if args.ordering is None else f"{args.agent}/{args.ordering}"
+        label = args.agent
+        if args.ordering is not None:
+            label += f"/{args.ordering}"
+        if args.table is not None:
+            label += f"/{args.table}"
         print(
             f"{label}: checked {checked} records ({contract}), "
             f"{len(wrong)} disagreements in {time.perf_counter() - started:.0f}s"

@@ -31,12 +31,16 @@ from core.bitboard import Bitboard
 from core.board_naive import NaiveBoard
 from core.types import GameResult, Move
 from search.stats import UNLIMITED, Budget
+from search.transposition import NO_TABLE
 
 AGENTS = {
     "random": RandomAgent,
     "greedy": GreedyAgent,
     "minimax": MinimaxAgent,
-    "negamax": functools.partial(NegamaxAgent, pruning=False),
+    # `negamax` means the unoptimised search it meant in Phases 5 and 6, so the table is
+    # pinned off here as it is in `experiments.reference`. Leaving it on the default would
+    # quietly report a transposition table's node counts under the name of the baseline.
+    "negamax": functools.partial(NegamaxAgent, pruning=False, transposition=NO_TABLE),
     "alphabeta": functools.partial(NegamaxAgent, pruning=True),
 }
 BOARDS = {"bitboard": Bitboard, "naive": NaiveBoard}

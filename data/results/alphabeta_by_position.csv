@@ -1,8 +1,8 @@
-depth,evaluation,ordering,positions,minimax_nodes,alphabeta_nodes,node_ratio,speedup,ratio_best,ratio_median,ratio_worst
-1,full,center_first,200,1358,1358,1.0,1.0,1.0,1.0,1.0
-2,full,center_first,200,10147,4994,0.49217,2.03,0.26531,0.46667,1.0
-3,full,center_first,200,66850,20323,0.30401,3.29,0.04781,0.28378,0.76547
-4,full,center_first,200,433681,61727,0.14233,7.03,0.00948,0.11905,0.87287
-5,full,center_first,200,2800545,227162,0.08111,12.33,0.00172,0.0638,0.49003
-6,full,center_first,40,3569948,126483,0.03543,28.22,0.00739,0.02957,0.13795
-7,full,center_first,10,4910362,99419,0.02025,49.39,0.00643,0.02056,0.09523
+depth,evaluation,ordering,transposition,positions,minimax_nodes,alphabeta_nodes,node_ratio,speedup,ratio_best,ratio_median,ratio_worst
+1,full,center_first,no_table,200,1358,1358,1.0,1.0,1.0,1.0,1.0
+2,full,center_first,no_table,200,10147,4994,0.49217,2.03,0.26531,0.46667,1.0
+3,full,center_first,no_table,200,66850,20323,0.30401,3.29,0.04781,0.28378,0.76547
+4,full,center_first,no_table,200,433681,61727,0.14233,7.03,0.00948,0.11905,0.87287
+5,full,center_first,no_table,200,2800545,227162,0.08111,12.33,0.00172,0.0638,0.49003
+6,full,center_first,no_table,40,3569948,126483,0.03543,28.22,0.00739,0.02957,0.13795
+7,full,center_first,no_table,10,4910362,99419,0.02025,49.39,0.00643,0.02056,0.09523

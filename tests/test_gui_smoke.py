@@ -136,6 +136,28 @@ def test_the_panel_controls_change_the_session(game: Game):
     assert game.session.board.moves_played == 0
 
 
+def test_the_transposition_checkbox_changes_the_session_and_the_depth_cap(game: Game):
+    """Phase 8's checkbox. Unlike the ordering one it stays live with pruning off, because
+    a table needs only that a position occur twice and an unpruned tree is where it occurs
+    most often."""
+    place = config.seat_layout(1)
+    game.session.set_seat(1, replace(game.session.seats[1], controller=Controller.MACHINE))
+    box = next(w for w in game.widgets
+               if getattr(w, "label", None) == "tabela transpozicija"
+               and w.rect.x == place.inner_x)
+
+    assert game.session.seats[1].transposition is True
+    ceiling = game.session.seats[1].max_depth
+    assert box.click(box.rect.center) is True
+    assert game.session.seats[1].transposition is False
+    assert game.session.seats[1].max_depth <= ceiling
+    assert game.session.seats[1].depth <= game.session.seats[1].max_depth
+
+    game.session.set_seat(1, replace(game.session.seats[1], pruning=False))
+    assert box.click(box.rect.center) is True, "it must stay live with pruning off"
+    assert game.session.seats[1].transposition is True
+
+
 def test_the_ordering_checkbox_is_dead_while_pruning_is_off(game: Game):
     """There is nothing for a better move order to cut earlier when nothing is being cut,
     so the panel greys it out rather than offering a switch that does nothing."""

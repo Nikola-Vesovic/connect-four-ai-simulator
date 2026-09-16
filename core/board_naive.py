@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from core.rules import CELLS, COLS, CONNECT, DIRECTIONS, ROWS, render
+from core.rules import CELLS, COLS, CONNECT, DIRECTIONS, KEY_STRIDE, ROWS, render
 from core.types import EMPTY, GameResult, Move, Player
 
 
@@ -109,6 +109,27 @@ class NaiveBoard:
         if self._winner is not None:
             return GameResult.win_for(self._winner)
         return GameResult.DRAW if self.is_full() else GameResult.IN_PROGRESS
+
+    # ------------------------------------------------------------------ identity
+
+    def key(self) -> int:
+        """The bitboard's key, built the slow way -- see `core.rules.Board.key`.
+
+        Written out column by column from `cell()` rather than borrowed, so that the
+        differential test comparing the two is actually comparing two implementations.
+        No carry leaves a column, so summing the per-column contributions is the same
+        number the bitboard gets from a single addition.
+        """
+        mover = self.player_to_move
+        key = 0
+        for col in range(COLS):
+            height = self._heights[col]
+            own = 0
+            for row in range(height):
+                if self._grid[row][col] == mover:
+                    own |= 1 << row
+            key += (own + (1 << height) - 1) << (col * KEY_STRIDE)
+        return key
 
     # ------------------------------------------------------------------ win detection
 

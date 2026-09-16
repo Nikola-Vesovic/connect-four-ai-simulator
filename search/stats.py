@@ -78,6 +78,27 @@ class SearchStats:
     first_cutoffs: int = 0  # cutoffs that happened on the first move tried
     cut_index_total: int = 0  # sum of the 1-based rank of every cutting move
     killer_cutoffs: int = 0  # cutoffs caused by a move the killer table had promoted
+    tt_move_cutoffs: int = 0  # cutoffs caused by the move the table remembered
+
+    # --------------------------------------------------------- transposition table
+    #
+    # Phase 8, and reported for the same reason as the ordering-quality figures above: a
+    # node count says how much work was avoided, not where the saving came from. These
+    # are copied off the table when the search finishes, so they cost nothing per node.
+    #
+    # `tt_returns` is the one that matters most. A probe that hits is not yet a saving --
+    # the entry may be a bound that does not settle the current window, in which case all
+    # it contributes is a move to try first. A *return* is a whole subtree not searched.
+    tt_probes: int = 0
+    tt_hits: int = 0
+    tt_returns: int = 0  # probes that answered the node outright
+    tt_stores: int = 0
+    tt_rewrites: int = 0  # the same position stored again, its first entry being a bound
+    tt_collisions: int = 0  # a different position evicted (fixed-size table only)
+    tt_refused: int = 0  # stores dropped: table full, or beaten on depth
+    tt_entries: int = 0
+    tt_peak: int = 0
+    tt_capacity: int = 0
 
     @property
     def first_cutoff_rate(self) -> float:
@@ -88,3 +109,31 @@ class SearchStats:
     def mean_cut_index(self) -> float:
         """Average rank of the move that caused a cutoff. 1.0 would be perfect."""
         return self.cut_index_total / self.cutoffs if self.cutoffs else 0.0
+
+    @property
+    def tt_hit_rate(self) -> float:
+        """Share of probes that found the position already in the table."""
+        return self.tt_hits / self.tt_probes if self.tt_probes else 0.0
+
+    @property
+    def tt_return_rate(self) -> float:
+        """Share of probes that ended the node there and then."""
+        return self.tt_returns / self.tt_probes if self.tt_probes else 0.0
+
+    @property
+    def tt_fill(self) -> float:
+        return self.tt_entries / self.tt_capacity if self.tt_capacity else 0.0
+
+    def take_table(self, table) -> None:
+        """Copy a finished search's table counters in. None when the table is off."""
+        if table is None:
+            return
+        self.tt_probes = table.probes
+        self.tt_hits = table.hits
+        self.tt_stores = table.stores
+        self.tt_rewrites = table.rewrites
+        self.tt_collisions = table.collisions
+        self.tt_refused = table.overflows
+        self.tt_entries = table.entries
+        self.tt_peak = table.peak
+        self.tt_capacity = table.capacity

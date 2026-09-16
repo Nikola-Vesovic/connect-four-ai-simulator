@@ -32,9 +32,12 @@ it can do is make the search slow.
 
 **The slot Phase 8 fills.** The strongest ordering source of all is the transposition
 table's stored best move, which is a real answer for this exact position rather than a
-guess carried over from a neighbouring one. There is no transposition table yet, so it is
-not here; `MoveOrder.columns` is where it will go, in front of the killers. The two phases
-are kept apart on purpose so that their contributions can be attributed separately.
+guess carried over from a neighbouring one, so it goes in front of the killers. It is
+passed in rather than looked up here, because this module still must not be able to see a
+score; all it is told is "try this column first". Whether one arrives is the transposition
+switch's business, which keeps the two phases separately attributable -- and the search
+counts cutoffs caused by a table move apart from cutoffs caused by a killer, so the
+question of which source is doing the work is answered by measurement.
 
 **Why the "off" setting is not a second code path** (design principle 2, as with pruning
 in Phase 6): `Ordering(killers=False, history=False)` runs the same function over empty
@@ -44,10 +47,12 @@ reproduces Phase 6's node counts exactly rather than merely approximately, and t
 cannot drift apart.
 
 **One consequence worth stating because a test pins it.** At the root the tables are still
-empty, so the root always tries columns in the base order whatever the flags say. The move
-the search finally plays is therefore unchanged by any of this, and every playing-strength
-number measured in Phases 5 and 6 carries over untouched. Ordering changes the cost of the
-answer, not the answer -- and not even which of several equally good moves gets named.
+empty -- the killer slots, the history counts, and from Phase 8 the transposition table
+too, which is why the root deliberately never probes it. So the root always tries columns
+in the base order whatever the flags say. The move the search finally plays is therefore
+unchanged by any of this, and every playing-strength number measured in Phases 5 and 6
+carries over untouched. Ordering changes the cost of the answer, not the answer -- and not
+even which of several equally good moves gets named.
 """
 
 from __future__ import annotations
@@ -130,7 +135,8 @@ class MoveOrder:
     from one iteration to the next is both standard and harmless.
     """
 
-    __slots__ = ("base", "rng", "use_killers", "use_history", "killers", "history", "promoted")
+    __slots__ = ("base", "rng", "use_killers", "use_history", "killers", "history",
+                 "promoted", "tt_promoted")
 
     def __init__(self, spec: Ordering, max_ply: int, seed: int | None = None) -> None:
         self.base = BASE_ORDERS[spec.base]
@@ -139,25 +145,37 @@ class MoveOrder:
         self.use_history = spec.history
         self.killers: list[list[Move]] = [[-1] * KILLER_SLOTS for _ in range(max_ply + 2)]
         self.history: tuple[list[int], list[int]] = ([0] * COLS, [0] * COLS)
-        # How many of the columns just returned were promoted by the killer table. The
-        # search reads it immediately, before recursing can overwrite it.
+        # How many of the columns just returned were moved to the front, and how many of
+        # those came from the transposition table rather than the killer slots. The search
+        # reads both immediately, before recursing can overwrite them, and uses them to
+        # credit a cutoff to the source that actually caused it.
         self.promoted = 0
+        self.tt_promoted = 0
 
-    def columns(self, board: Board, ply: int) -> list[Move]:
-        """The legal columns at this node, best guess first."""
+    def columns(self, board: Board, ply: int, tt_move: Move = -1) -> list[Move]:
+        """The legal columns at this node, best guess first.
+
+        `tt_move` is the column the transposition table remembers for this exact
+        position, or -1. It is tried first when there is one: a killer is a refutation
+        borrowed from a sibling, while this one was computed here.
+        """
         ordered = [col for col in self.base if board.can_play(col)]
         if self.rng is not None:
             self.rng.shuffle(ordered)
 
-        promoted = 0
+        front = []
+        if tt_move >= 0 and board.can_play(tt_move):
+            front.append(tt_move)
+        tt_promoted = len(front)
+
         if self.use_killers:
-            front = []
             for killer in self.killers[ply]:
                 if killer >= 0 and killer not in front and board.can_play(killer):
                     front.append(killer)
-            if front:
-                ordered = front + [col for col in ordered if col not in front]
-                promoted = len(front)
+
+        promoted = len(front)
+        if front:
+            ordered = front + [col for col in ordered if col not in front]
 
         if self.use_history:
             table = self.history[board.player_to_move - 1]
@@ -167,6 +185,7 @@ class MoveOrder:
             ordered[promoted:] = tail
 
         self.promoted = promoted
+        self.tt_promoted = tt_promoted
         return ordered
 
     def cutoff(self, board: Board, col: Move, ply: int, depth: int) -> None:

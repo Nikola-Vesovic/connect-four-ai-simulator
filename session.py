@@ -23,7 +23,7 @@ Three things live here that the window needs and the experiment harness does not
 * **the measured cost tables** -- see below. They bound the depth slider.
 
 **Why the depth is capped, and how the cap was chosen.** A depth-8 plain minimax move
-takes over two minutes, which in a window is indistinguishable from a crash. The three
+takes over two minutes, which in a window is indistinguishable from a crash. The four
 tables below hold the *measured* worst case of a single move, one table per optimisation
 level, and each cap is simply the length of its table: **the interface offers exactly the
 depths that have been measured, and no others.** That way the cap cannot quietly drift
@@ -31,8 +31,15 @@ away from the evidence for it. The numbers are also shown next to the slider, so
 of a setting is visible before it is paid.
 
 One consequence is the clearest thing the panel says about this project: **each
-optimisation lengthens its own table.** Pruning takes the reachable depth from 7 to 9 and
-move ordering takes it from 9 to 11, and those are measurements rather than claims.
+optimisation lengthens its own table.** Pruning takes the reachable depth from 7 to 9,
+move ordering from 9 to 11, and the transposition table from 11 to 12, and those are
+measurements rather than claims.
+
+The tables form a *ladder*, and a configuration that skips a rung is costed by the last
+rung it completed -- a search with a table but no move ordering is priced as if it had
+neither. That is deliberately conservative rather than precise: the alternative is one
+table per combination, which is six sweeps to measure and keep honest, and the direction
+of the approximation is checked rather than assumed (`tests/test_session.py`).
 """
 
 from __future__ import annotations
@@ -52,6 +59,7 @@ from core.types import GameResult, Move, Player
 from search.evaluation import DEFAULT, ZERO, Evaluation
 from search.ordering import DYNAMIC, STATIC, Ordering
 from search.stats import UNLIMITED, Budget, SearchStats
+from search.transposition import NO_TABLE, TABLE, Transposition
 
 # Worst case of ONE move in seconds, depth 1 upwards, re-measured 2026-09-15 over a stated
 # sample -- the empty board plus four random openings at each of 2, 4, 6, 8, 10 and 12
@@ -74,10 +82,19 @@ PRUNED_WORST_SECONDS: tuple[float, ...] = (
 ORDERED_WORST_SECONDS: tuple[float, ...] = (
     0.001, 0.001, 0.003, 0.008, 0.029, 0.082, 0.222, 0.598, 2.533, 6.346, 18.665,
 )
+# Phase 8, the same twenty-five positions: alpha-beta with move ordering AND the table.
+# Two entries longer than Phase 7's, so the checkbox is worth two more plies of reachable
+# depth -- and the entry that says what the phase is worth where a user can feel it is
+# depth 11, which cost 18.7 s in Phase 7 and costs 6.7 s now.
+TABLE_WORST_SECONDS: tuple[float, ...] = (
+    0.001, 0.001, 0.003, 0.007, 0.025, 0.060, 0.167, 0.343, 1.224, 2.570, 6.652,
+    10.739, 34.252,
+)
 
 MAX_DEPTH_UNPRUNED = len(UNPRUNED_WORST_SECONDS)
 MAX_DEPTH_PRUNED = len(PRUNED_WORST_SECONDS)
 MAX_DEPTH_ORDERED = len(ORDERED_WORST_SECONDS)
+MAX_DEPTH_TABLE = len(TABLE_WORST_SECONDS)
 
 
 class Controller(str, Enum):
@@ -97,6 +114,7 @@ class AlgorithmSpec:
     uses_depth: bool = False
     uses_pruning: bool = False
     uses_ordering: bool = False
+    uses_transposition: bool = False
     uses_evaluation: bool = False
 
 
@@ -119,11 +137,13 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
             pruning=spec.pruning,
             evaluation=spec.evaluation,
             ordering=spec.ordering,
+            transposition=spec.transposition_spec,
             seed=seed,
         ),
         uses_depth=True,
         uses_pruning=True,
         uses_ordering=True,
+        uses_transposition=True,
         uses_evaluation=True,
     ),
 }
@@ -140,6 +160,7 @@ class SeatSpec:
     depth: int = 6
     pruning: bool = True
     move_ordering: bool = True
+    transposition: bool = True
     threats: bool = True
     center: bool = True
     parity: bool = True
@@ -185,10 +206,36 @@ class SeatSpec:
         return DYNAMIC if self.move_ordering else STATIC
 
     @property
+    def can_transpose(self) -> bool:
+        """Whether the transposition switch means anything here -- regardless of its value.
+
+        Unlike `can_order` this does **not** require pruning, and the difference is a
+        measurement rather than a matter of taste. Move ordering needs cutoffs to bring
+        forward, so with pruning off it has nothing to do. A table needs only that the
+        same position turn up twice, which happens in any tree; with pruning off it is in
+        fact at its most effective, because the unpruned tree is the one with the most
+        repeats in it.
+        """
+        return self.spec.uses_transposition
+
+    @property
+    def transposition_active(self) -> bool:
+        """Whether the table is actually in effect. This is what the depth cap and the
+        cost estimate depend on -- the same two-property split Phase 7 needed, where
+        conflating them was a real bug."""
+        return self.can_transpose and self.transposition
+
+    @property
+    def transposition_spec(self) -> Transposition:
+        return TABLE if self.transposition else NO_TABLE
+
+    @property
     def max_depth(self) -> int:
         if not self.prunes:
             return MAX_DEPTH_UNPRUNED
-        return MAX_DEPTH_ORDERED if self.orders else MAX_DEPTH_PRUNED
+        if not self.orders:
+            return MAX_DEPTH_PRUNED
+        return MAX_DEPTH_TABLE if self.transposition_active else MAX_DEPTH_ORDERED
 
     @property
     def evaluation(self) -> Evaluation:
@@ -209,16 +256,21 @@ class SeatSpec:
             return 0.0 if self.controller is Controller.MACHINE else None
         if not self.prunes:
             table = UNPRUNED_WORST_SECONDS
+        elif not self.orders:
+            table = PRUNED_WORST_SECONDS
+        elif self.transposition_active:
+            table = TABLE_WORST_SECONDS
         else:
-            table = ORDERED_WORST_SECONDS if self.orders else PRUNED_WORST_SECONDS
+            table = ORDERED_WORST_SECONDS
         return table[min(self.depth, len(table)) - 1]
 
     def normalised(self) -> SeatSpec:
         """The same spec with the depth inside the range that has been measured.
 
-        Turning an optimisation off lowers the cap -- 11 with ordering, 9 without it, 7
-        with no pruning at all -- so a depth that was fine a moment ago may not be;
-        clamping here means no caller can end up with a setting whose cost is unknown.
+        Turning an optimisation off lowers the cap -- 12 with the table, 11 with ordering,
+        9 without it, 7 with no pruning at all -- so a depth that was fine a moment ago
+        may not be; clamping here means no caller can end up with a setting whose cost is
+        unknown.
         """
         depth = max(1, min(self.depth, self.max_depth))
         return self if depth == self.depth else replace(self, depth=depth)
