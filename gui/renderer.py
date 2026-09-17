@@ -293,6 +293,14 @@ class Renderer:
                       f"{stats.tt_return_rate:.0%}" if stats.tt_probes else "—",
                       x, y, width,
                       config.GOOD if stats.tt_returns else config.TEXT_MUTED)
+        # NegaScout's bet, stated as the share of null-window searches that turned out to
+        # be wrong and had to be run again with the real window. Low is good: it is the
+        # one number in the panel where a smaller value is the better one.
+        y = self.stat("ponovne pretrage",
+                      f"{stats.research_rate:.0%}" if stats.scout_searches else "—",
+                      x, y, width,
+                      config.GOOD if stats.scout_searches and stats.research_rate < 0.25
+                      else config.TEXT_MUTED)
         self.stat("vreme", seconds(stats.elapsed), x, y, width)
 
     def draw_totals(self, totals: SeatTotals, place) -> None:

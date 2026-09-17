@@ -15,10 +15,10 @@ python main.py
 Nema nijednog argumenta komandne linije — sve se bira u prozoru:
 
 - **režim igre**: čovek vs mašina, mašina vs mašina, čovek vs čovek;
-- **algoritam po sedištu**: Random, Greedy, Minimax, Negamax (kasnije NegaScout i MCTS);
+- **algoritam po sedištu**: Random, Greedy, Minimax, Negamax (kasnije MCTS);
 - **optimizacije po sedištu**: alfa-beta odsecanje, sortiranje poteza (killer potezi +
-  istorijska heuristika), tabela transpozicija i progresivno produbljivanje, i svaka
-  komponenta funkcije procene (pretnje, centar, parnost) nezavisno;
+  istorijska heuristika), tabela transpozicija, progresivno produbljivanje i negascout, i
+  svaka komponenta funkcije procene (pretnje, centar, parnost) nezavisno;
 - **dubina pretrage**, sa izmerenom cenom najgoreg poteza uz klizač — ili, kada je
   progresivno produbljivanje uključeno, **vreme po potezu**, pa dubina postaje rezultat.
 
@@ -47,6 +47,14 @@ To je jedini prekidač u prozoru koji najgori slučaj čini *manjim* — sa 34 s
 onoliko sekundi koliko je izabrano, uz izmereno prekoračenje od oko 1 ms. Pretraga se
 izvršava u zasebnoj niti, pa prozor i tada crta 60 slika u sekundi i može da se zatvori.
 
+**NegaScout je jedina optimizacija koja lestvicu niti produžava niti ukida.** Ona pretragu
+samo pojeftinjuje, pa se konfiguracija sa njom računa po istoj prečki kao i bez nje —
+procena tako ostaje konzervativna. Prva moće da bude i skuplja: nad 200 realnih pozicija
+ona gubi na dubini 1 (0,888x) i 2 (0,912x), izjednačuje se na 3, a dobitak počinje od
+dubine 4 i raste do **1,303x na dubini 7**. Panel zato prikazuje i **ponovne pretrage** —
+udeo pretraga nultim prozorom koje su morale da se ponove, jedini broj u panelu kod koga
+je manje bolje.
+
 ## Struktura
 
 ```
@@ -59,12 +67,13 @@ connect4/
   agents/        base.py (interfejs), random_agent.py, greedy_agent.py                    [4]
                  minimax.py (MAX/MIN, ogranicen dubinom)                                  [5]
                  alphabeta.py (negamax; alfa-beta koja se iskljucuje)                     [6]
-                 negascout, mcts, oracle                                                  [10-11, 13]
+                 mcts, oracle                                                             [11, 13]
   search/        stats.py (Budget + SearchStats)                                          [4]
                  ordering.py (centar-prvo [4]; killer potezi + istorija, ukljucivi)       [7]
                  evaluation.py (pretnje, centar, parnost -- svaka iskljuciva)             [5]
                  transposition.py (position+mask kljuc, EXACT/LOWER/UPPER, dict i niz)    [8]
                  deepening.py (progresivno produbljivanje + prekid po vremenu/cvorovima)  [9]
+                 scouting.py (negascout: nulti prozor + ponovna pretraga)                 [10]
   gui/           renderer.py (crtanje), widgets.py (kontrole), sprites.py (diskovi)       [3]
   experiments/   match.py (mec izmedju dva agenta, sa semenom)                            [4]
                  reference.py (zamrznute vrednosti), scaling.py (cvorovi i kriva)         [5-6]
@@ -95,11 +104,17 @@ python -m experiments.scaling --deepening        # progresivno produbljivanje na
 python -m experiments.scaling --deepening-empty  # isto, prazna tabla, do dubine 12
 python -m experiments.scaling --deepening-games  # isto, kroz cele partije
 python -m experiments.scaling --deepening-clock  # da li se vremenski budzet postuje
+python -m experiments.scaling --scout            # negascout nad 200 pozicija
+python -m experiments.scaling --scout-empty      # isto, prazna tabla, do dubine 12
+python -m experiments.scaling --scout-games      # isto, kroz cele partije
+python -m experiments.scaling --scout-ordering   # slajd 148: negascout protiv 4 redosleda
+python -m experiments.scaling --scout-deepening  # negascout sa i bez produbljivanja
 python -m experiments.reference --generate # zamrzni vrednosti obicnog minimaxa
 python -m experiments.reference --verify --agent alphabeta   # gate za faze 6-10
 python -m experiments.reference --verify --agent alphabeta --ordering center_first
 python -m experiments.reference --verify --agent alphabeta --table no_table
 python -m experiments.reference --verify --agent alphabeta --deepening iterative+pv+order
+python -m experiments.reference --verify --agent alphabeta --scout no_scout
 ```
 
 Svaka optimizacija u fazama 6-10 mora da vrati **istu vrednost** kao obican minimax.
@@ -111,7 +126,8 @@ Sve cetiri imenovane strategije redosleda daju 0 neslaganja nad svih 1.050 zapis
 Obican minimax nema odsecanja, pa ga ni jedno ni drugo ne moze skrenuti; alfa-beta odseca
 na osnovu onoga sto je vec nasla, pa zavisi od oba. Od faze 8 tome se dodaje i tabela
 transpozicija, a od faze 9 i **budzet** — pretraga zaustavljena satom nema ponovljiv broj
-cvorova. Zato svaki CSV u `data/results/` nosi kolone `evaluation`, `ordering`,
+cvorova, a od faze 10 i **varijanta pretrage** (negascout ili ne). Zato svaki CSV u
+`data/results/` nosi kolone `evaluation`, `ordering`,
 `transposition` i `budget`, a svaki broj koji se citira u radu dolazi iz budzeta po dubini
 ili po cvorovima; vreme se koristi samo tamo gde se vreme i meri.
 

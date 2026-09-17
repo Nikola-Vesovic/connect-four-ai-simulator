@@ -102,6 +102,16 @@ class SearchStats:
     killer_cutoffs: int = 0  # cutoffs caused by a move the killer table had promoted
     tt_move_cutoffs: int = 0  # cutoffs caused by the move the table remembered
 
+    # ------------------------------------------------------------------------ negascout
+    #
+    # Phase 10, and this pair is not a diagnostic: it is the quantity the algorithm bets
+    # on. Scouting a move with a null window is cheap when it fails low and costs a whole
+    # second search when it does not, so the share of scouts that had to be re-searched is
+    # what decides whether the phase pays. A re-search is charged a node of its own, like
+    # any other visit to a position, so the node count stays a count of work done.
+    scout_searches: int = 0  # moves searched with a null window instead of the real one
+    researches: int = 0  # those that failed high and had to be searched again
+
     # --------------------------------------------------------- transposition table
     #
     # Phase 8, and reported for the same reason as the ordering-quality figures above: a
@@ -131,6 +141,11 @@ class SearchStats:
     def mean_cut_index(self) -> float:
         """Average rank of the move that caused a cutoff. 1.0 would be perfect."""
         return self.cut_index_total / self.cutoffs if self.cutoffs else 0.0
+
+    @property
+    def research_rate(self) -> float:
+        """Share of null-window searches that had to be redone. 0.0 is the ideal."""
+        return self.researches / self.scout_searches if self.scout_searches else 0.0
 
     @property
     def tt_hit_rate(self) -> float:

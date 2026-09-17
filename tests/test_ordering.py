@@ -40,6 +40,7 @@ from search.ordering import (
     MoveOrder,
     Ordering,
 )
+from search.scouting import NO_SCOUT
 
 ALL = (STATIC, DYNAMIC, LEFT, RANDOM)
 
@@ -216,11 +217,17 @@ def test_over_real_positions_the_learned_ordering_visits_materially_fewer_nodes(
     Deliberately *not* measured on the empty board: that is alpha-beta's best case
     (thesis point P11), centre-first ordering is already close to ideal there, and the
     learned ordering has nothing left to win.
+
+    Pinned at `scouting=NO_SCOUT`, which is the configuration this was measured in.
+    NegaScout prunes hard on a null window whatever order the moves arrive in, so it
+    takes back part of what the ordering is worth -- 1.60x here instead of 1.66x -- and
+    that interaction is a Phase 10 result (`scout_by_ordering.csv`), not a reason to
+    relax a Phase 7 number.
     """
     static_total = dynamic_total = 0
     for board in positions(seed=233, count=25):
-        _, before = NegamaxAgent(6, ordering=STATIC).choose_move(board)
-        _, after = NegamaxAgent(6, ordering=DYNAMIC).choose_move(board)
+        _, before = NegamaxAgent(6, ordering=STATIC, scouting=NO_SCOUT).choose_move(board)
+        _, after = NegamaxAgent(6, ordering=DYNAMIC, scouting=NO_SCOUT).choose_move(board)
         assert after.value == before.value
         static_total += before.nodes
         dynamic_total += after.nodes
@@ -275,16 +282,24 @@ def test_a_bad_base_order_costs_a_great_deal_and_the_learned_ordering_wins_it_ba
     centre-first's 42,057 (2.6x), a per-node shuffle 61,835 (1.5x). Adding killers and
     history to the left-to-right order brings it to 28,405 -- below the good static order
     that has no learning in it at all.
+
+    Pinned at `scouting=NO_SCOUT` for the same reason as the test above: what a bad base
+    order costs is a smaller number once a null window is doing part of the pruning, and
+    that is Phase 10's finding rather than a correction to this one.
     """
     totals = {spec: 0 for spec in (STATIC, DYNAMIC, LEFT, RANDOM)}
     learned = {LEFT: 0, RANDOM: 0}
     for board in positions(seed=251, count=15):
         for spec in totals:
-            _, stats = NegamaxAgent(6, ordering=spec, seed=3).choose_move(board)
+            _, stats = NegamaxAgent(
+                6, ordering=spec, scouting=NO_SCOUT, seed=3
+            ).choose_move(board)
             totals[spec] += stats.nodes
         for spec in learned:
             with_learning = Ordering(base=spec.base, killers=True, history=True)
-            _, stats = NegamaxAgent(6, ordering=with_learning, seed=3).choose_move(board)
+            _, stats = NegamaxAgent(
+                6, ordering=with_learning, scouting=NO_SCOUT, seed=3
+            ).choose_move(board)
             learned[spec] += stats.nodes
 
     good = totals[STATIC]

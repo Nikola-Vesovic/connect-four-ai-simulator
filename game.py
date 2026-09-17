@@ -160,6 +160,10 @@ class Game:
             # it hands the depth control over to the clock beside it.
             switch("deepening", "progresivno produbljivanje", place.optimisation_y[3],
                    uses("uses_deepening")),
+            # A null window is a pruning window, so like the ordering and unlike the table
+            # this one is greyed out whenever alpha-beta itself is off.
+            switch("scouting", "negascout", place.optimisation_y[4],
+                   lambda: machine() and seats[index].can_scout),
             switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation")),
             switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation")),
             switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation")),

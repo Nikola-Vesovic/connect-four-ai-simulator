@@ -64,9 +64,11 @@ PANEL_INSET = 14
 GROUP_GAP = 6
 
 SPINNERS = 4  # kontrola, algoritam, dubina, vreme
-OPTIMISATIONS = 4  # pruning, ordering, transposition table, iterative deepening. 10-11 add more.
+# pruning, ordering, transposition table, iterative deepening, negascout. Phase 11 adds
+# MCTS, which is a fifth entry in the picker rather than a sixth box here.
+OPTIMISATIONS = 5
 EVAL_SWITCHES = 3  # threats, center, parity
-LAST_MOVE_LINES = 8
+LAST_MOVE_LINES = 9
 TOTAL_LINES = 4
 
 

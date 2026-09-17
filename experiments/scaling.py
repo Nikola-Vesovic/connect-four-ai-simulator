@@ -38,6 +38,14 @@ measurement in front of them: how many of the positions in the tree are repeats 
 counted directly, before any search is involved. That number is the ceiling, and quoting a
 gain without it would leave the reader unable to tell a good result from a poor one.
 
+**Phase 10 adds NegaScout**, measured the same three ways and with two more beside them,
+because this is the first optimisation whose value depends on another one. Slide 148 ties
+its performance directly to the move ordering, so the ordering is swept against it; and
+Phase 9 measured that iterative deepening produces a much better first move, which is
+exactly the condition it needs, so the deepening switch is swept against it too. Every one
+of those rows carries the *scouting* column as well, which is the fifth thing thesis point
+P10 now requires beside a node count.
+
     python -m experiments.scaling --nodes
     python -m experiments.scaling --curve
     python -m experiments.scaling --pruning
@@ -48,6 +56,11 @@ gain without it would leave the reader unable to tell a good result from a poor 
     python -m experiments.scaling --table
     python -m experiments.scaling --table-empty
     python -m experiments.scaling --table-games
+    python -m experiments.scaling --scout
+    python -m experiments.scaling --scout-empty
+    python -m experiments.scaling --scout-games
+    python -m experiments.scaling --scout-ordering
+    python -m experiments.scaling --scout-deepening
 """
 
 from __future__ import annotations
@@ -68,6 +81,7 @@ from experiments.match import Tally, play_match
 from search.deepening import DIRECT, EVEN, ITERATIVE, NAIVE, Deepening
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC, Ordering
+from search.scouting import DEEP, NO_SCOUT, SCOUT, WIDE, Scout
 from search.stats import Budget
 from search.transposition import ARRAY, NO_TABLE, PERSISTENT, TABLE, WRITE_ONLY, Transposition
 
@@ -87,6 +101,11 @@ DEEPENING_CSV = RESULTS / "deepening_by_position.csv"
 DEEPENING_EMPTY_CSV = RESULTS / "deepening_on_empty_board.csv"
 DEEPENING_GAMES_CSV = RESULTS / "deepening_by_game.csv"
 DEEPENING_CLOCK_CSV = RESULTS / "deepening_under_a_clock.csv"
+SCOUT_CSV = RESULTS / "scout_by_position.csv"
+SCOUT_EMPTY_CSV = RESULTS / "scout_on_empty_board.csv"
+SCOUT_GAMES_CSV = RESULTS / "scout_by_game.csv"
+SCOUT_ORDERING_CSV = RESULTS / "scout_by_ordering.csv"
+SCOUT_DEEPENING_CSV = RESULTS / "scout_under_deepening.csv"
 
 # The tables compared. The first is Phase 7's search and every gain is quoted against it.
 # `write_only` is the controlled experiment: it keeps the table exactly as the real one
@@ -134,6 +153,13 @@ ORDERING = STATIC.name
 PV_ONLY = Deepening(enabled=True, root_pv=True, share_order=False)
 ORDER_ONLY = Deepening(enabled=True, root_pv=False, share_order=True)
 DEEPENINGS: tuple[Deepening, ...] = (DIRECT, NAIVE, PV_ONLY, ORDER_ONLY, ITERATIVE, EVEN)
+
+# The scouting settings compared. The first is Phase 9's search and every gain is quoted
+# against it. `negascout+wide` is the control for the re-search window -- the classic bug
+# of this algorithm -- and must return identical values while visiting different nodes;
+# `negascout+from3` leaves the degenerate depths alone, where the children of a node are
+# horizon nodes and a null window has nothing it can cut.
+SCOUTS: tuple[Scout, ...] = (NO_SCOUT, SCOUT, WIDE, DEEP)
 
 # The budget every node count before Phase 9 was measured under. It is the fourth column
 # thesis point P10 now requires beside the evaluation, the ordering and the table: a
@@ -280,7 +306,7 @@ def pruning_by_depth(max_depth: int, unpruned_depth: int, max_seconds: float) ->
         slowest = 0.0
         for evaluation in (ZERO, DEFAULT):
             started = time.perf_counter()
-            _, stats = NegamaxAgent(depth, pruning=True, evaluation=evaluation, transposition=NO_TABLE).choose_move(
+            _, stats = NegamaxAgent(depth, pruning=True, evaluation=evaluation, transposition=NO_TABLE, scouting=NO_SCOUT).choose_move(
                 Bitboard()
             )
             seconds = time.perf_counter() - started
@@ -341,7 +367,7 @@ def pruning_by_position(max_depth: int) -> list[dict]:
     for record in data["records"]:
         if record["depth"] > max_depth:
             continue
-        agent = NegamaxAgent(record["depth"], pruning=True, evaluation=DEFAULT, transposition=NO_TABLE)
+        agent = NegamaxAgent(record["depth"], pruning=True, evaluation=DEFAULT, transposition=NO_TABLE, scouting=NO_SCOUT)
         _, stats = agent.choose_move(Bitboard.from_move_string(record["moves"]))
         assert stats.value == record["value"], f"value moved on {record['moves']}"
         by_depth.setdefault(record["depth"], []).append((record["nodes"], stats.nodes))
@@ -391,7 +417,7 @@ def ordering_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
     for depth in depths:
         baseline = None
         for spec in ORDERINGS:
-            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026)
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, scouting=NO_SCOUT, seed=2026)
             started = time.perf_counter()
             _, stats = agent.choose_move(Bitboard())
             seconds = time.perf_counter() - started
@@ -440,7 +466,7 @@ def ordering_by_position(depths: tuple[int, ...]) -> list[dict]:
         records = [record for record in data["records"] if record["depth"] == depth]
         baseline = None
         for spec in ORDERINGS:
-            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026)
+            agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, scouting=NO_SCOUT, seed=2026)
             nodes = leaves = cutoffs = first = index_total = killer = 0
             seconds = 0.0
             for record in records:
@@ -505,7 +531,7 @@ def ordering_by_game(depth: int, games: int, seed: int, opening_plies: int) -> l
     rows = []
     baseline = None
     for spec in ORDERINGS:
-        agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, seed=seed)
+        agent = NegamaxAgent(depth, ordering=spec, evaluation=DEFAULT, transposition=NO_TABLE, scouting=NO_SCOUT, seed=seed)
         nodes = cutoffs = first = index_total = plies = 0
         seconds = 0.0
         for opening in openings:
@@ -648,7 +674,7 @@ def _accumulate(total: dict, stats) -> None:
     for field in (
         "nodes", "leaves", "cutoffs", "first_cutoffs", "cut_index_total", "killer_cutoffs",
         "tt_move_cutoffs", "tt_probes", "tt_hits", "tt_returns", "tt_stores", "tt_rewrites",
-        "tt_collisions", "tt_refused",
+        "tt_collisions", "tt_refused", "scout_searches", "researches",
     ):
         total[field] = total.get(field, 0) + getattr(stats, field)
     for field in ("tt_entries", "tt_peak"):
@@ -672,7 +698,8 @@ def transposition_by_position(depths: tuple[int, ...]) -> list[dict]:
         baseline = baseline_seconds = None
         for spec in TRANSPOSITIONS:
             agent = NegamaxAgent(
-                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=2026
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec,
+                scouting=NO_SCOUT, seed=2026,
             )
             total: dict = {}
             seconds = 0.0
@@ -760,7 +787,8 @@ def transposition_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
         baseline = baseline_seconds = None
         for spec in TRANSPOSITIONS:
             agent = NegamaxAgent(
-                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=2026
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec,
+                scouting=NO_SCOUT, seed=2026,
             )
             started = time.perf_counter()
             _, stats = agent.choose_move(Bitboard())
@@ -819,7 +847,8 @@ def transposition_by_game(depth: int, games: int, seed: int, opening_plies: int)
     baseline = baseline_seconds = None
     for spec in TRANSPOSITIONS + (PERSISTENT,):
         agent = NegamaxAgent(
-            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec, seed=seed
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=spec,
+            scouting=NO_SCOUT, seed=seed,
         )
         total: dict = {}
         seconds = 0.0
@@ -912,7 +941,7 @@ def deepening_by_position(depths: tuple[int, ...]) -> list[dict]:
         for spec in DEEPENINGS:
             agent = NegamaxAgent(
                 depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
-                deepening=spec, seed=2026,
+                deepening=spec, scouting=NO_SCOUT, seed=2026,
             )
             answer_depth = depth if spec.answers(depth) else depth - 1
             total: dict = {}
@@ -989,16 +1018,18 @@ def deepening_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
         # back, which is a different quantity and belongs in the `gain` column.
         separate = sum(
             NegamaxAgent(
-                k, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026
+                k, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE,
+                scouting=NO_SCOUT, seed=2026,
             ).choose_move(Bitboard())[1].nodes
             for k in range(1, depth + 1)
         )
         direct_untabled = NegamaxAgent(
-            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE,
+            scouting=NO_SCOUT, seed=2026,
         ).choose_move(Bitboard())[1].nodes
         untabled = NegamaxAgent(
             depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE,
-            deepening=NAIVE, seed=2026,
+            deepening=NAIVE, scouting=NO_SCOUT, seed=2026,
         ).choose_move(Bitboard())[1]
         assert untabled.nodes == separate, (
             f"naive/no_table at depth {depth}: {untabled.nodes} != {separate}"
@@ -1009,7 +1040,7 @@ def deepening_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
         for spec in DEEPENINGS:
             agent = NegamaxAgent(
                 depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
-                deepening=spec, seed=2026,
+                deepening=spec, scouting=NO_SCOUT, seed=2026,
             )
             started = time.perf_counter()
             move, stats = agent.choose_move(Bitboard())
@@ -1075,7 +1106,7 @@ def deepening_by_game(depth: int, games: int, seed: int, opening_plies: int) -> 
     for spec in DEEPENINGS:
         agent = NegamaxAgent(
             depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
-            deepening=spec, seed=seed,
+            deepening=spec, scouting=NO_SCOUT, seed=seed,
         )
         total: dict = {}
         seconds = 0.0
@@ -1154,7 +1185,7 @@ def deepening_under_a_clock(budgets: tuple[float, ...], positions: int) -> list[
         for spec in (ITERATIVE, EVEN):
             agent = NegamaxAgent(
                 42, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
-                deepening=spec, seed=2026,
+                deepening=spec, scouting=NO_SCOUT, seed=2026,
             )
             over, depths, nodes, aborted = [], [], 0, 0
             for board in sample:
@@ -1194,6 +1225,391 @@ def deepening_under_a_clock(budgets: tuple[float, ...], positions: int) -> list[
     return rows
 
 
+# ------------------------------------------------------------------ Phase 10, negascout
+
+
+def _scout_row(stats_or_total, spec: Scout) -> dict:
+    """The counters NegaScout adds. `research_rate` is not a diagnostic: it is the
+    quantity the algorithm bets on, so it is reported beside every node count it
+    produced rather than inferred from the saving afterwards."""
+    scouts = stats_or_total.scout_searches
+    return {
+        "scout_searches": scouts,
+        "researches": stats_or_total.researches,
+        "research_rate": round(stats_or_total.researches / scouts, 4) if scouts else "",
+    }
+
+
+def _rate(part: int, whole: int, places: int = 4) -> float:
+    """A depth-1 alpha-beta search records no cutoffs at all -- the root never cuts -- so
+    every cutoff-derived rate has to survive an empty denominator."""
+    return round(part / whole, places) if whole else 0.0
+
+
+def scout_by_position(depths: tuple[int, ...]) -> list[dict]:
+    """The gate of Phase 10 over the 200 frozen reference positions.
+
+    Every value is checked against the stored one as it goes, and so is every *move*:
+    unlike Phase 9, NegaScout is back in the category of Phases 7 and 8 and provably
+    cannot name a different one of several equally good moves, so `changed_move` is not a
+    counter to be interpreted -- it has to be zero, and the sweep says so rather than
+    assuming it.
+
+    Four settings. `no_scout` is Phase 9's direct search and every gain is quoted against
+    it; `negascout` is the phase; `negascout+wide` throws the scout's bound away and
+    re-searches from alpha instead, which is the control for the classic bug of this
+    algorithm; `negascout+from3` leaves the degenerate shallow depths alone, where a null
+    window has nothing to cut and a re-search is pure loss.
+    """
+    data = reference.load()
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        baseline = baseline_seconds = None
+        baseline_moves: list = []
+        for spec in SCOUTS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                scouting=spec, seed=2026,
+            )
+            total: dict = {}
+            seconds = 0.0
+            chosen = []
+            for record in records:
+                board = Bitboard.from_move_string(record["moves"])
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                assert stats.value == record["value"], (
+                    f"{spec.name} at depth {depth} changed the value of {record['moves']!r}"
+                )
+                _accumulate(total, stats)
+                chosen.append(move)
+            nodes, cutoffs = total["nodes"], total["cutoffs"]
+            if baseline is None:
+                baseline, baseline_seconds, baseline_moves = nodes, seconds, chosen
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": TABLE.name,
+                    "deepening": DIRECT.name,
+                    "scouting": spec.name,
+                    "budget": BUDGET,
+                    "positions": len(records),
+                    "nodes": nodes,
+                    "leaves": total["leaves"],
+                    "cutoffs": cutoffs,
+                    "gain": round(baseline / nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "ebf": round((nodes / len(records)) ** (1 / depth), 4),
+                    "changed_move": sum(a != b for a, b in zip(chosen, baseline_moves)),
+                    "first_cutoff_rate": _rate(total["first_cutoffs"], cutoffs),
+                    "mean_cut_index": _rate(total["cut_index_total"], cutoffs, 3),
+                    "killer_cutoff_rate": _rate(total["killer_cutoffs"], cutoffs),
+                    "tt_move_cutoff_rate": _rate(total["tt_move_cutoffs"], cutoffs),
+                    **_table_row(_Totals(total), TABLE),
+                    **_scout_row(_Totals(total), spec),
+                    "seconds": round(seconds, 2),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth}  {spec.name:<18} {nodes:>10,} nodes  {row['gain']:>5}x  "
+                f"time {row['time_gain']:>5}x  "
+                f"re-search {row['research_rate'] or 0:>7.2%} of {row['scout_searches']:>7,}  "
+                f"tt ret {row['tt_return_rate']:>6.1%}  tt-cut {row['tt_move_cutoff_rate']:>6.1%}"
+                f"  moved differently {row['changed_move']:>3}/{len(records)}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def scout_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
+    """The same four settings on the one position everybody benchmarks.
+
+    Reported for the reason Phases 7 and 8 report it: the empty board is alpha-beta's
+    best case (thesis point P11) and it has gone both ways before -- move ordering lost
+    here, the transposition table won here. It is also the only view in which the
+    degenerate depths are visible one row at a time, and they are where this phase loses.
+    """
+    rows = []
+    for depth in depths:
+        baseline = baseline_seconds = baseline_value = None
+        baseline_move = None
+        for spec in SCOUTS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                scouting=spec, seed=2026,
+            )
+            started = time.perf_counter()
+            move, stats = agent.choose_move(Bitboard())
+            seconds = time.perf_counter() - started
+            if baseline is None:
+                baseline, baseline_seconds = stats.nodes, seconds
+                baseline_value, baseline_move = stats.value, move
+            assert stats.value == baseline_value, f"{spec.name} changed the value at {depth}"
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": TABLE.name,
+                    "deepening": DIRECT.name,
+                    "scouting": spec.name,
+                    "budget": BUDGET,
+                    "nodes": stats.nodes,
+                    "leaves": stats.leaves,
+                    "cutoffs": stats.cutoffs,
+                    "gain": round(baseline / stats.nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "changed_move": int(move != baseline_move),
+                    "first_cutoff_rate": round(stats.first_cutoff_rate, 4),
+                    "killer_cutoff_rate": round(
+                        stats.killer_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    "tt_move_cutoff_rate": round(
+                        stats.tt_move_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    **_table_row(stats, TABLE),
+                    **_scout_row(stats, spec),
+                    "value": stats.value,
+                    "seconds": round(seconds, 3),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth:>2}  {spec.name:<18} {stats.nodes:>10,} nodes  "
+                f"{row['gain']:>5}x  time {row['time_gain']:>5}x  "
+                f"re-search {row['research_rate'] or 0:>7.2%} of {row['scout_searches']:>6,}  "
+                f"tt ret {row['tt_return_rate']:>6.1%}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def scout_by_game(depth: int, games: int, seed: int, opening_plies: int) -> list[dict]:
+    """The third view, as in Phases 7, 8 and 9: complete games rather than positions.
+
+    A game walks from an opening, where there is a large tree to prune, into an endgame
+    where there is hardly any, so the average over a game is a different number from the
+    average over a position set and both belong in the results. `same_games` is the
+    property Phase 9 broke and this phase restores: with the deepening switch off,
+    NegaScout cannot change a move, so every setting must play the identical games.
+    """
+    rng = random.Random(seed)
+    openings = [[rng.randrange(7) for _ in range(opening_plies)] for _ in range(games)]
+    rows = []
+    baseline = baseline_seconds = None
+    baseline_games: list = []
+    for spec in SCOUTS:
+        agent = NegamaxAgent(
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+            scouting=spec, seed=seed,
+        )
+        total: dict = {}
+        seconds = 0.0
+        plies = 0
+        played = []
+        for game, opening in enumerate(openings):
+            agent.new_game(seed + game)
+            board = Bitboard()
+            for col in opening:
+                if not board.is_terminal() and board.can_play(col):
+                    board.play(col)
+            while not board.is_terminal():
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                _accumulate(total, stats)
+                plies += 1
+                board.play(move)
+            played.append("".join(str(col + 1) for col in board.history))
+        nodes, cutoffs = total["nodes"], total["cutoffs"]
+        if baseline is None:
+            baseline, baseline_seconds, baseline_games = nodes, seconds, played
+        rows.append(
+            {
+                "depth": depth,
+                "evaluation": DEFAULT.name,
+                "ordering": DYNAMIC.name,
+                "transposition": TABLE.name,
+                "deepening": DIRECT.name,
+                "scouting": spec.name,
+                "budget": BUDGET,
+                "games": games,
+                "opening_plies": opening_plies,
+                "moves": plies,
+                "same_games": played == baseline_games,
+                "games_that_differ": sum(a != b for a, b in zip(played, baseline_games)),
+                "nodes": nodes,
+                "nodes_per_move": round(nodes / plies, 1),
+                "cutoffs": cutoffs,
+                "gain": round(baseline / nodes, 3),
+                "time_gain": round(baseline_seconds / seconds, 3),
+                "first_cutoff_rate": round(total["first_cutoffs"] / cutoffs, 4),
+                "killer_cutoff_rate": round(total["killer_cutoffs"] / cutoffs, 4),
+                "tt_move_cutoff_rate": round(total["tt_move_cutoffs"] / cutoffs, 4),
+                **_table_row(_Totals(total), TABLE),
+                **_scout_row(_Totals(total), spec),
+                "seconds": round(seconds, 2),
+                "seconds_per_move": round(seconds / plies, 4),
+            }
+        )
+        row = rows[-1]
+        print(
+            f"{spec.name:<18} {nodes:>11,} nodes over {plies} moves  {row['gain']:>5}x  "
+            f"re-search {row['research_rate'] or 0:>7.2%}  "
+            f"same games {str(row['same_games']):<5}  {seconds:7.2f}s",
+            flush=True,
+        )
+    return rows
+
+
+def scout_by_ordering(depths: tuple[int, ...]) -> list[dict]:
+    """Slide 148's warning, measured on this phase the way Phase 7 measured it on its own.
+
+    NegaScout is supposed to win when the first move tried is usually the best one and to
+    lose when it is not, because every wrong guess costs a whole re-search. The four base
+    orders are the same four Phase 7 used, so the row for `center_first+killers+history`
+    is directly comparable with the position sweep and the two failure modes are the ones
+    the slide names.
+    """
+    data = reference.load()
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        for ordering in (DYNAMIC, STATIC, LEFT, RANDOM):
+            baseline = baseline_seconds = None
+            for spec in (NO_SCOUT, SCOUT):
+                agent = NegamaxAgent(
+                    depth, ordering=ordering, evaluation=DEFAULT, transposition=TABLE,
+                    scouting=spec, seed=2026,
+                )
+                total: dict = {}
+                seconds = 0.0
+                for record in records:
+                    board = Bitboard.from_move_string(record["moves"])
+                    started = time.perf_counter()
+                    _, stats = agent.choose_move(board)
+                    seconds += time.perf_counter() - started
+                    assert stats.value == record["value"], (
+                        f"{ordering.name}/{spec.name} changed the value of "
+                        f"{record['moves']!r} at depth {depth}"
+                    )
+                    _accumulate(total, stats)
+                nodes, cutoffs = total["nodes"], total["cutoffs"]
+                if baseline is None:
+                    baseline, baseline_seconds = nodes, seconds
+                rows.append(
+                    {
+                        "depth": depth,
+                        "evaluation": DEFAULT.name,
+                        "ordering": ordering.name,
+                        "transposition": TABLE.name,
+                        "deepening": DIRECT.name,
+                        "scouting": spec.name,
+                        "budget": BUDGET,
+                        "positions": len(records),
+                        "nodes": nodes,
+                        "cutoffs": cutoffs,
+                        "gain": round(baseline / nodes, 3),
+                        "time_gain": round(baseline_seconds / seconds, 3),
+                        "first_cutoff_rate": _rate(total["first_cutoffs"], cutoffs),
+                        **_scout_row(_Totals(total), spec),
+                        "seconds": round(seconds, 2),
+                    }
+                )
+                row = rows[-1]
+                print(
+                    f"depth {depth}  {ordering.name:<30} {spec.name:<10} "
+                    f"{nodes:>10,} nodes  {row['gain']:>5}x  "
+                    f"first-cut {row['first_cutoff_rate']:>6.1%}  "
+                    f"re-search {row['research_rate'] or 0:>7.2%}  {seconds:7.2f}s",
+                    flush=True,
+                )
+        print()
+    return rows
+
+
+def scout_under_deepening(depths: tuple[int, ...]) -> list[dict]:
+    """The two phases that were supposed to help each other, measured together.
+
+    Phase 9 found that under iterative deepening the transposition move causes 24.6-37.5%
+    of cutoffs against 0.2-0.6% in a direct search, i.e. the first move tried is a far
+    better guess. That is exactly the condition NegaScout needs, so the gain should be
+    *larger* here than it is over a direct search. Both gains are quoted against their own
+    baseline, which is the only way the comparison means anything.
+
+    Aspiration windows at the root -- narrowing the *root* window around the previous
+    iteration's value -- are the natural next step from here and are deliberately out of
+    scope: they can fail low or high at the root, which needs a widening loop, and a
+    widening loop is a place where a value can be lost. Named here rather than half done.
+    """
+    data = reference.load()
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        for deepening in (DIRECT, ITERATIVE):
+            baseline = baseline_seconds = None
+            for spec in (NO_SCOUT, SCOUT):
+                agent = NegamaxAgent(
+                    depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                    deepening=deepening, scouting=spec, seed=2026,
+                )
+                total: dict = {}
+                seconds = 0.0
+                for record in records:
+                    board = Bitboard.from_move_string(record["moves"])
+                    started = time.perf_counter()
+                    _, stats = agent.choose_move(board)
+                    seconds += time.perf_counter() - started
+                    assert stats.value == record["value"], (
+                        f"{deepening.name}/{spec.name} changed the value of "
+                        f"{record['moves']!r} at depth {depth}"
+                    )
+                    _accumulate(total, stats)
+                nodes, cutoffs = total["nodes"], total["cutoffs"]
+                if baseline is None:
+                    baseline, baseline_seconds = nodes, seconds
+                rows.append(
+                    {
+                        "depth": depth,
+                        "evaluation": DEFAULT.name,
+                        "ordering": DYNAMIC.name,
+                        "transposition": TABLE.name,
+                        "deepening": deepening.name,
+                        "scouting": spec.name,
+                        "budget": BUDGET,
+                        "positions": len(records),
+                        "nodes": nodes,
+                        "cutoffs": cutoffs,
+                        "gain": round(baseline / nodes, 3),
+                        "time_gain": round(baseline_seconds / seconds, 3),
+                        "first_cutoff_rate": _rate(total["first_cutoffs"], cutoffs),
+                        "killer_cutoff_rate": _rate(total["killer_cutoffs"], cutoffs),
+                        "tt_move_cutoff_rate": _rate(total["tt_move_cutoffs"], cutoffs),
+                        **_table_row(_Totals(total), TABLE),
+                        **_scout_row(_Totals(total), spec),
+                        "seconds": round(seconds, 2),
+                    }
+                )
+                row = rows[-1]
+                print(
+                    f"depth {depth}  {deepening.name:<22} {spec.name:<10} "
+                    f"{nodes:>10,} nodes  {row['gain']:>5}x  "
+                    f"first-cut {row['first_cutoff_rate']:>6.1%}  "
+                    f"tt-cut {row['tt_move_cutoff_rate']:>6.1%}  "
+                    f"re-search {row['research_rate'] or 0:>7.2%}  {seconds:7.2f}s",
+                    flush=True,
+                )
+        print()
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--nodes", action="store_true")
@@ -1211,6 +1627,11 @@ def main() -> None:
     parser.add_argument("--deepening-empty", action="store_true")
     parser.add_argument("--deepening-games", action="store_true")
     parser.add_argument("--deepening-clock", action="store_true")
+    parser.add_argument("--scout", action="store_true")
+    parser.add_argument("--scout-empty", action="store_true")
+    parser.add_argument("--scout-games", action="store_true")
+    parser.add_argument("--scout-ordering", action="store_true")
+    parser.add_argument("--scout-deepening", action="store_true")
     parser.add_argument("--max-depth", type=int, default=8)
     parser.add_argument("--timed-depth", type=int, default=6)
     parser.add_argument("--unpruned-depth", type=int, default=8)
@@ -1283,6 +1704,22 @@ def main() -> None:
             deepening_under_a_clock((0.02, 0.05, 0.1, 0.25, 0.5, 1.0), positions=25),
             DEEPENING_CLOCK_CSV,
         )
+    if args.scout:
+        write(scout_by_position((1, 2, 3, 4, 5, 6, 7)), SCOUT_CSV)
+    if args.scout_empty:
+        write(
+            scout_on_empty_board((1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)),
+            SCOUT_EMPTY_CSV,
+        )
+    if args.scout_games:
+        write(
+            scout_by_game(6, games=10, seed=args.seed, opening_plies=args.opening_plies),
+            SCOUT_GAMES_CSV,
+        )
+    if args.scout_ordering:
+        write(scout_by_ordering((5, 6, 7)), SCOUT_ORDERING_CSV)
+    if args.scout_deepening:
+        write(scout_under_deepening((4, 5, 6, 7)), SCOUT_DEEPENING_CSV)
 
 
 if __name__ == "__main__":

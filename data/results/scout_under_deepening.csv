@@ -1,0 +1,17 @@
+depth,evaluation,ordering,transposition,deepening,scouting,budget,positions,nodes,cutoffs,gain,time_gain,first_cutoff_rate,killer_cutoff_rate,tt_move_cutoff_rate,tt_probes,tt_hits,tt_hit_rate,tt_returns,tt_return_rate,tt_stores,tt_rewrites,tt_collisions,tt_refused,tt_entries,tt_peak,tt_capacity,tt_fill,scout_searches,researches,research_rate,seconds
+4,full,center_first+killers+history,dict,direct,no_scout,depth,200,41704,9672,1.0,1.0,0.8421,0.8515,0.0016,15507,1850,0.1193,1791,0.1155,13716,59,0,0,146,146,1048576,0.00014,0,0,,0.73
+4,full,center_first+killers+history,dict,direct,negascout,depth,200,41340,10529,1.009,1.031,0.8305,0.8031,0.069,16452,3705,0.2252,2247,0.1366,14205,1458,0,0,138,138,1048576,0.00013,6518,1036,0.1589,0.71
+4,full,center_first+killers+history,dict,iterative+pv+order,no_scout,depth,200,49839,11541,1.0,1.0,0.8941,0.6484,0.2465,17659,6392,0.362,1673,0.0947,15986,4719,0,0,121,121,1048576,0.00012,0,0,,0.9
+4,full,center_first+killers+history,dict,iterative+pv+order,negascout,depth,200,51014,12512,0.977,0.986,0.8851,0.6304,0.2676,18664,7401,0.3965,1901,0.1019,16763,5500,0,0,113,113,1048576,0.00011,11001,1043,0.0948,0.91
+5,full,center_first+killers+history,dict,direct,no_scout,depth,200,115434,21646,1.0,1.0,0.8068,0.8521,0.003,38978,5433,0.1394,5038,0.1293,33940,395,0,0,441,441,1048576,0.00042,0,0,,2.11
+5,full,center_first+killers+history,dict,direct,negascout,depth,200,107645,24909,1.072,1.135,0.8008,0.8206,0.0532,42502,10961,0.2579,7342,0.1727,35160,3619,0,0,368,368,1048576,0.00035,10675,1654,0.1549,1.85
+5,full,center_first+killers+history,dict,iterative+pv+order,no_scout,depth,200,133024,27174,1.0,1.0,0.8713,0.5569,0.3513,45629,19758,0.433,5003,0.1096,40626,14755,0,0,389,389,1048576,0.00037,0,0,,2.43
+5,full,center_first+killers+history,dict,iterative+pv+order,negascout,depth,200,131664,29779,1.01,1.032,0.8578,0.551,0.3564,48123,22475,0.467,5916,0.1229,42207,16559,0,0,327,327,1048576,0.00031,17298,1613,0.0932,2.36
+6,full,center_first+killers+history,dict,direct,no_scout,depth,40,52495,13047,1.0,1.0,0.8428,0.8922,0.0038,22386,4494,0.2008,4205,0.1878,18181,289,0,0,1231,1231,1048576,0.00117,0,0,,0.87
+6,full,center_first+killers+history,dict,direct,negascout,depth,40,46979,12663,1.117,1.145,0.8226,0.8436,0.0507,21290,5964,0.2801,4351,0.2044,16939,1613,0,0,949,949,1048576,0.00091,3139,480,0.1529,0.76
+6,full,center_first+killers+history,dict,iterative+pv+order,no_scout,depth,40,60489,14576,1.0,1.0,0.8813,0.6395,0.2893,24515,11180,0.456,3944,0.1609,20571,7236,0,0,938,938,1048576,0.00089,0,0,,1.03
+6,full,center_first+killers+history,dict,iterative+pv+order,negascout,depth,40,58169,15083,1.04,1.057,0.8772,0.6191,0.3085,24757,12080,0.4879,4216,0.1703,20541,7864,0,0,770,770,1048576,0.00073,4955,466,0.094,0.98
+7,full,center_first+killers+history,dict,direct,no_scout,depth,10,25365,5043,1.0,1.0,0.8237,0.8818,0.0063,9505,1928,0.2028,1776,0.1868,7729,152,0,0,1951,1951,1048576,0.00186,0,0,,0.55
+7,full,center_first+killers+history,dict,direct,negascout,depth,10,19463,4806,1.303,1.634,0.81,0.8664,0.026,8295,1997,0.2407,1630,0.1965,6665,367,0,0,1602,1602,1048576,0.00153,722,91,0.126,0.34
+7,full,center_first+killers+history,dict,iterative+pv+order,no_scout,depth,10,28035,6067,1.0,1.0,0.8891,0.5612,0.3753,10875,5445,0.5007,1875,0.1724,9000,3570,0,0,1359,1359,1048576,0.0013,0,0,,0.48
+7,full,center_first+killers+history,dict,iterative+pv+order,negascout,depth,10,26415,6226,1.061,1.083,0.8882,0.5567,0.3803,10731,5530,0.5153,1851,0.1725,8880,3679,0,0,1335,1335,1048576,0.00127,1369,113,0.0825,0.44

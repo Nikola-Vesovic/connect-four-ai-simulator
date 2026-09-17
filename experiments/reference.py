@@ -20,6 +20,7 @@ leaving a stale file that quietly fails a Phase 6 gate for the wrong reason.
     python -m experiments.reference --verify --agent alphabeta
     python -m experiments.reference --verify --agent alphabeta --ordering center_first
     python -m experiments.reference --verify --agent alphabeta --table no_table
+    python -m experiments.reference --verify --agent alphabeta --scout no_scout
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ from agents.base import Agent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
 from core.types import Score
-from search import deepening, evaluation, ordering, transposition
+from search import deepening, evaluation, ordering, scouting, transposition
 from search.evaluation import DEFAULT
 from search.transposition import NO_TABLE
 
@@ -86,6 +87,16 @@ TABLES: dict[str, transposition.Transposition] = {
 # actually answered from.
 DEEPENINGS: dict[str, deepening.Deepening] = {
     spec.name: spec for spec in (deepening.DIRECT, deepening.NAIVE, deepening.ITERATIVE)
+}
+
+# Phase 10. Every one of these has to return the same 1,050 values, and the pair
+# `negascout`/`negascout+wide` is the one that matters most: the re-search window is the
+# classic bug of this algorithm, and the two conventions differ in nodes and in nothing
+# else. `no_scout` is Phase 9's search, kept replayable for the same reason `no_table`
+# and `center_first` were.
+SCOUTS: dict[str, scouting.Scout] = {
+    spec.name: spec
+    for spec in (scouting.SCOUT, scouting.NO_SCOUT, scouting.WIDE, scouting.DEEP)
 }
 
 # 200 positions get the cheap depths; the expensive ones go to a prefix of the same list,
@@ -236,6 +247,7 @@ def main() -> None:
     parser.add_argument("--ordering", default=None, choices=sorted(ORDERINGS))
     parser.add_argument("--table", default=None, choices=sorted(TABLES))
     parser.add_argument("--deepening", default=None, choices=sorted(DEEPENINGS))
+    parser.add_argument("--scout", default=None, choices=sorted(SCOUTS))
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--max-depth", type=int, default=None)
     args = parser.parse_args()
@@ -271,6 +283,15 @@ def main() -> None:
             # Iterating searches depths 1..d, so the node count is a different number by
             # construction. The value is not, and that is the whole gate.
             check_nodes = check_nodes and not spec.enabled
+        if args.scout is not None:
+            if args.agent == "minimax":
+                parser.error("minimax has no window to narrow; a null window needs alpha-beta.")
+            factory = functools.partial(factory, scouting=SCOUTS[args.scout])
+            # Deliberately NOT dropped to values-only. The only search here that carries a
+            # node-count contract is `negamax`, which is pinned to `pruning=False`, and a
+            # null window around an alpha that is never raised is meaningless -- so the
+            # agent ignores this setting entirely there. Leaving the node comparison in
+            # turns that sentence into part of the gate.
         started = time.perf_counter()
         checked, wrong = verify(
             data,
@@ -284,6 +305,10 @@ def main() -> None:
             label += f"/{args.ordering}"
         if args.table is not None:
             label += f"/{args.table}"
+        if args.deepening is not None:
+            label += f"/{args.deepening}"
+        if args.scout is not None:
+            label += f"/{args.scout}"
         print(
             f"{label}: checked {checked} records ({contract}), "
             f"{len(wrong)} disagreements in {time.perf_counter() - started:.0f}s"

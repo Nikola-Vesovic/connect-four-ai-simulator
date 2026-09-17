@@ -34,6 +34,7 @@ from helpers import random_position, safe_columns, winning_columns
 from search.deepening import DIRECT, ITERATIVE
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC
+from search.scouting import NO_SCOUT, SCOUT
 from search.stats import Budget
 from search.transposition import NO_TABLE, TABLE
 from test_minimax import EVERY_MOVE_LOSES, WIN_IN_ONE_OR_THREE
@@ -179,25 +180,35 @@ def test_the_empty_board_tree_is_the_size_it_was_measured_to_be():
     the very tree about to be searched -- does not cover the re-search at these depths. It
     starts to at depth 11 on this position (`deepening_on_empty_board.csv`), and the
     purpose of the algorithm is not to be cheaper anyway: it is to be stoppable.
+
+    The fifth row is Phase 10's, and it is the one that has to be read a column at a time.
+    NegaScout is *behind* at depth 3 and level at 1 and 2 -- a null window can save
+    nothing at a node whose children are horizon nodes, and a re-search there is pure
+    loss -- and then it takes 9% at depth 5 and 15% at depth 6, growing to 39% at depth 10
+    (`scout_on_empty_board.csv`). A single row of six numbers containing both a loss and a
+    gain is the reason the depth sweep is reported rather than one headline.
     """
     phase6 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (181, 59), 5: (819, 139), 6: (1526, 491)}
     phase7 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (180, 59), 5: (850, 148), 6: (1514, 468)}
     phase8 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (170, 49), 5: (695, 121), 6: (1127, 277)}
     phase9 = {1: (7, 0), 2: (27, 6), 3: (108, 17), 4: (278, 67), 5: (877, 171), 6: (2004, 456)}
+    phase10 = {1: (7, 0), 2: (20, 6), 3: (84, 12), 4: (172, 50), 5: (650, 121), 6: (960, 262)}
 
-    for ordering, table, deepening, expected in (
-        (STATIC, NO_TABLE, DIRECT, phase6),
-        (DYNAMIC, NO_TABLE, DIRECT, phase7),
-        (DYNAMIC, TABLE, DIRECT, phase8),
-        (DYNAMIC, TABLE, ITERATIVE, phase9),
+    for ordering, table, deepening, scouting, expected in (
+        (STATIC, NO_TABLE, DIRECT, NO_SCOUT, phase6),
+        (DYNAMIC, NO_TABLE, DIRECT, NO_SCOUT, phase7),
+        (DYNAMIC, TABLE, DIRECT, NO_SCOUT, phase8),
+        (DYNAMIC, TABLE, ITERATIVE, NO_SCOUT, phase9),
+        (DYNAMIC, TABLE, DIRECT, SCOUT, phase10),
     ):
         for depth, (nodes, cutoffs) in expected.items():
             _, stats = NegamaxAgent(
                 depth, evaluation=DEFAULT, ordering=ordering, transposition=table,
-                deepening=deepening,
+                deepening=deepening, scouting=scouting,
             ).choose_move(Bitboard())
             assert (stats.nodes, stats.cutoffs) == (nodes, cutoffs), (
-                f"{ordering.name}/{table.name}/{deepening.name} at depth {depth}"
+                f"{ordering.name}/{table.name}/{deepening.name}/{scouting.name} "
+                f"at depth {depth}"
             )
 
 

@@ -98,6 +98,22 @@ about how it is wired in here:
   transposition store at the bottom of `_negamax`, which is exactly right -- `best` is
   partial there -- and the root puts the board back by undoing to the ply it started at.
 * **Iteration 1 is uninterruptible**, so a legal move comes back however small the budget.
+
+**Phase 10 adds NegaScout**, the fifth switch and the smallest change of the five: one
+expression for the window a child is given, and one re-search when the scout was wrong.
+See `search/scouting.py` for why the algorithm exists. Three things about how it is wired
+in here:
+
+* **The first move of every node, root included, keeps the full window.** A null window
+  can only ever answer "better than alpha or not", and something has to establish what
+  alpha is worth in the first place.
+* **A re-search is charged a node.** It visits the same position a second time and the
+  whole subtree under it, and every position inside that subtree is counted again anyway,
+  so not counting the re-searched move itself would be the one inconsistency. The effect
+  is to make the gain this phase reports an under-statement rather than an over-statement.
+* **It is ignored entirely when `pruning` is off**, because a null window around an alpha
+  that is never raised is a window below the score scale. That is also what keeps the
+  `--verify --agent negamax` node-count gate untouched by this phase.
 """
 
 from __future__ import annotations
@@ -110,6 +126,7 @@ from core.types import Move, Score
 from search.deepening import DIRECT, Deepening
 from search.evaluation import DEFAULT, Evaluation
 from search.ordering import DYNAMIC, MoveOrder, Ordering
+from search.scouting import SCOUT, Scout
 from search.stats import Budget, SearchStats
 from search.transposition import (
     EXACT,
@@ -154,6 +171,7 @@ class NegamaxAgent(Agent):
         ordering: Ordering = DYNAMIC,
         transposition: Transposition = TABLE,
         deepening: Deepening = DIRECT,
+        scouting: Scout = SCOUT,
         seed: int | None = None,
     ) -> None:
         if depth < 1:
@@ -165,6 +183,7 @@ class NegamaxAgent(Agent):
         self.ordering = ordering
         self.transposition = transposition
         self.deepening = deepening
+        self.scouting = scouting
         self._table = transposition.start() if transposition.persistent else None
         # Only a random base order consumes it, and it is kept rather than drawn from
         # `self._rng` so that the same position always produces the same tree.
@@ -182,6 +201,8 @@ class NegamaxAgent(Agent):
             suffix += f"-{transposition.name}"
         if deepening != DIRECT:
             suffix += f"-{deepening.name}"
+        if scouting != SCOUT:
+            suffix += f"-{scouting.name}"
         self.name = f"{'alphabeta' if pruning else 'negamax'}-d{depth}{suffix}"
 
     def new_game(self, seed: int | None = None) -> None:
@@ -290,14 +311,34 @@ class NegamaxAgent(Agent):
         so the only two things that can reorder it are `pv_move` and, once it has been
         carried over from an earlier iteration, the history table. Both are Phase 9's, and
         both are switches.
+
+        Phase 10 scouts here too, and this is where its central claim lives: the first
+        move is searched with the full window and fixes `alpha` at the exact value, every
+        later move is asked only whether it beats that, and a move that fails low comes
+        back at most `alpha` -- which never clears the **strict** improvement the line
+        below requires. So the column that gets played is the one alpha-beta played.
         """
         alpha, beta = _BEYOND_LOSS, _BEYOND_WIN
         best_value = _BEYOND_LOSS
         best_move = None
-        for col in order.columns(board, 0, pv_move):
+        scouting = self.pruning and self.scouting.scouts(depth)
+        for index, col in enumerate(order.columns(board, 0, pv_move)):
             board.play(col)
             stats.nodes += 1
-            value = -self._negamax(board, order, table, depth - 1, 1, -beta, -alpha, stats)
+            scouted = scouting and index > 0 and alpha + 1 < beta
+            value = -self._negamax(
+                board, order, table, depth - 1, 1,
+                -(alpha + 1) if scouted else -beta, -alpha, stats,
+            )
+            if scouted:
+                stats.scout_searches += 1
+                if alpha < value < beta:
+                    stats.researches += 1
+                    stats.nodes += 1
+                    value = -self._negamax(
+                        board, order, table, depth - 1, 1, -beta,
+                        -(value if self.scouting.narrow else alpha), stats,
+                    )
             board.undo()
             if value > best_value:
                 best_value, best_move = value, col
@@ -367,10 +408,35 @@ class NegamaxAgent(Agent):
         columns = order.columns(board, ply, tt_move)
         promoted = order.promoted  # bound now: recursing will overwrite it
         from_table = order.tt_promoted
+        scouting = self.pruning and self.scouting.scouts(depth)
+        narrow = self.scouting.narrow
         for index, col in enumerate(columns):
             board.play(col)
             stats.nodes += 1
-            value = -self._negamax(board, order, table, depth - 1, ply + 1, -beta, -alpha, stats)
+            # The first move is asked what this node is worth and needs the real window
+            # to answer. Every later one is only asked whether it beats `alpha`, and
+            # `(alpha, alpha + 1)` is the narrowest window that can put that question --
+            # no integer value sits strictly inside it, so the search cannot come back
+            # undecided. With scouting off this expression is `beta` at every move, which
+            # is Phase 9's search unchanged.
+            scouted = scouting and index > 0 and alpha + 1 < beta
+            value = -self._negamax(
+                board, order, table, depth - 1, ply + 1,
+                -(alpha + 1) if scouted else -beta, -alpha, stats,
+            )
+            if scouted:
+                stats.scout_searches += 1
+                if alpha < value < beta:
+                    # The scout was wrong: this move may be better, and a null window
+                    # cannot say by how much. `value` is a fail-soft *lower* bound on the
+                    # move's true value, so re-searching from it rather than from `alpha`
+                    # cannot lose the answer -- see `search/scouting.py`.
+                    stats.researches += 1
+                    stats.nodes += 1
+                    value = -self._negamax(
+                        board, order, table, depth - 1, ply + 1, -beta,
+                        -(value if narrow else alpha), stats,
+                    )
             board.undo()
             if value > best:
                 best = value

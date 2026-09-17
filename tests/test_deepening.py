@@ -35,6 +35,7 @@ from helpers import random_position
 from search.deepening import DIRECT, EVEN, ITERATIVE, NAIVE, Deepening
 from search.evaluation import DEFAULT
 from search.ordering import DYNAMIC
+from search.scouting import NO_SCOUT
 from search.stats import Budget, SearchStats
 from search.transposition import NO_TABLE, TABLE
 
@@ -392,10 +393,16 @@ def test_the_transposition_move_finally_does_the_ordering():
     exactly the depth needed and *answers* the node instead of ordering it -- the table
     move caused 0.63% of cutoffs. Iterating breaks that: the same key now carries
     different depths on different iterations, so a shallow entry can order a deep search.
+
+    Pinned at `scouting=NO_SCOUT`, the configuration Phase 9 measured. Phase 10 loosens
+    the "every hit answers the node" half of the argument by a second route -- a
+    null-window node can never store an EXACT value -- and that is measured there.
     """
     board = Bitboard.from_move_string("4455")
-    direct = NegamaxAgent(7, evaluation=DEFAULT).choose_move(board)[1]
-    iterative = NegamaxAgent(7, evaluation=DEFAULT, deepening=ITERATIVE).choose_move(board)[1]
+    direct = NegamaxAgent(7, evaluation=DEFAULT, scouting=NO_SCOUT).choose_move(board)[1]
+    iterative = NegamaxAgent(
+        7, evaluation=DEFAULT, deepening=ITERATIVE, scouting=NO_SCOUT
+    ).choose_move(board)[1]
     assert direct.tt_move_cutoffs / direct.cutoffs < 0.05
     assert iterative.tt_move_cutoffs / iterative.cutoffs > 0.20
     # and the killers give up the share the table move takes

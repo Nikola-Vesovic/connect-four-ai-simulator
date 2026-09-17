@@ -46,6 +46,7 @@ from session import (
     Session,
 )
 from search.deepening import DIRECT, ITERATIVE
+from search.scouting import NO_SCOUT, SCOUT
 from search.stats import UNLIMITED, Budget
 from search.transposition import NO_TABLE, TABLE
 
@@ -222,6 +223,35 @@ def test_the_deepening_switch_reaches_the_agent_and_is_named_there():
     assert not machine("negamax", deepening=False).deepens
     assert not machine("minimax").can_deepen
     assert not machine("greedy").can_deepen
+
+
+def test_the_scouting_switch_reaches_the_agent_and_is_named_there():
+    """Phase 10's checkbox. It sides with the ordering rather than with the table: a null
+    window is a pruning window, so with alpha-beta off there is nothing for it to do and
+    the agent ignores it -- which is what the panel says by greying it out.
+
+    It is also the first switch since Phase 8 that does not touch the depth cap. NegaScout
+    can only make a search cheaper, so it is priced by the rung it shares with the search
+    without it, and the ladder stays conservative.
+    """
+    assert ALGORITHMS["negamax"].uses_scouting
+    assert not ALGORITHMS["minimax"].uses_scouting
+    assert machine(scouting=True).build().scouting is SCOUT
+    assert machine(scouting=False).build().scouting is NO_SCOUT
+    assert machine(scouting=False).build().name.endswith("-no_scout")
+    assert "scout" not in machine(scouting=True).build().name
+
+    assert not machine("negamax", pruning=False, scouting=True).can_scout
+    assert not machine("negamax", pruning=False, scouting=True).scouts
+    assert machine("negamax", pruning=True, scouting=False).can_scout  # still clickable
+    assert not machine("negamax", pruning=True, scouting=False).scouts
+    assert not machine("minimax").can_scout
+
+    for depth in range(1, MAX_DEPTH_TABLE + 1):
+        with_scout = machine(depth=depth, scouting=True)
+        without = machine(depth=depth, scouting=False)
+        assert with_scout.max_depth == without.max_depth
+        assert with_scout.estimated_seconds == without.estimated_seconds
 
 
 def test_the_clock_replaces_the_depth_cap_rather_than_extending_it():

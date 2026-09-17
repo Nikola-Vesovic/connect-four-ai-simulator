@@ -47,6 +47,13 @@ bound the depth and measure what that costs. An iterative search can be stopped,
 bound becomes the budget and the depth stops being a setting at all: the fourth checkbox
 greys the depth control out, releases the cap, and puts the depth *reached* in the panel
 as a result. It is also the only switch in the window that makes the worst case smaller.
+
+**Phase 10 does not extend the ladder either, and for the opposite reason to Phase 9's.**
+NegaScout only ever makes a search cheaper at the depths the slider offers, so a
+configuration with it switched on is priced by the rung it shares with the configuration
+without it. That keeps the tables at four and the promise the panel makes conservative --
+the quoted worst case is one the search can no longer actually incur -- which is the
+direction the ladder has always had to approximate in.
 """
 
 from __future__ import annotations
@@ -66,6 +73,7 @@ from core.types import GameResult, Move, Player
 from search.deepening import DIRECT, ITERATIVE, Deepening
 from search.evaluation import DEFAULT, ZERO, Evaluation
 from search.ordering import DYNAMIC, STATIC, Ordering
+from search.scouting import NO_SCOUT, SCOUT, Scout
 from search.stats import UNLIMITED, Budget, SearchStats
 from search.transposition import NO_TABLE, TABLE, Transposition
 
@@ -136,6 +144,7 @@ class AlgorithmSpec:
     uses_ordering: bool = False
     uses_transposition: bool = False
     uses_deepening: bool = False
+    uses_scouting: bool = False
     uses_evaluation: bool = False
 
 
@@ -160,6 +169,7 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
             ordering=spec.ordering,
             transposition=spec.transposition_spec,
             deepening=spec.deepening_spec,
+            scouting=spec.scouting_spec,
             seed=seed,
         ),
         uses_depth=True,
@@ -167,6 +177,7 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
         uses_ordering=True,
         uses_transposition=True,
         uses_deepening=True,
+        uses_scouting=True,
         uses_evaluation=True,
     ),
 }
@@ -185,6 +196,7 @@ class SeatSpec:
     move_ordering: bool = True
     transposition: bool = True
     deepening: bool = False
+    scouting: bool = True
     time_budget: float = 1.0
     threats: bool = True
     center: bool = True
@@ -275,6 +287,32 @@ class SeatSpec:
     @property
     def deepening_spec(self) -> Deepening:
         return ITERATIVE if self.deepening else DIRECT
+
+    @property
+    def can_scout(self) -> bool:
+        """Whether the NegaScout switch means anything here -- regardless of its value.
+
+        This one sides with `can_order` rather than with `can_transpose`: a null window is
+        a *pruning* window, so with pruning off there is nothing for it to do, and the
+        agent ignores the setting entirely in that case. Greying it out is therefore an
+        honest description of what the search will do and not a matter of taste.
+        """
+        return self.spec.uses_scouting and self.prunes
+
+    @property
+    def scouts(self) -> bool:
+        """Whether null-window scouting is actually in effect -- the two-property split
+        every optimisation since Phase 7 has needed.
+
+        Unlike its three predecessors this one feeds no depth cap: NegaScout is priced by
+        the rung it shares with the configuration without it, because it can only make a
+        search cheaper and the ladder must never quote a cost below what can be incurred.
+        """
+        return self.can_scout and self.scouting
+
+    @property
+    def scouting_spec(self) -> Scout:
+        return SCOUT if self.scouting else NO_SCOUT
 
     @property
     def budget(self) -> Budget:

@@ -226,6 +226,49 @@ def test_the_ordering_checkbox_is_dead_while_pruning_is_off(game: Game):
     assert game.session.seats[1].move_ordering == before
 
 
+def test_the_negascout_checkbox_needs_alpha_beta_and_leaves_the_depth_cap_alone(game: Game):
+    """Phase 10's checkbox, and it behaves like the ordering one rather than the table
+    one: a null window is a pruning window, so with alpha-beta off it is greyed out.
+
+    It is the first optimisation switch that does not lengthen the depth slider. NegaScout
+    only makes a search cheaper, so it is priced by the rung it shares with the search
+    without it -- the ladder must never quote a cost the search can actually exceed, and
+    over-quoting is the safe direction.
+    """
+    place = config.seat_layout(1)
+    game.session.set_seat(1, replace(game.session.seats[1], controller=Controller.MACHINE))
+    box = next(w for w in game.widgets
+               if getattr(w, "label", None) == "negascout" and w.rect.x == place.inner_x)
+
+    assert game.session.seats[1].scouting is True
+    ceiling = game.session.seats[1].max_depth
+    assert box.click(box.rect.center) is True
+    assert game.session.seats[1].scouting is False
+    assert game.session.seats[1].max_depth == ceiling
+    assert box.click(box.rect.center) is True
+    assert game.session.seats[1].scouting is True
+
+    game.session.set_seat(1, replace(game.session.seats[1], pruning=False))
+    before = game.session.seats[1].scouting
+    assert box.click(box.rect.center) is False, "it must be dead with pruning off"
+    assert game.session.seats[1].scouting == before
+
+
+def test_the_panel_reports_the_re_search_rate_after_a_scouted_move(game: Game):
+    """The bet the algorithm makes is on the screen, not only in a CSV: the share of
+    null-window searches that had to be run again. It is the one line in the panel where
+    a smaller number is the better one."""
+    game.session.set_seat(1, replace(
+        game.session.seats[1], controller=Controller.MACHINE, depth=6, scouting=True
+    ))
+    game.session.commit(3, None)  # seat 1 to move
+    move, stats = game.session.plan()
+    game.session.commit(move, stats)
+    assert stats.scout_searches > 0
+    assert 0.0 <= stats.research_rate < 1.0
+    game.draw()  # the line is drawn from those counters; this is where a formatting bug shows
+
+
 def test_a_disabled_control_ignores_its_click(game: Game):
     """Seat 0 is a human, so its depth spinner must not do anything."""
     place = config.seat_layout(0)
