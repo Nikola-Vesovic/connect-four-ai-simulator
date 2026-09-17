@@ -31,6 +31,7 @@ from core.board_naive import NaiveBoard
 from core.types import Score
 from experiments import reference
 from helpers import random_position, safe_columns, winning_columns
+from search.deepening import DIRECT, ITERATIVE
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC
 from search.stats import Budget
@@ -171,22 +172,32 @@ def test_the_empty_board_tree_is_the_size_it_was_measured_to_be():
     empty board is the most symmetric position on the board, which is exactly where the
     same position is reachable by the most different move orders, so it is where a
     transposition table has the most to find. It wins at every depth from 4.
+
+    The fourth row is Phase 9's, and it is the first row that is *worse than the one above
+    it on purpose*. Iterating to depth d searches depths 1..d, and what the shallow
+    iterations buy back -- a root move, killer slots, history counts and table entries for
+    the very tree about to be searched -- does not cover the re-search at these depths. It
+    starts to at depth 11 on this position (`deepening_on_empty_board.csv`), and the
+    purpose of the algorithm is not to be cheaper anyway: it is to be stoppable.
     """
     phase6 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (181, 59), 5: (819, 139), 6: (1526, 491)}
     phase7 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (180, 59), 5: (850, 148), 6: (1514, 468)}
     phase8 = {1: (7, 0), 2: (20, 6), 3: (81, 11), 4: (170, 49), 5: (695, 121), 6: (1127, 277)}
+    phase9 = {1: (7, 0), 2: (27, 6), 3: (108, 17), 4: (278, 67), 5: (877, 171), 6: (2004, 456)}
 
-    for ordering, table, expected in (
-        (STATIC, NO_TABLE, phase6),
-        (DYNAMIC, NO_TABLE, phase7),
-        (DYNAMIC, TABLE, phase8),
+    for ordering, table, deepening, expected in (
+        (STATIC, NO_TABLE, DIRECT, phase6),
+        (DYNAMIC, NO_TABLE, DIRECT, phase7),
+        (DYNAMIC, TABLE, DIRECT, phase8),
+        (DYNAMIC, TABLE, ITERATIVE, phase9),
     ):
         for depth, (nodes, cutoffs) in expected.items():
             _, stats = NegamaxAgent(
-                depth, evaluation=DEFAULT, ordering=ordering, transposition=table
+                depth, evaluation=DEFAULT, ordering=ordering, transposition=table,
+                deepening=deepening,
             ).choose_move(Bitboard())
             assert (stats.nodes, stats.cutoffs) == (nodes, cutoffs), (
-                f"{ordering.name}/{table.name} at depth {depth}"
+                f"{ordering.name}/{table.name}/{deepening.name} at depth {depth}"
             )
 
 

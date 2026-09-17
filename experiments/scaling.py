@@ -65,8 +65,10 @@ from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
 from experiments import reference
 from experiments.match import Tally, play_match
+from search.deepening import DIRECT, EVEN, ITERATIVE, NAIVE, Deepening
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC, Ordering
+from search.stats import Budget
 from search.transposition import ARRAY, NO_TABLE, PERSISTENT, TABLE, WRITE_ONLY, Transposition
 
 RESULTS = Path(__file__).resolve().parent.parent / "data" / "results"
@@ -81,6 +83,10 @@ DENSITY_CSV = RESULTS / "transposition_density.csv"
 TABLE_CSV = RESULTS / "transposition_by_position.csv"
 TABLE_EMPTY_CSV = RESULTS / "transposition_on_empty_board.csv"
 TABLE_GAMES_CSV = RESULTS / "transposition_by_game.csv"
+DEEPENING_CSV = RESULTS / "deepening_by_position.csv"
+DEEPENING_EMPTY_CSV = RESULTS / "deepening_on_empty_board.csv"
+DEEPENING_GAMES_CSV = RESULTS / "deepening_by_game.csv"
+DEEPENING_CLOCK_CSV = RESULTS / "deepening_under_a_clock.csv"
 
 # The tables compared. The first is Phase 7's search and every gain is quoted against it.
 # `write_only` is the controlled experiment: it keeps the table exactly as the real one
@@ -119,6 +125,21 @@ ORDERINGS: tuple[Ordering, ...] = (
 # The ordering every Phase 6 node count was measured under, kept as the CSV label it was
 # written with so old and new result files line up.
 ORDERING = STATIC.name
+
+# The deepening settings compared. The first is Phase 8's search and every gain is quoted
+# against it. The two in the middle take the carried state apart: the root principal
+# variation on its own, and the killer/history tables on their own, so the bundle is never
+# presented as if each half contributed what the pair does. `naive` carries neither and is
+# the control that cannot change the move played.
+PV_ONLY = Deepening(enabled=True, root_pv=True, share_order=False)
+ORDER_ONLY = Deepening(enabled=True, root_pv=False, share_order=True)
+DEEPENINGS: tuple[Deepening, ...] = (DIRECT, NAIVE, PV_ONLY, ORDER_ONLY, ITERATIVE, EVEN)
+
+# The budget every node count before Phase 9 was measured under. It is the fourth column
+# thesis point P10 now requires beside the evaluation, the ordering and the table: a
+# search that stops on a clock has a node count that depends on the machine, so every
+# number in these files is produced by a depth budget and says so.
+BUDGET = "depth"
 
 
 def standard_error(tally: Tally) -> float:
@@ -855,9 +876,328 @@ def transposition_by_game(depth: int, games: int, seed: int, opening_plies: int)
     return rows
 
 
+def _deepening_row(stats, spec: Deepening) -> dict:
+    """The counters iterative deepening adds, kept apart from the node count for the same
+    reason Phase 7 kept the ordering quality apart from it: how deep a search got and how
+    much it spent are different questions, and under a clock the first one is the result."""
+    return {
+        "iterations": stats.iterations,
+        "depth_reached": stats.depth,
+        "aborted": stats.aborted,
+    }
+
+
+def deepening_by_position(depths: tuple[int, ...]) -> list[dict]:
+    """The gate of Phase 9 over the 200 frozen reference positions.
+
+    Every value is checked against the stored one as it goes, so the sweep is the
+    measurement and the correctness check at once -- the same arrangement Phase 8 used,
+    and it has more to prove here. Iterative deepening is the first optimisation in this
+    project that is allowed to change the *move*, so the value contract is the only thing
+    left holding it: an iteration that completed at depth d must return exactly the value
+    a direct depth-d search returns, and `changed_move` counts, rather than hides, the
+    cases where a different column of equal value came back.
+
+    `even` answers from depth d-1 when d is odd, so it is checked against the reference
+    record for the depth it actually answered from. Comparing it against depth d would be
+    comparing it against a question it deliberately declined to answer.
+    """
+    data = reference.load()
+    values = {(r["moves"], r["depth"]): r["value"] for r in data["records"]}
+    rows = []
+    for depth in depths:
+        records = [record for record in data["records"] if record["depth"] == depth]
+        baseline = baseline_seconds = None
+        baseline_moves: list = []
+        for spec in DEEPENINGS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                deepening=spec, seed=2026,
+            )
+            answer_depth = depth if spec.answers(depth) else depth - 1
+            total: dict = {}
+            seconds = 0.0
+            chosen, reached, aborted = [], [], 0
+            for record in records:
+                board = Bitboard.from_move_string(record["moves"])
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                assert stats.value == values[(record["moves"], answer_depth)], (
+                    f"{spec.name} at depth {depth} changed the value of {record['moves']!r}"
+                )
+                assert stats.depth == answer_depth, f"{spec.name} answered from {stats.depth}"
+                _accumulate(total, stats)
+                chosen.append(move)
+                reached.append(stats.depth)
+                aborted += stats.aborted
+            nodes, cutoffs = total["nodes"], total["cutoffs"]
+            if baseline is None:
+                baseline, baseline_seconds, baseline_moves = nodes, seconds, chosen
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": TABLE.name,
+                    "deepening": spec.name,
+                    "budget": BUDGET,
+                    "positions": len(records),
+                    "nodes": nodes,
+                    "leaves": total["leaves"],
+                    "cutoffs": cutoffs,
+                    "gain": round(baseline / nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "ebf": round((nodes / len(records)) ** (1 / depth), 4),
+                    "changed_move": sum(a != b for a, b in zip(chosen, baseline_moves)),
+                    "answer_depth": answer_depth,
+                    "aborted": aborted,
+                    "first_cutoff_rate": round(total["first_cutoffs"] / cutoffs, 4),
+                    "mean_cut_index": round(total["cut_index_total"] / cutoffs, 3),
+                    "killer_cutoff_rate": round(total["killer_cutoffs"] / cutoffs, 4),
+                    "tt_move_cutoff_rate": round(total["tt_move_cutoffs"] / cutoffs, 4),
+                    **_table_row(_Totals(total), TABLE),
+                    "seconds": round(seconds, 2),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth}  {spec.name:<26} {nodes:>10,} nodes  {row['gain']:>5}x  "
+                f"first-cut {row['first_cutoff_rate']:>6.1%}  "
+                f"killer-cut {row['killer_cutoff_rate']:>6.1%}  "
+                f"tt-cut {row['tt_move_cutoff_rate']:>6.1%}  "
+                f"moved differently {row['changed_move']:>3}/{len(records)}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def deepening_on_empty_board(depths: tuple[int, ...]) -> list[dict]:
+    """The one position where the surcharge can be stated as an identity.
+
+    With the transposition table switched off, `naive` carries nothing at all between
+    iterations, so its node count must be *exactly* the sum of the separate searches at
+    depths 1..d. That is asserted here rather than assumed, which turns the textbook
+    "about b/(b-1) extra work" into a number that can be wrong.
+    """
+    rows = []
+    for depth in depths:
+        # The identity, computed the slow honest way: d separate searches, added up. The
+        # table has to be off on BOTH sides of this ratio or it is not the surcharge of
+        # iterating -- it is the surcharge of iterating minus what the shared table gives
+        # back, which is a different quantity and belongs in the `gain` column.
+        separate = sum(
+            NegamaxAgent(
+                k, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026
+            ).choose_move(Bitboard())[1].nodes
+            for k in range(1, depth + 1)
+        )
+        direct_untabled = NegamaxAgent(
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE, seed=2026
+        ).choose_move(Bitboard())[1].nodes
+        untabled = NegamaxAgent(
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=NO_TABLE,
+            deepening=NAIVE, seed=2026,
+        ).choose_move(Bitboard())[1]
+        assert untabled.nodes == separate, (
+            f"naive/no_table at depth {depth}: {untabled.nodes} != {separate}"
+        )
+
+        baseline = baseline_seconds = None
+        baseline_move = None
+        for spec in DEEPENINGS:
+            agent = NegamaxAgent(
+                depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                deepening=spec, seed=2026,
+            )
+            started = time.perf_counter()
+            move, stats = agent.choose_move(Bitboard())
+            seconds = time.perf_counter() - started
+            if baseline is None:
+                baseline, baseline_seconds, baseline_move = stats.nodes, seconds, move
+            rows.append(
+                {
+                    "depth": depth,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": TABLE.name,
+                    "deepening": spec.name,
+                    "budget": BUDGET,
+                    "nodes": stats.nodes,
+                    "leaves": stats.leaves,
+                    "cutoffs": stats.cutoffs,
+                    "gain": round(baseline / stats.nodes, 3),
+                    "time_gain": round(baseline_seconds / seconds, 3),
+                    "separate_searches": separate,
+                    "direct_no_table": direct_untabled,
+                    "surcharge_no_table": round(separate / direct_untabled, 3),
+                    "changed_move": int(move != baseline_move),
+                    "first_cutoff_rate": round(stats.first_cutoff_rate, 4),
+                    "killer_cutoff_rate": round(
+                        stats.killer_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    "tt_move_cutoff_rate": round(
+                        stats.tt_move_cutoffs / stats.cutoffs if stats.cutoffs else 0.0, 4
+                    ),
+                    **_table_row(stats, TABLE),
+                    **_deepening_row(stats, spec),
+                    "value": stats.value,
+                    "seconds": round(seconds, 3),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"depth {depth:>2}  {spec.name:<26} {stats.nodes:>10,} nodes  "
+                f"{row['gain']:>5}x  tt-cut {row['tt_move_cutoff_rate']:>6.1%}  "
+                f"killer-cut {row['killer_cutoff_rate']:>6.1%}  "
+                f"answered from {stats.depth:>2}  {seconds:7.2f}s",
+                flush=True,
+            )
+        print(f"           separate searches 1..{depth}, no table: {separate:,} "
+              f"= {separate / direct_untabled:.3f}x the untabled direct search "
+              f"({direct_untabled:,})\n")
+    return rows
+
+
+def deepening_by_game(depth: int, games: int, seed: int, opening_plies: int) -> list[dict]:
+    """The third view, as in Phases 7 and 8: whole games rather than isolated positions.
+
+    This is also where the move change becomes visible as something other than a counter.
+    Every phase so far has ended with "all settings played exactly the same moves"; this
+    one cannot, and `same_games` is the field that says so.
+    """
+    rng = random.Random(seed)
+    openings = [[rng.randrange(7) for _ in range(opening_plies)] for _ in range(games)]
+    rows = []
+    baseline = baseline_seconds = None
+    baseline_games: list = []
+    for spec in DEEPENINGS:
+        agent = NegamaxAgent(
+            depth, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+            deepening=spec, seed=seed,
+        )
+        total: dict = {}
+        seconds = 0.0
+        plies = 0
+        played = []
+        for game, opening in enumerate(openings):
+            agent.new_game(seed + game)
+            board = Bitboard()
+            for col in opening:
+                if board.is_terminal() or not board.can_play(col):
+                    break
+                board.play(col)
+            while not board.is_terminal():
+                started = time.perf_counter()
+                move, stats = agent.choose_move(board)
+                seconds += time.perf_counter() - started
+                _accumulate(total, stats)
+                plies += 1
+                board.play(move)
+            played.append("".join(str(col + 1) for col in board.history))
+        nodes, cutoffs = total["nodes"], total["cutoffs"]
+        if baseline is None:
+            baseline, baseline_seconds, baseline_games = nodes, seconds, played
+        rows.append(
+            {
+                "depth": depth,
+                "evaluation": DEFAULT.name,
+                "ordering": DYNAMIC.name,
+                "transposition": TABLE.name,
+                "deepening": spec.name,
+                "budget": BUDGET,
+                "games": games,
+                "opening_plies": opening_plies,
+                "moves": plies,
+                "same_games": played == baseline_games,
+                "games_that_differ": sum(a != b for a, b in zip(played, baseline_games)),
+                "nodes": nodes,
+                "nodes_per_move": round(nodes / plies, 1),
+                "cutoffs": cutoffs,
+                "gain": round(baseline / nodes, 3),
+                "time_gain": round(baseline_seconds / seconds, 3),
+                "first_cutoff_rate": round(total["first_cutoffs"] / cutoffs, 4),
+                "killer_cutoff_rate": round(total["killer_cutoffs"] / cutoffs, 4),
+                "tt_move_cutoff_rate": round(total["tt_move_cutoffs"] / cutoffs, 4),
+                **_table_row(_Totals(total), TABLE),
+                "seconds": round(seconds, 2),
+                "seconds_per_move": round(seconds / plies, 4),
+            }
+        )
+        row = rows[-1]
+        print(
+            f"{spec.name:<26} {nodes:>11,} nodes over {plies} moves  {row['gain']:>5}x  "
+            f"tt-cut {row['tt_move_cutoff_rate']:>6.1%}  "
+            f"games differing {row['games_that_differ']}/{games}  {seconds:7.2f}s",
+            flush=True,
+        )
+    return rows
+
+
+def deepening_under_a_clock(budgets: tuple[float, ...], positions: int) -> list[dict]:
+    """The only measurement in this project that a clock is allowed to produce.
+
+    Everything else is budgeted by depth or by nodes precisely so that it reproduces. What
+    is being measured here *is* the clock: whether the budget is honoured, and how deep a
+    search gets inside it. The overshoot is reported rather than asserted -- an assertion
+    would turn a loaded machine into a failing test, and the number itself is the result.
+
+    The depth column is the point of the whole phase. It is not a setting any more.
+    """
+    sample = [Bitboard()] + [
+        Bitboard.from_move_string(moves)
+        for moves in reference.sample_positions(positions, seed=2026)[1:]
+    ]
+    rows = []
+    for budget in budgets:
+        for spec in (ITERATIVE, EVEN):
+            agent = NegamaxAgent(
+                42, ordering=DYNAMIC, evaluation=DEFAULT, transposition=TABLE,
+                deepening=spec, seed=2026,
+            )
+            over, depths, nodes, aborted = [], [], 0, 0
+            for board in sample:
+                _, stats = agent.choose_move(board, Budget(time=budget))
+                over.append(stats.elapsed - budget)
+                depths.append(stats.depth)
+                nodes += stats.nodes
+                aborted += stats.aborted
+            rows.append(
+                {
+                    "budget_seconds": budget,
+                    "evaluation": DEFAULT.name,
+                    "ordering": DYNAMIC.name,
+                    "transposition": TABLE.name,
+                    "deepening": spec.name,
+                    "budget": "time",
+                    "positions": len(sample),
+                    "worst_overshoot_ms": round(max(over) * 1000, 3),
+                    "worst_overshoot_share": round(max(over) / budget, 5),
+                    "mean_overshoot_ms": round(sum(over) / len(over) * 1000, 3),
+                    "exceeded": sum(value > 0 for value in over),
+                    "min_depth": min(depths),
+                    "median_depth": sorted(depths)[len(depths) // 2],
+                    "max_depth": max(depths),
+                    "aborted": aborted,
+                    "nodes": nodes,
+                }
+            )
+            row = rows[-1]
+            print(
+                f"budget {budget:>6}s  {spec.name:<26} worst overshoot "
+                f"{row['worst_overshoot_ms']:>+8.2f} ms ({row['worst_overshoot_share']:>+7.2%})"
+                f"  depth {row['min_depth']:>2}-{row['max_depth']:>2} "
+                f"(median {row['median_depth']:>2})  aborted {aborted}/{len(sample)}",
+                flush=True,
+            )
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--nodes", action="store_true")
+
     parser.add_argument("--curve", action="store_true")
     parser.add_argument("--pruning", action="store_true")
     parser.add_argument("--positions", action="store_true")
@@ -867,6 +1207,10 @@ def main() -> None:
     parser.add_argument("--table", action="store_true")
     parser.add_argument("--table-empty", action="store_true")
     parser.add_argument("--table-games", action="store_true")
+    parser.add_argument("--deepening", action="store_true")
+    parser.add_argument("--deepening-empty", action="store_true")
+    parser.add_argument("--deepening-games", action="store_true")
+    parser.add_argument("--deepening-clock", action="store_true")
     parser.add_argument("--max-depth", type=int, default=8)
     parser.add_argument("--timed-depth", type=int, default=6)
     parser.add_argument("--unpruned-depth", type=int, default=8)
@@ -922,6 +1266,22 @@ def main() -> None:
                 6, games=10, seed=args.seed, opening_plies=args.opening_plies
             ),
             TABLE_GAMES_CSV,
+        )
+    if args.deepening:
+        write(deepening_by_position((4, 5, 6, 7)), DEEPENING_CSV)
+    if args.deepening_empty:
+        write(deepening_on_empty_board((4, 5, 6, 7, 8, 9, 10, 11, 12)), DEEPENING_EMPTY_CSV)
+    if args.deepening_games:
+        write(
+            deepening_by_game(
+                6, games=10, seed=args.seed, opening_plies=args.opening_plies
+            ),
+            DEEPENING_GAMES_CSV,
+        )
+    if args.deepening_clock:
+        write(
+            deepening_under_a_clock((0.02, 0.05, 0.1, 0.25, 0.5, 1.0), positions=25),
+            DEEPENING_CLOCK_CSV,
         )
 
 

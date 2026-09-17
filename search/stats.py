@@ -25,6 +25,14 @@ class Budget:
     signature of `choose_move` must never change again: node budgets are the primary
     measurement axis (BUILD_PLAN 6.1), depth is what a fixed-depth minimax takes, and
     time is the only honest common currency between alpha-beta and MCTS.
+
+    `nodes` and `time` did nothing at all until Phase 9, because a fixed-depth search has
+    no answer to give until it finishes and so cannot be stopped part way. An iterative
+    one always holds the previous iteration's answer, which is what makes either of them
+    enforceable. The two are not interchangeable: **a node budget aborts at the same node
+    every time and a time budget does not**, so every pinned number in this thesis comes
+    from `nodes` or `depth` and `time` is used only where time is the quantity being
+    measured.
     """
 
     nodes: int | None = None
@@ -62,6 +70,20 @@ class SearchStats:
     elapsed: float = 0.0  # seconds, filled in by Agent.choose_move
     move: Move | None = None
     value: int | None = None  # root score on the core.types.Score scale
+
+    # ------------------------------------------------------------- iterative deepening
+    #
+    # Phase 9. `depth` stops being a setting and becomes a result: it is the depth of the
+    # iteration the answer came from, which under a clock is whatever fitted. `depth_cap`
+    # is what was allowed, so the pair says how much of the budget the position used.
+    #
+    # `aborted` is the honest half of a time budget. An iteration that ran out of time
+    # contributes nothing -- its partial root score is discarded -- so this flag is the
+    # only trace it leaves, and without it a search that stopped early is indistinguishable
+    # from one that simply finished.
+    iterations: int = 0  # iterations that completed
+    depth_cap: int = 0  # the deepest iteration that was allowed
+    aborted: bool = False  # an iteration was cut off by the budget and thrown away
 
     # --------------------------------------------------------------- ordering quality
     #

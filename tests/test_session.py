@@ -30,6 +30,7 @@ from core.types import EMPTY, GameResult, Player
 from session import (
     ALGORITHM_KEYS,
     ALGORITHMS,
+    MAX_DEPTH_DEEPENING,
     MAX_DEPTH_ORDERED,
     MAX_DEPTH_PRUNED,
     MAX_DEPTH_TABLE,
@@ -38,11 +39,14 @@ from session import (
     ORDERED_WORST_SECONDS,
     PRUNED_WORST_SECONDS,
     TABLE_WORST_SECONDS,
+    TIME_BUDGETS,
     UNPRUNED_WORST_SECONDS,
     Controller,
     SeatSpec,
     Session,
 )
+from search.deepening import DIRECT, ITERATIVE
+from search.stats import UNLIMITED, Budget
 from search.transposition import NO_TABLE, TABLE
 
 HUMAN = SeatSpec(controller=Controller.HUMAN)
@@ -203,6 +207,62 @@ def test_the_transposition_switch_reaches_the_agent_and_is_named_there():
     assert machine(transposition=False).build().transposition is NO_TABLE
     assert machine(transposition=False).build().name.endswith("-no_table")
     assert "no_table" not in machine(transposition=True).build().name
+
+
+def test_the_deepening_switch_reaches_the_agent_and_is_named_there():
+    assert machine(deepening=True).build().deepening is ITERATIVE
+    assert machine(deepening=False).build().deepening is DIRECT
+    assert machine(deepening=True).build().name.endswith("-iterative+pv+order")
+    assert "iterative" not in machine(deepening=False).build().name
+
+    # Like the table and unlike the ordering, it does not need pruning to mean something.
+    assert machine("negamax", pruning=False, deepening=True).can_deepen
+    assert machine("negamax", pruning=False, deepening=True).deepens
+    assert machine("negamax", deepening=False).can_deepen  # still clickable when off
+    assert not machine("negamax", deepening=False).deepens
+    assert not machine("minimax").can_deepen
+    assert not machine("greedy").can_deepen
+
+
+def test_the_clock_replaces_the_depth_cap_rather_than_extending_it():
+    """The point of the phase, stated as a property of the interface.
+
+    Every other switch lengthens its own measured cost table, so the worst move the
+    window permits gets *bigger*. This one hands the bound to the budget: the depth is
+    released to the only ceiling the game itself has, and the quoted cost becomes the
+    number the user chose -- which is smaller than the deepest fixed-depth setting.
+    """
+    deep = machine(deepening=True, time_budget=1.0)
+    assert deep.max_depth == MAX_DEPTH_DEEPENING > MAX_DEPTH_TABLE
+    assert deep.estimated_seconds == 1.0
+    assert deep.estimated_seconds < TABLE_WORST_SECONDS[-1]
+    assert deep.budget == Budget(time=1.0)
+    assert machine(deepening=False).budget is UNLIMITED
+    for budget in TIME_BUDGETS:
+        assert replace(deep, time_budget=budget).estimated_seconds == budget
+
+
+def test_ticking_the_clock_raises_the_depth_and_unticking_puts_it_back():
+    """A stale depth would quietly break the promise the checkbox makes -- "as deep as
+    fits in the time" is not "as deep as the slider happened to be showing"."""
+    session = Session((HUMAN, machine(depth=6)))
+    stored = session.set_seat(1, machine(depth=6, deepening=True))
+    assert stored.depth == MAX_DEPTH_DEEPENING
+    stored = session.set_seat(1, replace(stored, deepening=False))
+    assert stored.depth == MAX_DEPTH_TABLE
+
+
+def test_a_seat_under_a_clock_is_asked_for_a_move_with_that_clock():
+    """`Session.plan()` with no argument has to hand the agent the seat's own budget, or
+    the switch would be visible in the panel and absent from the search."""
+    session = Session((machine(deepening=True, time_budget=0.1), HUMAN))
+    _, stats = session.plan()
+    assert stats.iterations > 1
+    assert stats.elapsed < 0.5
+    assert stats.depth_cap == MAX_DEPTH_DEEPENING
+    # An explicit budget still wins, which is what keeps `experiments/` authoritative.
+    _, capped = session.plan(Budget(depth=3))
+    assert capped.depth == 3
 
 
 def test_the_evaluation_switches_reach_the_agent():

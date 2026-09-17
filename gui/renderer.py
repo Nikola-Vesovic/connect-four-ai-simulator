@@ -246,7 +246,11 @@ class Renderer:
             colour = config.WARN
         else:
             colour = config.GOOD
-        self.text("izmereno najgore", config.FONT_SMALL, config.TEXT_MUTED, (x, middle))
+        # Under a clock this stops being an estimate: the search can be stopped, so the
+        # worst case of a move is the number the user picked rather than a measurement of
+        # the position. It is the one setting in the panel that lowers it.
+        label = "ograničenje" if spec.deepens else "izmereno najgore"
+        self.text(label, config.FONT_SMALL, config.TEXT_MUTED, (x, middle))
         self.text(seconds(estimate, 2), config.FONT_MONO, colour, (x + width, middle), right=True)
 
     def draw_last_move(self, view, index: int, place) -> None:
@@ -265,7 +269,15 @@ class Renderer:
         y = self.stat("kolona", str((stats.move or 0) + 1), x, y, width)
         y = self.stat("vrednost", "—" if stats.value is None else f"{stats.value:+d}",
                       x, y, width)
-        y = self.stat("dubina", str(stats.depth), x, y, width)
+        # From Phase 9 the depth is a *result* when the search was iterative: it is how
+        # deep the last completed iteration got inside the budget, not what was asked for.
+        # The iteration count is shown beside it so the difference is visible rather than
+        # implied.
+        y = self.stat("dubina",
+                      f"{stats.depth} (it. {stats.iterations})" if stats.iterations > 1
+                      else str(stats.depth),
+                      x, y, width,
+                      config.GOOD if stats.iterations > 1 else config.TEXT_MUTED)
         y = self.stat("čvorova", thousands(stats.nodes), x, y, width, config.TEXT)
         y = self.stat("odsecanja", thousands(stats.cutoffs), x, y, width,
                       config.GOOD if stats.cutoffs else config.TEXT_MUTED)

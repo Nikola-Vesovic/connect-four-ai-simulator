@@ -130,9 +130,17 @@ class MoveOrder:
     Deliberately per-search and thrown away afterwards. Carrying killers and history from
     one move to the next would make a search depend on which positions happened to be
     searched before it, and with that goes the property that a given position always
-    produces the same tree -- which every measurement in this thesis relies on. Phase 9
-    revisits it, because iterative deepening is the one place where handing the tables
-    from one iteration to the next is both standard and harmless.
+    produces the same tree -- which every measurement in this thesis relies on.
+
+    **Phase 9 revisits it and the sentence that used to be here was wrong.** It said that
+    handing the tables from one iteration of an iterative-deepening search to the next is
+    "both standard and harmless". Standard it is; harmless it is not. Measured against
+    carrying nothing, `share_order` is worth about 3% of nodes over the reference
+    positions at depth 7 and costs **39%** on the empty board at depth 10 (58,720 against
+    81,861), which is Phase 7's own finding repeating itself -- a learned order can only
+    perturb a centre-first order that is already nearly perfect on a symmetric position.
+    It is a switch (`search.deepening.Deepening.share_order`) rather than an assumption
+    for exactly that reason.
     """
 
     __slots__ = ("base", "rng", "use_killers", "use_history", "killers", "history",

@@ -37,7 +37,7 @@ from agents.base import Agent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
 from core.types import Score
-from search import evaluation, ordering, transposition
+from search import deepening, evaluation, ordering, transposition
 from search.evaluation import DEFAULT
 from search.transposition import NO_TABLE
 
@@ -75,6 +75,17 @@ TABLES: dict[str, transposition.Transposition] = {
         transposition.WRITE_ONLY,
         transposition.PERSISTENT,
     )
+}
+
+# Same idea for Phase 9, and here the flag earns its keep twice over. Iterative deepening
+# is the first setting in this project that may return a different one of several equally
+# good moves, so the value contract is the *only* thing left holding it -- and that is
+# what this file has enforced since Phase 5. `even` answers from depth d-1 when d is odd,
+# so it is deliberately not offered here: it would be checked against a question it
+# declined to answer. `experiments.scaling --deepening` compares it at the depth it
+# actually answered from.
+DEEPENINGS: dict[str, deepening.Deepening] = {
+    spec.name: spec for spec in (deepening.DIRECT, deepening.NAIVE, deepening.ITERATIVE)
 }
 
 # 200 positions get the cheap depths; the expensive ones go to a prefix of the same list,
@@ -224,6 +235,7 @@ def main() -> None:
     parser.add_argument("--agent", default="minimax", choices=sorted(SEARCHES))
     parser.add_argument("--ordering", default=None, choices=sorted(ORDERINGS))
     parser.add_argument("--table", default=None, choices=sorted(TABLES))
+    parser.add_argument("--deepening", default=None, choices=sorted(DEEPENINGS))
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--max-depth", type=int, default=None)
     args = parser.parse_args()
@@ -251,6 +263,14 @@ def main() -> None:
             factory = functools.partial(factory, transposition=TABLES[args.table])
             # A table changes which nodes are visited, so only the value stays comparable.
             check_nodes = check_nodes and not TABLES[args.table].enabled
+        if args.deepening is not None:
+            if args.agent == "minimax":
+                parser.error("minimax searches one fixed depth; it has nothing to iterate.")
+            spec = DEEPENINGS[args.deepening]
+            factory = functools.partial(factory, deepening=spec)
+            # Iterating searches depths 1..d, so the node count is a different number by
+            # construction. The value is not, and that is the whole gate.
+            check_nodes = check_nodes and not spec.enabled
         started = time.perf_counter()
         checked, wrong = verify(
             data,

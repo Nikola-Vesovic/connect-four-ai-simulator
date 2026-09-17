@@ -81,13 +81,33 @@ because each of them is a decision rather than a detail:
 * **The root never probes.** It needs a move rather than a value, and leaving it out keeps
   the root's move order the base order, which is what preserves the property tested since
   Phase 6: the optimisation checkboxes cannot change which column gets played.
+
+**Phase 9 adds iterative deepening**, and it is the first thing in this file that breaks
+that last sentence. See `search/deepening.py` for why the algorithm exists; three things
+about how it is wired in here:
+
+* **The answer is the last iteration that finished.** A budget can stop the search in the
+  middle of an iteration, and that iteration is thrown away whole -- root score, best move
+  and all. Keeping the best of the three root moves it managed to look at would be a value
+  no depth ever computed.
+* **The abort is an exception, and the cost of being able to abort is one integer
+  comparison per node.** `stats.nodes >= self._next_check` is `inf` when no budget is
+  live, so a depth-budgeted search pays a single predictable branch. When it does fire,
+  the node limit is checked exactly and the clock only every `_CLOCK_INTERVAL` nodes,
+  because reading a clock is the expensive half. The unwinding exception skips the
+  transposition store at the bottom of `_negamax`, which is exactly right -- `best` is
+  partial there -- and the root puts the board back by undoing to the ply it started at.
+* **Iteration 1 is uninterruptible**, so a legal move comes back however small the budget.
 """
 
 from __future__ import annotations
 
+import time
+
 from agents.base import Agent
 from core.rules import Board
 from core.types import Move, Score
+from search.deepening import DIRECT, Deepening
 from search.evaluation import DEFAULT, Evaluation
 from search.ordering import DYNAMIC, MoveOrder, Ordering
 from search.stats import Budget, SearchStats
@@ -106,6 +126,23 @@ from search.transposition import (
 _BEYOND_LOSS = Score.LOSS - 1
 _BEYOND_WIN = Score.WIN + 1
 
+# How often a budgeted search is allowed to read the clock, in nodes. A node budget is
+# checked exactly -- it is an integer comparison -- but `perf_counter` is not free, and
+# this is what bounds the overshoot: once the deadline passes, the search runs at most
+# this many more nodes before noticing. The number was chosen by measuring rather than
+# guessed: 2,048 nodes overshot a tenth of a second by 15 ms, and this does not.
+_CLOCK_INTERVAL = 64
+
+_NEVER = float("inf")
+
+
+class _OutOfBudget(Exception):
+    """Raised at the node where the budget ran out, caught by the iteration loop.
+
+    Carries nothing: everything the aborted iteration computed is discarded by
+    definition, so there is nothing for it to carry.
+    """
+
 
 class NegamaxAgent(Agent):
     def __init__(
@@ -116,6 +153,7 @@ class NegamaxAgent(Agent):
         evaluation: Evaluation = DEFAULT,
         ordering: Ordering = DYNAMIC,
         transposition: Transposition = TABLE,
+        deepening: Deepening = DIRECT,
         seed: int | None = None,
     ) -> None:
         if depth < 1:
@@ -126,15 +164,24 @@ class NegamaxAgent(Agent):
         self.evaluation = evaluation
         self.ordering = ordering
         self.transposition = transposition
+        self.deepening = deepening
         self._table = transposition.start() if transposition.persistent else None
         # Only a random base order consumes it, and it is kept rather than drawn from
         # `self._rng` so that the same position always produces the same tree.
         self._ordering_seed = seed
+        # The live budget, for the duration of one search. `_next_check` is the whole cost
+        # of being interruptible: one comparison per node against a number that is
+        # infinite whenever there is nothing to enforce.
+        self._next_check: float = _NEVER
+        self._node_limit: float = _NEVER
+        self._deadline: float = _NEVER
         suffix = "" if evaluation is DEFAULT else f"-{evaluation.name}"
         if ordering != DYNAMIC:
             suffix += f"-{ordering.name}"
         if transposition != TABLE:
             suffix += f"-{transposition.name}"
+        if deepening != DIRECT:
+            suffix += f"-{deepening.name}"
         self.name = f"{'alphabeta' if pruning else 'negamax'}-d{depth}{suffix}"
 
     def new_game(self, seed: int | None = None) -> None:
@@ -148,19 +195,106 @@ class NegamaxAgent(Agent):
         # The budget is a ceiling, not an instruction: it can only make the search
         # shallower. It cannot make it zero, because a move still has to come back.
         depth = self.depth if budget.depth is None else max(1, min(self.depth, budget.depth))
-        stats.depth = depth
-        order = self.ordering.start(depth, self._ordering_seed)
+        stats.depth_cap = depth
+        # Created once per MOVE and used by every iteration of it. That is the whole of
+        # "shared between iterations, thrown away between moves" -- Phase 8 measured why
+        # the second half has to stay true (BUILD_PLAN, thesis point P21).
         table = self._table if self.transposition.persistent else self.transposition.start()
         if table is not None:
             table.reset_counters()
 
+        if not self.deepening.enabled:
+            stats.depth = depth
+            stats.iterations = 1
+            order = self.ordering.start(depth, self._ordering_seed)
+            move, value = self._search_root(board, order, table, depth, -1, stats)
+            stats.value = value
+            stats.take_table(table)
+            return move
+
+        return self._deepen(board, table, depth, budget, stats)
+
+    # ------------------------------------------------------------ iterative deepening
+
+    def _deepen(
+        self, board: Board, table, cap: int, budget: Budget, stats: SearchStats
+    ) -> Move:
+        """Search 1, 2, 3... plies until the budget runs out; answer from the last one
+        that finished."""
+        deepening = self.deepening
+        self._node_limit = _NEVER if budget.nodes is None else budget.nodes
+        self._deadline = (
+            _NEVER if budget.time is None else time.perf_counter() + budget.time
+        )
+        root_plies = board.moves_played
+        shared = self.ordering.start(cap, self._ordering_seed) if deepening.share_order else None
+
+        answer: tuple[Move, int, int] | None = None  # move, value, depth it came from
+        latest: tuple[Move, int, int] | None = None  # the same, ignoring the parity rule
+        pv_move = -1
+
+        for depth in range(1, cap + 1):
+            # Iteration 1 is never interrupted: without it there would be no move at all.
+            if depth == 1:
+                self._next_check = _NEVER
+            else:
+                if stats.nodes >= self._node_limit or time.perf_counter() >= self._deadline:
+                    break
+                self._next_check = min(self._node_limit, stats.nodes + _CLOCK_INTERVAL)
+
+            order = shared if shared is not None else self.ordering.start(
+                depth, self._ordering_seed
+            )
+            try:
+                move, value = self._search_root(
+                    board, order, table, depth, pv_move if deepening.root_pv else -1, stats
+                )
+            except _OutOfBudget:
+                # Everything this iteration found is discarded, including whatever the
+                # board still has on it.
+                while board.moves_played > root_plies:
+                    board.undo()
+                stats.aborted = True
+                break
+
+            stats.iterations += 1
+            latest = (move, value, depth)
+            pv_move = move
+            if deepening.answers(depth):
+                answer = latest
+
+        self._next_check = _NEVER
+        # `latest` is the fallback for `parity="even"` before the first even iteration has
+        # finished; depth 1 always completes, so one of the two is always set.
+        move, value, depth = answer if answer is not None else latest
+        stats.depth = depth
+        stats.value = value
+        stats.take_table(table)
+        return move
+
+    # --------------------------------------------------------------------- the search
+
+    def _search_root(
+        self,
+        board: Board,
+        order: MoveOrder,
+        table,
+        depth: int,
+        pv_move: Move,
+        stats: SearchStats,
+    ) -> tuple[Move, int]:
+        """One search of the whole tree to `depth`, returning the best move and its value.
+
+        The killer slots at ply 0 are empty whatever happens -- a cutoff is only ever
+        recorded inside `_negamax` -- and the root deliberately does not probe the table,
+        so the only two things that can reorder it are `pv_move` and, once it has been
+        carried over from an earlier iteration, the history table. Both are Phase 9's, and
+        both are switches.
+        """
         alpha, beta = _BEYOND_LOSS, _BEYOND_WIN
         best_value = _BEYOND_LOSS
         best_move = None
-        # The killer slots, the history counts and the table are all empty here, and the
-        # root deliberately does not probe, so this is the base order whatever the flags
-        # say -- which is why none of this can change the move played.
-        for col in order.columns(board, 0):
+        for col in order.columns(board, 0, pv_move):
             board.play(col)
             stats.nodes += 1
             value = -self._negamax(board, order, table, depth - 1, 1, -beta, -alpha, stats)
@@ -169,10 +303,13 @@ class NegamaxAgent(Agent):
                 best_value, best_move = value, col
                 if self.pruning:
                     alpha = best_value
+        return best_move, best_value
 
-        stats.value = best_value
-        stats.take_table(table)
-        return best_move
+    def _out_of_budget(self, stats: SearchStats) -> None:
+        """Called only when `stats.nodes` has reached the next checkpoint."""
+        if stats.nodes >= self._node_limit or time.perf_counter() >= self._deadline:
+            raise _OutOfBudget
+        self._next_check = min(self._node_limit, stats.nodes + _CLOCK_INTERVAL)
 
     def _negamax(
         self,
@@ -191,6 +328,8 @@ class NegamaxAgent(Agent):
         the recursive call passes `(-beta, -alpha)` and negates what comes back: the child
         is the opponent's node, and every bound has to be read from his side of the axis.
         """
+        if stats.nodes >= self._next_check:  # infinite unless a budget is being enforced
+            self._out_of_budget(stats)
         if board.winner() is not None:  # the opponent just moved into this, so he won
             stats.leaves += 1
             return Score.loss_in(ply)

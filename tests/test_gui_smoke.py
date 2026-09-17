@@ -158,6 +158,58 @@ def test_the_transposition_checkbox_changes_the_session_and_the_depth_cap(game: 
     assert game.session.seats[1].transposition is True
 
 
+def test_the_deepening_checkbox_hands_the_depth_control_over_to_the_clock(game: Game):
+    """Phase 9's checkbox, and the only one in the window that trades one control for
+    another: ticking it releases the depth cap, greys the depth spinner out and makes the
+    time spinner live, because the depth is now something the search reports rather than
+    something the user sets."""
+    place = config.seat_layout(1)
+    game.session.set_seat(1, replace(game.session.seats[1], controller=Controller.MACHINE))
+
+    def widget(label: str):
+        return next(w for w in game.widgets
+                    if getattr(w, "label", None) == label and w.rect.x == place.inner_x)
+
+    box, depth, clock = widget("progresivno produbljivanje"), widget("dubina"), widget("vreme")
+
+    assert game.session.seats[1].deepening is False
+    assert depth.enabled() is True and clock.enabled() is False
+    before = game.session.seats[1].max_depth
+
+    assert box.click(box.rect.center) is True
+    assert game.session.seats[1].deepening is True
+    assert game.session.seats[1].max_depth > before
+    assert game.session.seats[1].depth == game.session.seats[1].max_depth
+    assert depth.enabled() is False and clock.enabled() is True
+
+    # And the clock spinner really moves the budget the seat will be searched with.
+    budget = game.session.seats[1].time_budget
+    clock.click(clock.rect.center)
+    assert game.session.seats[1].time_budget != budget
+    assert game.session.seats[1].budget.time == game.session.seats[1].time_budget
+
+    assert box.click(box.rect.center) is True
+    assert game.session.seats[1].deepening is False
+    assert game.session.seats[1].depth <= game.session.seats[1].max_depth
+
+
+def test_a_machine_move_under_a_clock_comes_back_inside_its_budget(game: Game):
+    """End to end through the window's own path: the seat is configured in the panel, the
+    move is planned the way the worker thread plans it, and the depth that comes back is a
+    result rather than the setting."""
+    game.session.set_seat(1, replace(
+        game.session.seats[1], controller=Controller.MACHINE, deepening=True, time_budget=0.1
+    ))
+    game.session.commit(3, None)  # seat 1 to move
+    move, stats = game.session.plan()
+    assert move in game.session.board.legal_moves()
+    assert stats.elapsed < 0.6
+    assert stats.iterations > 1
+    # The cap was released and the clock, not the cap, is what stopped it.
+    assert stats.depth_cap == game.session.seats[1].max_depth
+    assert 1 <= stats.depth < stats.depth_cap
+
+
 def test_the_ordering_checkbox_is_dead_while_pruning_is_off(game: Game):
     """There is nothing for a better move order to cut earlier when nothing is being cut,
     so the panel greys it out rather than offering a switch that does nothing."""

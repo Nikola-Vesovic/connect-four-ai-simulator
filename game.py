@@ -43,7 +43,7 @@ from core.types import EMPTY
 from gui.renderer import Renderer
 from gui.sprites import DiscSprite
 from gui.widgets import Button, Checkbox, Spinner
-from session import ALGORITHM_KEYS, ALGORITHMS, MODES, Controller, Session
+from session import ALGORITHM_KEYS, ALGORITHMS, MODES, TIME_BUDGETS, Controller, Session
 
 CONTROLLER_LABELS = {Controller.HUMAN: "čovek", Controller.MACHINE: "mašina"}
 
@@ -132,7 +132,18 @@ class Game:
                 lambda: seats[index].depth,
                 lambda value: self._seat_field(index, depth=value),
                 str,
-                uses("uses_depth"),
+                # Greyed out once the clock is in charge: under iterative deepening the
+                # depth is what the search reached, which is a result and not a setting.
+                lambda: machine() and seats[index].spec.uses_depth
+                and not seats[index].deepens,
+            ),
+            Spinner(
+                row(place.spinner_y[3], config.ROW_H), "vreme",
+                lambda: list(TIME_BUDGETS),
+                lambda: seats[index].time_budget,
+                lambda value: self._seat_field(index, time_budget=value),
+                lambda value: f"{value:g} s",
+                lambda: machine() and seats[index].deepens,
             ),
             switch("pruning", "alfa-beta odsecanje", place.optimisation_y[0],
                    uses("uses_pruning")),
@@ -145,6 +156,10 @@ class Game:
             # it needs only that the same position occur twice, which any tree does.
             switch("transposition", "tabela transpozicija", place.optimisation_y[2],
                    uses("uses_transposition")),
+            # The only switch in the window that makes the worst case of a move *smaller*:
+            # it hands the depth control over to the clock beside it.
+            switch("deepening", "progresivno produbljivanje", place.optimisation_y[3],
+                   uses("uses_deepening")),
             switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation")),
             switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation")),
             switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation")),

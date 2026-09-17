@@ -70,9 +70,19 @@ Whether that conversion is *load-bearing* in this phase is a separate question, 
 answer turned out to be no -- see the Phase 8 notes in BUILD_PLAN. Every move puts exactly
 one disc on the board, so a position's key determines how many discs it has, which fixes
 the ply it can occur at within one search from one root; and `depth + ply` is constant, so
-it fixes the remaining depth too. Same key, same ply, same depth. The conversion is an
-identity here and starts to matter the moment a table outlives the root it was built for.
-It is written anyway, because that moment is Phase 9.
+it fixes the remaining depth too. Same key, same ply, same depth.
+
+**Phase 8 predicted that Phase 9 would make it load-bearing, and Phase 9 measured that it
+does not.** Iterative deepening keeps the root fixed, so key still implies disc count
+still implies ply, and an entry is never read at a ply other than the one it was written
+at -- replacing both functions with the identity leaves **0 wrong values over 1,050
+records, 341 of them mates**, exactly as in Phase 8. What iterating *does* break is the
+second half of the argument: `depth + ply` is no longer constant, because iteration k
+reaches ply p with k - p plies left. Measured on the empty board at depth 8, **34.1% of
+stored keys are written at more than one depth, against 0% in a direct search** -- so the
+`stored_depth >= depth` test and depth-preferred replacement are what stop being
+degenerate here, and the mate conversion is not. The conversion stays, because a table
+that outlives its root still needs it and Phase 8 measured that configuration too.
 """
 
 from __future__ import annotations

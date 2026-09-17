@@ -32,7 +32,7 @@ of a setting is visible before it is paid.
 
 One consequence is the clearest thing the panel says about this project: **each
 optimisation lengthens its own table.** Pruning takes the reachable depth from 7 to 9,
-move ordering from 9 to 11, and the transposition table from 11 to 12, and those are
+move ordering from 9 to 11, and the transposition table from 11 to 13, and those are
 measurements rather than claims.
 
 The tables form a *ladder*, and a configuration that skips a rung is costed by the last
@@ -40,6 +40,13 @@ rung it completed -- a search with a table but no move ordering is priced as if 
 neither. That is deliberately conservative rather than precise: the alternative is one
 table per combination, which is six sweeps to measure and keep honest, and the direction
 of the approximation is checked rather than assumed (`tests/test_session.py`).
+
+**Phase 9 ends the ladder rather than extending it.** Every rung above exists because a
+fixed-depth search has no answer until it finishes, so the only way to bound a move is to
+bound the depth and measure what that costs. An iterative search can be stopped, so the
+bound becomes the budget and the depth stops being a setting at all: the fourth checkbox
+greys the depth control out, releases the cap, and puts the depth *reached* in the panel
+as a result. It is also the only switch in the window that makes the worst case smaller.
 """
 
 from __future__ import annotations
@@ -54,8 +61,9 @@ from agents.greedy_agent import GreedyAgent
 from agents.minimax import MinimaxAgent
 from agents.random_agent import RandomAgent
 from core.bitboard import Bitboard
-from core.rules import Board, winning_line
+from core.rules import CELLS, Board, winning_line
 from core.types import GameResult, Move, Player
+from search.deepening import DIRECT, ITERATIVE, Deepening
 from search.evaluation import DEFAULT, ZERO, Evaluation
 from search.ordering import DYNAMIC, STATIC, Ordering
 from search.stats import UNLIMITED, Budget, SearchStats
@@ -96,6 +104,18 @@ MAX_DEPTH_PRUNED = len(PRUNED_WORST_SECONDS)
 MAX_DEPTH_ORDERED = len(ORDERED_WORST_SECONDS)
 MAX_DEPTH_TABLE = len(TABLE_WORST_SECONDS)
 
+# Phase 9. With iterative deepening and a clock there is **no cost table at all**, because
+# there is nothing left to bound: the search stops when the time is up, so the worst case
+# of a move is the budget the user chose and not a property of the position. The cap goes
+# to the only ceiling the game itself imposes -- a search cannot usefully look further
+# ahead than there are empty cells -- and the interface is honest about the change by
+# greying the depth out and showing the depth actually *reached* in the panel instead.
+#
+# This is the one number in the project that a checkbox makes *smaller*: the worst move
+# the window permits drops from 34.3 s (depth 13 with the table) to whatever is picked here.
+MAX_DEPTH_DEEPENING = CELLS
+TIME_BUDGETS: tuple[float, ...] = (0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0)
+
 
 class Controller(str, Enum):
     """Who supplies the moves for a seat."""
@@ -115,6 +135,7 @@ class AlgorithmSpec:
     uses_pruning: bool = False
     uses_ordering: bool = False
     uses_transposition: bool = False
+    uses_deepening: bool = False
     uses_evaluation: bool = False
 
 
@@ -133,17 +154,19 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
         "negamax",
         "Negamax",
         lambda spec, seed: NegamaxAgent(
-            spec.depth,
+            spec.search_depth,
             pruning=spec.pruning,
             evaluation=spec.evaluation,
             ordering=spec.ordering,
             transposition=spec.transposition_spec,
+            deepening=spec.deepening_spec,
             seed=seed,
         ),
         uses_depth=True,
         uses_pruning=True,
         uses_ordering=True,
         uses_transposition=True,
+        uses_deepening=True,
         uses_evaluation=True,
     ),
 }
@@ -161,6 +184,8 @@ class SeatSpec:
     pruning: bool = True
     move_ordering: bool = True
     transposition: bool = True
+    deepening: bool = False
+    time_budget: float = 1.0
     threats: bool = True
     center: bool = True
     parity: bool = True
@@ -230,7 +255,46 @@ class SeatSpec:
         return TABLE if self.transposition else NO_TABLE
 
     @property
+    def can_deepen(self) -> bool:
+        """Whether the deepening switch means anything here -- regardless of its value.
+
+        Like `can_transpose` and unlike `can_order`, it does **not** require pruning:
+        searching 1, 2, 3... plies and answering from the last one that finished is the
+        same algorithm with or without cutoffs. What it does require is a search with a
+        depth to iterate towards, which greedy and random have not got.
+        """
+        return self.spec.uses_deepening
+
+    @property
+    def deepens(self) -> bool:
+        """Whether the clock is actually in charge. This is what the depth cap, the
+        estimate and the budget depend on -- the same two-property split Phase 7 needed,
+        where conflating the two was a real bug."""
+        return self.can_deepen and self.deepening
+
+    @property
+    def deepening_spec(self) -> Deepening:
+        return ITERATIVE if self.deepening else DIRECT
+
+    @property
+    def budget(self) -> Budget:
+        """What the seat's agent is allowed to spend on one move.
+
+        The first budget in this project that is not `UNLIMITED`, and the reason the
+        window's anti-freeze guarantee stops depending on a measured depth cap: a search
+        that can be stopped is bounded by the number chosen here rather than by a table.
+        """
+        return Budget(time=self.time_budget) if self.deepens else UNLIMITED
+
+    @property
+    def search_depth(self) -> int:
+        """The depth handed to the agent. Under a clock it is a ceiling, not a target."""
+        return MAX_DEPTH_DEEPENING if self.deepens else self.depth
+
+    @property
     def max_depth(self) -> int:
+        if self.deepens:
+            return MAX_DEPTH_DEEPENING
         if not self.prunes:
             return MAX_DEPTH_UNPRUNED
         if not self.orders:
@@ -251,9 +315,17 @@ class SeatSpec:
 
     @property
     def estimated_seconds(self) -> float | None:
-        """Measured worst case for one move at this setting, or None if it does not search."""
+        """Measured worst case for one move at this setting, or None if it does not search.
+
+        With the clock in charge this stops being an estimate at all and becomes the
+        budget itself -- which is the strongest form of the guarantee the depth caps were
+        invented to provide, and the reason Phase 9 is the phase that *lowers* the worst
+        case the interface permits.
+        """
         if not self.spec.uses_depth:
             return 0.0 if self.controller is Controller.MACHINE else None
+        if self.deepens:
+            return self.time_budget
         if not self.prunes:
             table = UNPRUNED_WORST_SECONDS
         elif not self.orders:
@@ -267,12 +339,19 @@ class SeatSpec:
     def normalised(self) -> SeatSpec:
         """The same spec with the depth inside the range that has been measured.
 
-        Turning an optimisation off lowers the cap -- 12 with the table, 11 with ordering,
+        Turning an optimisation off lowers the cap -- 13 with the table, 11 with ordering,
         9 without it, 7 with no pruning at all -- so a depth that was fine a moment ago
         may not be; clamping here means no caller can end up with a setting whose cost is
         unknown.
+
+        Ticking *iterative deepening* does the opposite and raises the depth to the
+        released cap, rather than leaving the search silently limited to whatever number
+        the slider happened to be showing. The promise the checkbox makes is "as deep as
+        fits in the time", and a stale 6 would quietly break it. The depth control greys
+        out at the same moment, so nothing the user can still change is being overridden.
         """
-        depth = max(1, min(self.depth, self.max_depth))
+        wanted = self.max_depth if self.deepens else self.depth
+        depth = max(1, min(wanted, self.max_depth))
         return self if depth == self.depth else replace(self, depth=depth)
 
     def build(self, seed: int | None = None) -> Agent | None:
@@ -450,18 +529,25 @@ class Session:
         self.commit(col, None)
         return True
 
-    def plan(self, budget: Budget = UNLIMITED) -> tuple[Move, SearchStats]:
+    def plan(self, budget: Budget | None = None) -> tuple[Move, SearchStats]:
         """Ask the agent in the seat to move for its move. Reads; changes nothing.
 
         Safe to call from another thread for exactly that reason: `Agent.choose_move`
         already hands the search a private copy of the board, so the game state this
         object holds is only ever touched by whoever calls `commit`.
+
+        `None` means "whatever this seat is allowed", which is `UNLIMITED` for everything
+        before Phase 9 and a clock once iterative deepening is switched on. An explicit
+        budget overrides it, which is what the experiment harness does -- and why nothing
+        in `experiments/` can accidentally inherit a wall-clock limit from the interface.
         """
         if self.is_over:
             raise ValueError("The game is over; there is no move to plan.")
         agent = self.agents[self.seat_to_move]
         if agent is None:
             raise ValueError("The seat to move is a human; there is nothing to ask.")
+        if budget is None:
+            budget = self.spec_to_move.budget
         return agent.choose_move(self.board, budget)
 
     def commit(self, col: Move, stats: SearchStats | None) -> None:

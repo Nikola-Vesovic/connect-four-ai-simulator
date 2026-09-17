@@ -1,0 +1,13 @@
+budget_seconds,evaluation,ordering,transposition,deepening,budget,positions,worst_overshoot_ms,worst_overshoot_share,mean_overshoot_ms,exceeded,min_depth,median_depth,max_depth,aborted,nodes
+0.02,full,center_first+killers+history,dict,iterative+pv+order,time,25,1.217,0.06083,0.534,25,4,5,21,22,35748
+0.02,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,1.391,0.06954,0.599,25,4,4,20,24,35628
+0.05,full,center_first+killers+history,dict,iterative+pv+order,time,25,1.098,0.02196,0.099,24,5,6,42,24,100357
+0.05,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,0.828,0.01656,0.112,24,4,6,42,24,100299
+0.1,full,center_first+killers+history,dict,iterative+pv+order,time,25,1.315,0.01315,-1.839,24,6,7,42,24,220300
+0.1,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,1.266,0.01266,-1.894,24,6,6,42,24,219847
+0.25,full,center_first+killers+history,dict,iterative+pv+order,time,25,1.347,0.00539,-16.402,22,7,9,42,22,551630
+0.25,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,1.786,0.00714,-16.488,22,6,8,42,22,550492
+0.5,full,center_first+killers+history,dict,iterative+pv+order,time,25,1.659,0.00332,-66.843,19,8,10,42,19,881658
+0.5,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,1.531,0.00306,-71.221,19,8,10,42,19,863542
+1.0,full,center_first+killers+history,dict,iterative+pv+order,time,25,7.916,0.00792,-191.069,19,9,11,42,19,1537846
+1.0,full,center_first+killers+history,dict,iterative+pv+order+even,time,25,53.91,0.05391,-165.831,19,8,10,42,19,1275849
