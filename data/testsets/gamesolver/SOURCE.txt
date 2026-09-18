@@ -1,0 +1,39 @@
+Connect Four benchmark positions with known theoretical scores.
+
+SOURCE      Pascal Pons, "Solving Connect 4: how to build a perfect AI",
+            part 2 - Benchmarking solvers.
+            http://blog.gamesolver.org/solving-connect-four/02-test-protocol/
+            Files downloaded from http://blog.gamesolver.org/data/<name> on 2026-09-18.
+            (The site's HTTPS certificate does not match the host, so the files came over
+            plain HTTP. They are therefore treated as UNTRUSTED input and verified against
+            our own full-depth search rather than believed -- see below.)
+
+CONTENT     6 files x 1,000 positions = 6,000. One position per line:
+            "<move string> <score>", the move string 1-based, which is the same notation
+            core.rules / Bitboard.from_move_string already use.
+
+            Test_L3_R1  End-Easy       28 < moves          remaining < 14
+            Test_L2_R1  Middle-Easy    14 < moves <= 28    remaining < 14
+            Test_L2_R2  Middle-Medium  14 < moves <= 28    14 <= remaining < 28
+            Test_L1_R1  Begin-Easy     moves <= 14         remaining < 14
+            Test_L1_R2  Begin-Medium   moves <= 14         14 <= remaining < 28
+            Test_L1_R3  Begin-Hard     moves <= 14         28 <= remaining
+
+SCORE       Pons's convention is not ours and the conversion matters:
+            his score is 22 minus the number of stones the WINNER has played when the
+            game ends, positive when the player to move wins, negative when he loses,
+            0 for a draw. Ours is Score.win_in(p) = WIN - p, with p in plies from the
+            root. With n stones on the board and the game ending p plies later the winner
+            has played ceil((n + p) / 2) stones, so
+
+                pons = +-(22 - ceil((n + p) / 2))
+
+VERIFIED    2026-09-18, before Phase 13 was started, with /tmp/p13_probe.py:
+            our own full-depth alpha-beta reproduced the published score EXACTLY --
+            outcome and mate distance -- on 40/40 End-Easy and 40/40 Middle-Easy
+            positions. That is the artifact validating our solver and our solver
+            validating the artifact at the same time.
+
+USE         The data is third-party. It is quoted and attributed, never presented as ours.
+            Pons's C++ solver is AGPL-3.0; none of it is used here -- only the published
+            positions and their scores.
