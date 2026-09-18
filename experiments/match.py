@@ -25,11 +25,13 @@ from typing import Sequence
 from agents.alphabeta import NegamaxAgent
 from agents.base import Agent
 from agents.greedy_agent import GreedyAgent
+from agents.mcts import MctsAgent
 from agents.minimax import MinimaxAgent
 from agents.random_agent import RandomAgent
 from core.bitboard import Bitboard
 from core.board_naive import NaiveBoard
 from core.types import GameResult, Move
+from search.playout import RANDOM as RANDOM_PLAYOUT
 from search.stats import UNLIMITED, Budget
 from search.transposition import NO_TABLE
 
@@ -42,6 +44,11 @@ AGENTS = {
     # quietly report a transposition table's node counts under the name of the baseline.
     "negamax": functools.partial(NegamaxAgent, pruning=False, transposition=NO_TABLE),
     "alphabeta": functools.partial(NegamaxAgent, pruning=True),
+    # Phase 11. Two entries rather than one, because the rollout policy is the switch that
+    # decides this algorithm and hiding it behind a default would make a match report
+    # unreadable: `mcts` is the light-heuristic playout, `mcts-random` is plain UCT.
+    "mcts": MctsAgent,
+    "mcts-random": functools.partial(MctsAgent, playout=RANDOM_PLAYOUT),
 }
 BOARDS = {"bitboard": Bitboard, "naive": NaiveBoard}
 

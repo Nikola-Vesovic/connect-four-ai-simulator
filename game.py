@@ -43,7 +43,16 @@ from core.types import EMPTY
 from gui.renderer import Renderer
 from gui.sprites import DiscSprite
 from gui.widgets import Button, Checkbox, Spinner
-from session import ALGORITHM_KEYS, ALGORITHMS, MODES, TIME_BUDGETS, Controller, Session
+from session import (
+    ALGORITHM_KEYS,
+    ALGORITHMS,
+    EXPLORATIONS,
+    MODES,
+    SIMULATION_BUDGETS,
+    TIME_BUDGETS,
+    Controller,
+    Session,
+)
 
 CONTROLLER_LABELS = {Controller.HUMAN: "čovek", Controller.MACHINE: "mašina"}
 
@@ -101,12 +110,22 @@ class Game:
         def uses(attribute: str):
             return lambda: machine() and getattr(seats[index].spec, attribute)
 
-        def switch(field: str, label: str, y: int, enabled):
+        def tree_search() -> bool:
+            return not seats[index].searches_a_tree
+
+        def monte_carlo() -> bool:
+            return seats[index].searches_a_tree
+
+        def either() -> bool:
+            return True
+
+        def switch(field: str, label: str, y: int, enabled, visible=None):
             return Checkbox(
                 row(y, config.CHECK_H), label,
                 lambda: getattr(seats[index], field),
                 lambda value: self._seat_field(index, **{field: value}),
                 enabled,
+                visible or tree_search,
             )
 
         return [
@@ -136,6 +155,19 @@ class Game:
                 # depth is what the search reached, which is a result and not a setting.
                 lambda: machine() and seats[index].spec.uses_depth
                 and not seats[index].deepens,
+                tree_search,
+            ),
+            # The same row for MCTS, because its budget is a simulation count and not a
+            # ply count. One of the two is visible at a time, so the panel is the same
+            # height whichever algorithm is chosen.
+            Spinner(
+                row(place.spinner_y[2], config.ROW_H), "simulacija",
+                lambda: list(SIMULATION_BUDGETS),
+                lambda: seats[index].simulations,
+                lambda value: self._seat_field(index, simulations=value),
+                lambda value: f"{value:,}".replace(",", "."),
+                lambda: machine() and not seats[index].deepens,
+                monte_carlo,
             ),
             Spinner(
                 row(place.spinner_y[3], config.ROW_H), "vreme",
@@ -164,9 +196,37 @@ class Game:
             # this one is greyed out whenever alpha-beta itself is off.
             switch("scouting", "negascout", place.optimisation_y[4],
                    lambda: machine() and seats[index].can_scout),
-            switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation")),
-            switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation")),
-            switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation")),
+            # --------------------------------------------------------------- Phase 11
+            # The same five rows, belonging to the other algorithm. MCTS is a fifth entry
+            # in the picker rather than a sixth checkbox here, because the five above are
+            # things that provably cannot change the move played and this one changes what
+            # is played -- so it grows its own block instead of joining theirs.
+            switch("greedy_rollouts", "greedy simulacije", place.optimisation_y[0],
+                   machine, monte_carlo),
+            switch("tree_reuse", "čuvanje stabla", place.optimisation_y[1],
+                   machine, monte_carlo),
+            switch("solver", "dokazivanje ishoda", place.optimisation_y[2],
+                   machine, monte_carlo),
+            # The same field as "progresivno produbljivanje" above and the same meaning:
+            # stop on the clock instead of at a fixed amount of work. MCTS is an anytime
+            # algorithm by construction, so it needs no extra machinery to obey one.
+            switch("deepening", "vremensko ograničenje", place.optimisation_y[3],
+                   machine, monte_carlo),
+            Spinner(
+                row(place.optimisation_y[4], config.CHECK_H), "istraživanje C",
+                lambda: list(EXPLORATIONS),
+                lambda: seats[index].exploration,
+                lambda value: self._seat_field(index, exploration=value),
+                lambda value: f"{value:.2f}",
+                machine,
+                monte_carlo,
+            ),
+            switch("threats", "pretnje", place.evaluation_y[0], uses("uses_evaluation"),
+                   either),
+            switch("center", "centar", place.evaluation_y[1], uses("uses_evaluation"),
+                   either),
+            switch("parity", "parnost", place.evaluation_y[2], uses("uses_evaluation"),
+                   either),
         ]
 
     def _buttons(self) -> list:

@@ -11,6 +11,13 @@ own, so the only copy of "what the user chose" is the one in `Session`. A widget
 drift out of step with the game, because it has nothing to drift with. The `enabled`
 callback is the same idea: the pruning checkbox greys itself out when the chosen algorithm
 has no pruning to switch, without anyone having to remember to tell it.
+
+`visible` is the stronger form of `enabled`, added in Phase 11 for one reason: MCTS is a
+fifth *algorithm* rather than a sixth checkbox, so it brings five switches of its own and
+they occupy the same five rows of the panel that alpha-beta's do. A greyed-out
+"alfa-beta odsecanje" is an honest label for a negamax seat and a meaningless one for an
+MCTS seat, so that row shows a different control instead -- and the window does not grow
+by a single pixel.
 """
 
 from __future__ import annotations
@@ -27,12 +34,14 @@ def _always() -> bool:
 
 
 class Widget:
-    def __init__(self, rect: pygame.Rect, enabled: Callable[[], bool] = _always) -> None:
+    def __init__(self, rect: pygame.Rect, enabled: Callable[[], bool] = _always,
+                 visible: Callable[[], bool] = _always) -> None:
         self.rect = rect
         self.enabled = enabled
+        self.visible = visible
 
     def hit(self, pos: tuple[int, int]) -> bool:
-        return self.enabled() and self.rect.collidepoint(pos)
+        return self.visible() and self.enabled() and self.rect.collidepoint(pos)
 
     def click(self, pos: tuple[int, int]) -> bool:
         """Handle a click inside this widget. True if the widget consumed it."""
@@ -70,8 +79,9 @@ class Spinner(Widget):
         set_: Callable[[object], None],
         fmt: Callable[[object], str] = str,
         enabled: Callable[[], bool] = _always,
+        visible: Callable[[], bool] = _always,
     ) -> None:
-        super().__init__(rect, enabled)
+        super().__init__(rect, enabled, visible)
         self.label = label
         self.options = options
         self.get = get
@@ -109,6 +119,8 @@ class Spinner(Widget):
         return True
 
     def draw(self, surface: pygame.Surface, mouse: tuple[int, int]) -> None:
+        if not self.visible():
+            return
         live = self.enabled()
         label_colour = config.TEXT_MUTED if live else config.TEXT_DIM
         value_colour = config.TEXT if live else config.TEXT_DIM
@@ -141,8 +153,9 @@ class Checkbox(Widget):
         get: Callable[[], bool],
         set_: Callable[[bool], None],
         enabled: Callable[[], bool] = _always,
+        visible: Callable[[], bool] = _always,
     ) -> None:
-        super().__init__(rect, enabled)
+        super().__init__(rect, enabled, visible)
         self.label = label
         self.get = get
         self.set = set_
@@ -154,6 +167,8 @@ class Checkbox(Widget):
         return True
 
     def draw(self, surface: pygame.Surface, mouse: tuple[int, int]) -> None:
+        if not self.visible():
+            return
         live = self.enabled()
         on = bool(self.get())
         hot = live and self.rect.collidepoint(mouse)

@@ -65,6 +65,7 @@ from typing import Callable
 from agents.alphabeta import NegamaxAgent
 from agents.base import Agent
 from agents.greedy_agent import GreedyAgent
+from agents.mcts import MctsAgent
 from agents.minimax import MinimaxAgent
 from agents.random_agent import RandomAgent
 from core.bitboard import Bitboard
@@ -73,6 +74,7 @@ from core.types import GameResult, Move, Player
 from search.deepening import DIRECT, ITERATIVE, Deepening
 from search.evaluation import DEFAULT, ZERO, Evaluation
 from search.ordering import DYNAMIC, STATIC, Ordering
+from search.playout import SQRT2, Playout
 from search.scouting import NO_SCOUT, SCOUT, Scout
 from search.stats import UNLIMITED, Budget, SearchStats
 from search.transposition import NO_TABLE, TABLE, Transposition
@@ -124,6 +126,24 @@ MAX_DEPTH_TABLE = len(TABLE_WORST_SECONDS)
 MAX_DEPTH_DEEPENING = CELLS
 TIME_BUDGETS: tuple[float, ...] = (0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0)
 
+# Phase 11. MCTS is priced completely differently from everything above, and the reason
+# is the one thing that makes it easy to bound: it does a fixed number of simulations
+# whatever the position, so its cost is very nearly position-independent. A tree search is
+# the opposite -- thesis point P11 is the story of one depth costing 0.13 s on the empty
+# board and 2.3 s six plies in -- which is why the four tables above exist at all. One
+# measured worst case per simulation is therefore a defensible estimate here in a way that
+# one measured worst case per depth never was.
+#
+# Measured over exactly the same twenty-five position sample, 1,000 simulations each,
+# `data/results/mcts_cost.csv`: the greedy playout costs 214.3 positions a simulation and
+# the random one 15.1, which is the whole unit problem of this phase in two numbers.
+MCTS_WORST_SECONDS_PER_SIMULATION = {"greedy": 548.09e-6, "random": 48.68e-6}
+SIMULATION_BUDGETS: tuple[int, ...] = (100, 250, 500, 1_000, 2_500, 5_000, 10_000, 25_000)
+EXPLORATIONS: tuple[float, ...] = (0.0, 0.4, 0.7, 1.0, SQRT2, 2.0)
+# What the simulation count is set to when the clock is in charge instead: high enough
+# never to bind, so the budget the user picked is the only thing that stops the search.
+MCTS_TIME_CAP = 10_000_000
+
 
 class Controller(str, Enum):
     """Who supplies the moves for a seat."""
@@ -146,6 +166,7 @@ class AlgorithmSpec:
     uses_deepening: bool = False
     uses_scouting: bool = False
     uses_evaluation: bool = False
+    uses_simulations: bool = False  # Phase 11: budgeted in simulations, not in plies
 
 
 # The picker. Order is the order it cycles in: cheapest and simplest first.
@@ -180,6 +201,26 @@ ALGORITHMS: dict[str, AlgorithmSpec] = {
         uses_scouting=True,
         uses_evaluation=True,
     ),
+    # **MCTS is a fifth ALGORITHM, not a sixth checkbox, and this is the one place the
+    # Phase 3 argument comes out the other way.** Phase 3 refused to make alpha-beta a
+    # separate picker entry because it is `NegamaxAgent(pruning=True)` -- a switch on a
+    # search that is otherwise identical -- and Phase 10 refused again for NegaScout. The
+    # rule behind both refusals is that **the five checkboxes are things that provably
+    # cannot change the move played**; they buy the same answer for less work. MCTS is a
+    # different algorithm by that test: it computes no minimax value, consults no
+    # evaluation function, and plays different moves on purpose. So the five alpha-beta
+    # switches grey out for it and it brings its own.
+    "mcts": AlgorithmSpec(
+        "mcts",
+        "MCTS",
+        lambda spec, seed: MctsAgent(
+            MCTS_TIME_CAP if spec.deepens else spec.simulations,
+            playout=spec.playout_spec,
+            seed=seed,
+        ),
+        uses_deepening=True,
+        uses_simulations=True,
+    ),
 }
 
 ALGORITHM_KEYS: tuple[str, ...] = tuple(ALGORITHMS)
@@ -201,6 +242,13 @@ class SeatSpec:
     threats: bool = True
     center: bool = True
     parity: bool = True
+    # Phase 11. MCTS's own switches, which occupy the same five rows of the panel that
+    # the alpha-beta ones do -- the block is per algorithm, so the window does not grow.
+    simulations: int = 1_000
+    greedy_rollouts: bool = True
+    tree_reuse: bool = False
+    solver: bool = False
+    exploration: float = SQRT2
 
     @property
     def spec(self) -> AlgorithmSpec:
@@ -315,6 +363,24 @@ class SeatSpec:
         return SCOUT if self.scouting else NO_SCOUT
 
     @property
+    def searches_a_tree(self) -> bool:
+        """Whether this seat runs a Monte Carlo search rather than a game-tree search.
+
+        The single property the five alpha-beta checkboxes and the five MCTS ones switch
+        on. Its negation is not `uses_depth`: greedy and random use neither.
+        """
+        return self.spec.uses_simulations
+
+    @property
+    def playout_spec(self) -> Playout:
+        return Playout(
+            rollout="greedy" if self.greedy_rollouts else "random",
+            exploration=self.exploration,
+            reuse=self.tree_reuse,
+            solver=self.solver,
+        )
+
+    @property
     def budget(self) -> Budget:
         """What the seat's agent is allowed to spend on one move.
 
@@ -360,10 +426,15 @@ class SeatSpec:
         invented to provide, and the reason Phase 9 is the phase that *lowers* the worst
         case the interface permits.
         """
-        if not self.spec.uses_depth:
-            return 0.0 if self.controller is Controller.MACHINE else None
         if self.deepens:
             return self.time_budget
+        if self.searches_a_tree:
+            # Linear in the simulation count and almost flat across positions, which is
+            # exactly what a game-tree search is not.
+            policy = "greedy" if self.greedy_rollouts else "random"
+            return self.simulations * MCTS_WORST_SECONDS_PER_SIMULATION[policy]
+        if not self.spec.uses_depth:
+            return 0.0 if self.controller is Controller.MACHINE else None
         if not self.prunes:
             table = UNPRUNED_WORST_SECONDS
         elif not self.orders:
@@ -387,8 +458,12 @@ class SeatSpec:
         the slider happened to be showing. The promise the checkbox makes is "as deep as
         fits in the time", and a stale 6 would quietly break it. The depth control greys
         out at the same moment, so nothing the user can still change is being overridden.
+
+        MCTS has no depth to clamp: its budget is a simulation count and the tree grows
+        as deep as the simulations take it, so the clause below leaves its depth alone
+        rather than silently writing 42 into a setting the other algorithms share.
         """
-        wanted = self.max_depth if self.deepens else self.depth
+        wanted = self.max_depth if (self.deepens and self.spec.uses_depth) else self.depth
         depth = max(1, min(wanted, self.max_depth))
         return self if depth == self.depth else replace(self, depth=depth)
 

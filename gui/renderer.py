@@ -235,7 +235,12 @@ class Renderer:
 
         estimate = spec.estimated_seconds
         middle = place.estimate_y + 12
-        if not spec.spec.uses_depth or estimate is None:
+        # Zero means the agent does a bounded, trivial amount of work per move -- random
+        # and greedy. Everything that searches has a cost, and it is shown. The test used
+        # to be `spec.spec.uses_depth`, which was right until Phase 11: MCTS is budgeted in
+        # simulations rather than plies, so it has no depth and a very real cost, and the
+        # panel was announcing a quarter of a second as negligible.
+        if estimate is None or estimate <= 0.0:
             self.text("cena po potezu: zanemarljiva", config.FONT_SMALL, config.GOOD,
                       (x, middle))
             return
@@ -264,6 +269,10 @@ class Renderer:
             played = any(record.seat == index for record in session.history)
             self.text("odigrao čovek" if played else "—", config.FONT_SMALL,
                       config.TEXT_DIM, (x, y + config.LINE_H // 2))
+            return
+
+        if stats.simulations:
+            self.draw_monte_carlo(stats, x, y, width)
             return
 
         y = self.stat("kolona", str((stats.move or 0) + 1), x, y, width)
@@ -302,6 +311,52 @@ class Renderer:
                       config.GOOD if stats.scout_searches and stats.research_rate < 0.25
                       else config.TEXT_MUTED)
         self.stat("vreme", seconds(stats.elapsed), x, y, width)
+
+    def draw_monte_carlo(self, stats, x: int, y: int, width: int) -> None:
+        """The same nine lines, filled by an algorithm that counts nothing alpha-beta does.
+
+        Cutoffs, the first-move cutoff rate, transposition returns and re-searches are all
+        meaningless here -- MCTS has no window to cut against and no table -- so rather
+        than print nine dashes the block belongs to the algorithm, exactly as the
+        optimisation checkboxes above it do. Two of the nine lines are shared and mean the
+        same thing in both: `čvorova`, a position reached by making a move, which is the
+        only unit in which the two algorithms can be compared at all; and `dubina`, which
+        here is how deep the tree got rather than how deep the search was told to go.
+
+        The last line is the one thing worth seeing that no number can show: how the
+        simulations were divided between the seven columns. A flat row of bars is a search
+        that learned nothing; a single tall one is a search that is sure.
+        """
+        y = self.stat("kolona", str((stats.move or 0) + 1), x, y, width)
+        y = self.stat("procena", f"{stats.win_rate:.0%}", x, y, width,
+                      config.GOOD if stats.win_rate >= 0.5 else config.BAD)
+        y = self.stat("simulacija", thousands(stats.simulations), x, y, width, config.TEXT)
+        y = self.stat("čvorova", thousands(stats.nodes), x, y, width, config.TEXT)
+        y = self.stat("dubina stabla", str(stats.depth), x, y, width)
+        y = self.stat("čvorova u stablu", thousands(stats.tree_nodes), x, y, width)
+        # How concentrated the answer is: 14% is a search that spread itself evenly over
+        # seven columns and learned nothing, 100% is one that never looked elsewhere.
+        y = self.stat("koncentracija", f"{stats.visit_share:.0%}", x, y, width,
+                      config.GOOD if stats.visit_share >= 0.5 else config.TEXT_MUTED)
+        y = self.stat("vreme", seconds(stats.elapsed), x, y, width)
+        self.draw_visits(stats, x, y, width)
+
+    def draw_visits(self, stats, x: int, y: int, width: int) -> None:
+        """The visit distribution over the seven columns, as one row of bars."""
+        if not stats.visits:
+            return
+        top = max(stats.visits) or 1
+        slot = width // COLS
+        height = config.LINE_H - 4
+        best = stats.move
+        for col, count in enumerate(stats.visits):
+            bar = max(1, round(height * count / top))
+            rect = pygame.Rect(x + col * slot + 1, y + 2 + height - bar, slot - 3, bar)
+            pygame.draw.rect(
+                self.screen,
+                config.PANEL_ACTIVE if col == best else config.BUTTON_EDGE,
+                rect, border_radius=2,
+            )
 
     def draw_totals(self, totals: SeatTotals, place) -> None:
         x, width = place.inner_x, place.width

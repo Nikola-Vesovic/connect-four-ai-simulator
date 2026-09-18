@@ -1,0 +1,12 @@
+a,b,budget,games,opening_plies,a_first_score,b_first_score,score,sigma,wins,draws,losses,first_mover_wins,mean_plies,a_nodes_per_move,b_nodes_per_move,a_ms_per_move,b_ms_per_move,digest,question
+mcts-200,mcts-200-uct_random,simulations=200,120,4,0.825,0.7,0.7625,0.0383,90,3,27,0.55,26.63,23545.6,2163.4,38.232,5.276,4d32e827,rollout
+mcts-500-uct_random+c0.4,mcts-500-uct_random,simulations=500,120,4,0.625,0.4833,0.5542,0.0438,62,9,49,0.5333,29.38,5347.1,5200.7,13.037,12.698,1e620583,exploration
+mcts-500-uct_random+c0.7,mcts-500-uct_random,simulations=500,120,4,0.6083,0.4833,0.5458,0.0443,62,7,51,0.5333,28.27,5298.2,5242.4,12.947,12.814,b7a75e84,exploration
+mcts-500-uct_random+c1,mcts-500-uct_random,simulations=500,120,4,0.6083,0.4583,0.5333,0.0446,61,6,53,0.55,28.15,5260.2,5251.2,12.926,12.955,3617eb87,exploration
+mcts-500-uct_random+c2,mcts-500-uct_random,simulations=500,120,4,0.6167,0.3917,0.5042,0.0453,59,3,58,0.6,27.93,5333.3,5337.3,13.115,13.164,6a8e27b3,exploration
+mcts-500-uct_random+reuse,mcts-500-uct_random,simulations=500,120,4,0.5583,0.45,0.5042,0.0449,58,5,57,0.5333,28.48,5269.2,5272.7,12.884,12.938,5436fe3e,reuse
+mcts-500-uct_random+mean,mcts-500-uct_random,simulations=500,120,4,0.6083,0.3417,0.475,0.0446,54,6,60,0.6083,28.01,5292.6,5279.9,13.05,12.919,9382cf5f,root
+mcts-500-uct_random+left_to_right,mcts-500-uct_random,simulations=500,120,4,0.5417,0.3917,0.4667,0.045,54,4,62,0.5583,27.91,5442.3,5353.9,13.439,13.121,bd38fe24,order
+mcts-500-uct_random+solver,mcts-500-uct_random,simulations=500,120,4,0.525,0.425,0.475,0.045,55,4,61,0.5333,30.0,4550.6,5160.3,11.612,12.65,fc4cdc39,solver
+mcts-1000000,mcts-1000000-uct_random,time=0.05s,120,4,0.525,0.4833,0.5042,0.0449,58,5,57,0.5,30.53,28686.8,20894.7,50.217,50.199,312316cc,rollout
+mcts-500-uct_random+c0.4,mcts-500-uct_random,simulations=500,500,4,0.632,0.526,0.579,0.0215,277,25,198,0.528,29.87,5432.6,5305.6,13.44,13.171,d4594fd2,exploration

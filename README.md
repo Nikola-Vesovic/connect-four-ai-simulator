@@ -15,12 +15,15 @@ python main.py
 Nema nijednog argumenta komandne linije — sve se bira u prozoru:
 
 - **režim igre**: čovek vs mašina, mašina vs mašina, čovek vs čovek;
-- **algoritam po sedištu**: Random, Greedy, Minimax, Negamax (kasnije MCTS);
+- **algoritam po sedištu**: Random, Greedy, Minimax, Negamax, MCTS;
 - **optimizacije po sedištu**: alfa-beta odsecanje, sortiranje poteza (killer potezi +
   istorijska heuristika), tabela transpozicija, progresivno produbljivanje i negascout, i
   svaka komponenta funkcije procene (pretnje, centar, parnost) nezavisno;
+- **za MCTS, pet sopstvenih prekidača na istim tim redovima**: greedy simulacije, čuvanje
+  stabla, dokazivanje ishoda, vremensko ograničenje i konstanta istraživanja C;
 - **dubina pretrage**, sa izmerenom cenom najgoreg poteza uz klizač — ili, kada je
-  progresivno produbljivanje uključeno, **vreme po potezu**, pa dubina postaje rezultat.
+  progresivno produbljivanje uključeno, **vreme po potezu**, pa dubina postaje rezultat;
+  za MCTS na tom mestu stoji **broj simulacija**.
 
 Ispod svakog sedišta stoji šta je poslednja pretraga koštala: čvorova, odsecanja, kvalitet
 redosleda poteza, dubina, vrednost i vreme, plus zbir za celu partiju. To je ono što čini
@@ -55,6 +58,20 @@ dubine 4 i raste do **1,303x na dubini 7**. Panel zato prikazuje i **ponovne pre
 udeo pretraga nultim prozorom koje su morale da se ponove, jedini broj u panelu kod koga
 je manje bolje.
 
+**MCTS nije šesto polje za čekiranje nego peti algoritam, i to je pravilo a ne ukus.**
+Pet optimizacija iznad ne mogu da promene odigrani potez — kupuju isti odgovor za manje
+posla, zbog čega alfa-beta i negascout nisu zasebni algoritmi nego prekidači. MCTS pada
+na tom testu u svakom pravcu: ne računa minimax vrednost, ne poziva funkciju procene i
+namerno igra druge poteze. Zato dobija svoje mesto u biraču, sopstvene prekidače na istih
+pet redova panela (prozor ne raste) i **sopstvene statistike**: simulacije, čvorove,
+dubinu stabla, procenu pobede, koncentraciju i raspodelu poseta po sedam kolona.
+
+**Jedna simulacija nije jedan čvor, i to je najvažnija merna odluka faze 11.** Simulacija
+prođe put kroz stablo, doda jedan čvor i odigra celu partiju do kraja. Mereno nad istih
+25 pozicija: greedy simulacija košta **214,3 pozicije**, nasumična **15,1** — 14,2 puta
+manje. Zato se svako poređenje prijavljuje dvaput, pri jednakom broju simulacija i pri
+jednakom vremenu, i uvek se kaže koja je jedinica u pitanju.
+
 ## Struktura
 
 ```
@@ -67,13 +84,15 @@ connect4/
   agents/        base.py (interfejs), random_agent.py, greedy_agent.py                    [4]
                  minimax.py (MAX/MIN, ogranicen dubinom)                                  [5]
                  alphabeta.py (negamax; alfa-beta koja se iskljucuje)                     [6]
-                 mcts, oracle                                                             [11, 13]
+                 mcts.py (UCT: izbor, sirenje, simulacija, propagacija sa obrtanjem)      [11]
+                 oracle                                                                   [13]
   search/        stats.py (Budget + SearchStats)                                          [4]
                  ordering.py (centar-prvo [4]; killer potezi + istorija, ukljucivi)       [7]
                  evaluation.py (pretnje, centar, parnost -- svaka iskljuciva)             [5]
                  transposition.py (position+mask kljuc, EXACT/LOWER/UPPER, dict i niz)    [8]
                  deepening.py (progresivno produbljivanje + prekid po vremenu/cvorovima)  [9]
                  scouting.py (negascout: nulti prozor + ponovna pretraga)                 [10]
+                 playout.py (UCT: politika simulacije, C, cuvanje stabla, dokazivanje)    [11]
   gui/           renderer.py (crtanje), widgets.py (kontrole), sprites.py (diskovi)       [3]
   experiments/   match.py (mec izmedju dva agenta, sa semenom)                            [4]
                  reference.py (zamrznute vrednosti), scaling.py (cvorovi i kriva)         [5-6]
@@ -109,6 +128,12 @@ python -m experiments.scaling --scout-empty      # isto, prazna tabla, do dubine
 python -m experiments.scaling --scout-games      # isto, kroz cele partije
 python -m experiments.scaling --scout-ordering   # slajd 148: negascout protiv 4 redosleda
 python -m experiments.scaling --scout-deepening  # negascout sa i bez produbljivanja
+python -m experiments.scaling --mcts-cost         # koliko kosta jedna simulacija
+python -m experiments.scaling --mcts-tactics      # mat u jedan i odbrana od njega, po budzetu
+python -m experiments.scaling --mcts-convergence  # da li posete ostaju na dobitnom potezu
+python -m experiments.scaling --mcts-ablation     # svi prekidaci, pri jednakom broju simulacija
+python -m experiments.scaling --mcts-rollout-time # ista politika simulacije, ali pri jednakom vremenu
+python -m experiments.scaling --mcts-vs-alphabeta # obecano poredjenje: jednako vreme I jednaki cvorovi
 python -m experiments.reference --generate # zamrzni vrednosti obicnog minimaxa
 python -m experiments.reference --verify --agent alphabeta   # gate za faze 6-10
 python -m experiments.reference --verify --agent alphabeta --ordering center_first
@@ -121,6 +146,15 @@ Svaka optimizacija u fazama 6-10 mora da vrati **istu vrednost** kao obican mini
 `--verify` je ta provera; broj cvorova sme da se menja, vrednost ne sme. `--agent negamax`
 poredi i broj cvorova, jer taj rezim nema odsecanja pa mu je stablo isto kao minimaxu.
 Sve cetiri imenovane strategije redosleda daju 0 neslaganja nad svih 1.050 zapisa.
+
+**Za MCTS ta provera ne postoji i to treba reci naglas.** On ne racuna minimax vrednost,
+pa `reference.py` nad njim nema sta da uporedi — i strukturno ne moze, jer tog agenta
+nikada ni ne pravi. Umesto jedne jednakosti stoje **svojstva**, podeljena na dokaziva
+(isto seme + isti budzet daje isti potez i iste brojace; stablo ostaje u ravnotezi;
+zavrsena pozicija se nikada ne simulira; uz `dokazivanje ishoda` mat u jedan se **ne moze**
+propustiti) i **statisticka** (koliko cesto obican UCT nadje mat u jedan, koliko cesto ga
+odbrani, koliko cesto posete ostanu na potezu koji cuva dobijenu poziciju) — a statisticka
+se prijavljuju kao stope nad uzorkom cija je velicina navedena.
 
 **Od faze 6 nadalje broj cvorova nije uporediv bez funkcije procene i redosleda poteza.**
 Obican minimax nema odsecanja, pa ga ni jedno ni drugo ne moze skrenuti; alfa-beta odseca
@@ -136,6 +170,7 @@ ili po cvorovima; vreme se koristi samo tamo gde se vreme i meri.
 ```sh
 python -m experiments.match --a greedy --b random --games 10000 --seed 2026
 python -m experiments.match --a alphabeta --b greedy --games 200 --opening-plies 4
+python -m experiments.match --a mcts --b mcts-random --games 120 --opening-plies 4
 ```
 
 Rezultat je uvek razdvojen po tome ko je igrao prvi: sa nasumicnom igrom prvi igrac vec

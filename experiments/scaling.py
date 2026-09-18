@@ -46,6 +46,15 @@ exactly the condition it needs, so the deepening switch is swept against it too.
 of those rows carries the *scouting* column as well, which is the fifth thing thesis point
 P10 now requires beside a node count.
 
+**Phase 11 is the odd one out and says so.** Everything above compares searches that must
+return the same value, so each sweep can check itself as it goes. MCTS returns no minimax
+value at all, so the sweeps below measure *properties* -- how often a one-move tactic is
+seen, whether the visits settle on a move that keeps a forced win, what one simulation
+costs -- and each says whether what it reports is provable or statistical. The unit problem
+is handled the same way everywhere: an MCTS simulation and a search node differ by two
+orders of magnitude, so every comparison is run at equal work in each algorithm's own unit
+*and* at equal wall clock, and both sides' realised cost is quoted in both.
+
     python -m experiments.scaling --nodes
     python -m experiments.scaling --curve
     python -m experiments.scaling --pruning
@@ -61,6 +70,12 @@ P10 now requires beside a node count.
     python -m experiments.scaling --scout-games
     python -m experiments.scaling --scout-ordering
     python -m experiments.scaling --scout-deepening
+    python -m experiments.scaling --mcts-cost
+    python -m experiments.scaling --mcts-tactics
+    python -m experiments.scaling --mcts-convergence
+    python -m experiments.scaling --mcts-ablation
+    python -m experiments.scaling --mcts-rollout-time
+    python -m experiments.scaling --mcts-vs-alphabeta
 """
 
 from __future__ import annotations
@@ -70,19 +85,32 @@ import csv
 import math
 import random
 import time
+from dataclasses import replace
 from pathlib import Path
 
 from agents.alphabeta import NegamaxAgent
 from agents.greedy_agent import GreedyAgent
+from agents.mcts import MctsAgent
 from agents.minimax import MinimaxAgent
 from core.bitboard import Bitboard
+from core.rules import CELLS
+from core.types import Score
 from experiments import reference
 from experiments.match import Tally, play_match
 from search.deepening import DIRECT, EVEN, ITERATIVE, NAIVE, Deepening
 from search.evaluation import DEFAULT, ZERO
-from search.ordering import DYNAMIC, LEFT, RANDOM, STATIC, Ordering
+from search.ordering import DYNAMIC, LEFT, RANDOM as RANDOM_ORDER, STATIC, Ordering
+from search.playout import (
+    LEFT_FIRST,
+    MEAN_ROOT,
+    RANDOM,
+    REUSE,
+    SOLVER,
+    UCT,
+    Playout,
+)
 from search.scouting import DEEP, NO_SCOUT, SCOUT, WIDE, Scout
-from search.stats import Budget
+from search.stats import UNLIMITED, Budget
 from search.transposition import ARRAY, NO_TABLE, PERSISTENT, TABLE, WRITE_ONLY, Transposition
 
 RESULTS = Path(__file__).resolve().parent.parent / "data" / "results"
@@ -106,6 +134,16 @@ SCOUT_EMPTY_CSV = RESULTS / "scout_on_empty_board.csv"
 SCOUT_GAMES_CSV = RESULTS / "scout_by_game.csv"
 SCOUT_ORDERING_CSV = RESULTS / "scout_by_ordering.csv"
 SCOUT_DEEPENING_CSV = RESULTS / "scout_under_deepening.csv"
+MCTS_TACTICS_CSV = RESULTS / "mcts_tactics.csv"
+MCTS_CONVERGENCE_CSV = RESULTS / "mcts_convergence.csv"
+MCTS_COST_CSV = RESULTS / "mcts_cost.csv"
+MCTS_ABLATION_CSV = RESULTS / "mcts_ablation.csv"
+MCTS_VS_ALPHABETA_CSV = RESULTS / "mcts_vs_alphabeta.csv"
+
+# The two rollout policies, which are the ablation this phase is named after. `uct_greedy`
+# reuses the Phase 4 agent as a light heuristic playout; `uct_random` is plain UCT in the
+# textbook sense and is the baseline every rollout comparison is quoted against.
+MCTS_PLAYOUTS: tuple[Playout, ...] = (UCT, RANDOM, SOLVER)
 
 # The tables compared. The first is Phase 7's search and every gain is quoted against it.
 # `write_only` is the controlled experiment: it keeps the table exactly as the real one
@@ -137,7 +175,7 @@ ORDERINGS: tuple[Ordering, ...] = (
     DYNAMIC,
     LEFT,
     Ordering(base="left_to_right", killers=True, history=True),
-    RANDOM,
+    RANDOM_ORDER,
     Ordering(base="random", killers=True, history=True),
 )
 
@@ -272,6 +310,19 @@ def write(rows: list[dict], path: Path) -> None:
         writer.writeheader()
         writer.writerows(rows)
     print(f"wrote {path}")
+
+
+def read_rows(path: Path) -> list[dict]:
+    """Rows already written, so a second run can add to a file instead of replacing it.
+
+    Used by the one measurement in Phase 11 that has to run on an otherwise idle machine:
+    it belongs in the same file as the question it answers, but it cannot share the CPU
+    with the runs that produced the rest of it.
+    """
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
 
 
 def pruning_by_depth(max_depth: int, unpruned_depth: int, max_seconds: float) -> list[dict]:
@@ -1610,6 +1661,494 @@ def scout_under_deepening(depths: tuple[int, ...]) -> list[dict]:
     return rows
 
 
+# =====================================================================================
+# Phase 11 -- MCTS. A different kind of measurement, and the first paragraph of this
+# block says why: the 1,050 frozen minimax values are **useless** as a gate here. MCTS
+# does not compute the minimax value, does not search to a fixed depth, never calls the
+# evaluation function, and will play different moves. So the sweeps below measure
+# properties instead of equalities, and each one says whether it is provable or
+# statistical.
+#
+# The unit problem is the biggest measurement decision of the phase and it is handled the
+# same way everywhere: an MCTS *simulation* and a search *node* differ by two orders of
+# magnitude, so every comparison is run twice -- once at equal work expressed in the unit
+# each algorithm naturally uses, and once at equal wall clock -- and both sides' realised
+# cost is quoted in both. Phase 9's rule still stands: **nothing pinned may come from a
+# wall clock.** The email's promise of an equal-TIME comparison is the one exception, and
+# it is marked as such in the `budget` column of the file it lands in.
+# =====================================================================================
+
+
+def _mcts_accumulate(total: dict, stats) -> None:
+    for field in ("nodes", "leaves", "simulations", "rollouts", "tree_nodes", "tree_reused"):
+        total[field] = total.get(field, 0) + getattr(stats, field)
+    total["depth"] = max(total.get("depth", 0), stats.depth)
+
+
+def _mcts_row(total: dict, spec: Playout, iterations: int) -> dict:
+    """The counters MCTS adds, beside the two units every row has to name."""
+    sims = total.get("simulations", 0)
+    return {
+        "playout": spec.name,
+        "iterations": iterations,
+        "exploration": round(spec.exploration, 4),
+        "simulations": sims,
+        "rollouts": total.get("rollouts", 0),
+        "terminal_leaves": total.get("leaves", 0),
+        "max_tree_depth": total.get("depth", 0),
+        "nodes_per_simulation": round(total.get("nodes", 0) / sims, 1) if sims else "",
+    }
+
+
+def _sample_tactical(count: int, seed: int, kind: str) -> list[str]:
+    """Positions that contain a one-move tactic, as 1-based move strings.
+
+    `kind="win"`: the side to move can win immediately. `kind="block"`: it cannot, the
+    opponent is threatening to, and at least one column removes the threat -- which is
+    exactly the "safe column" definition Phase 4 audited the greedy agent against, and is
+    the correct statement of the property. ("Play the column the opponent would win in" is
+    not: filling their cell can open a new win directly above it.)
+    """
+    rng = random.Random(f"tactics-{kind}-{seed}")
+    found: dict[str, None] = {}
+    while len(found) < count:
+        board = Bitboard()
+        for _ in range(rng.randrange(1, 30)):
+            if board.is_terminal():
+                break
+            board.play(rng.choice(board.legal_moves()))
+        if board.is_terminal():
+            continue
+        me = board.player_to_move
+        wins = []
+        safe = []
+        for col in board.legal_moves():
+            board.play(col)
+            if board.winner() is me:
+                wins.append(col)
+            elif not board.is_terminal():
+                opponent = board.player_to_move
+                threatened = False
+                for reply in board.legal_moves():
+                    board.play(reply)
+                    threatened = board.winner() is opponent
+                    board.undo()
+                    if threatened:
+                        break
+                if not threatened:
+                    safe.append(col)
+            else:
+                safe.append(col)  # our move filled the board: there is no reply
+            board.undo()
+        legal = len(board.legal_moves())
+        if kind == "win" and wins:
+            found.setdefault("".join(str(c + 1) for c in board.history), None)
+        elif kind == "block" and not wins and safe and len(safe) < legal:
+            found.setdefault("".join(str(c + 1) for c in board.history), None)
+    return list(found)
+
+
+def _wins_here(board) -> list[int]:
+    me = board.player_to_move
+    out = []
+    for col in board.legal_moves():
+        board.play(col)
+        if board.winner() is me:
+            out.append(col)
+        board.undo()
+    return out
+
+
+def _safe_here(board) -> list[int]:
+    out = []
+    for col in board.legal_moves():
+        board.play(col)
+        safe = True
+        if not board.is_terminal():
+            opponent = board.player_to_move
+            for reply in board.legal_moves():
+                board.play(reply)
+                lost = board.winner() is opponent
+                board.undo()
+                if lost:
+                    safe = False
+                    break
+        board.undo()
+        if safe:
+            out.append(col)
+    return out
+
+
+def mcts_tactics(budgets: tuple[int, ...], positions: int) -> list[dict]:
+    """The gate of Phase 11: does it see a one-move tactic, and how often.
+
+    **Statistical, not provable** -- for plain UCT. A winning child is terminal and scores
+    1.0 on every visit, so nothing can beat its mean, but "the most visited child" is not
+    "the child with the best mean" and at a small budget the two come apart. The rate is
+    therefore reported as a rate over a sized sample, never as an anecdote.
+
+    With `solver` on the same property becomes **provable**: a terminal child is proven the
+    moment it is expanded, expansion is exhaustive, and a proven win outranks every
+    average at the root. Seven simulations are enough, whatever the position.
+    """
+    wins = _sample_tactical(positions, 2026, "win")
+    blocks = _sample_tactical(positions, 2026, "block")
+    rows = []
+    for spec in MCTS_PLAYOUTS:
+        for budget in budgets:
+            counts = {}
+            for kind, sample in (("win", wins), ("block", blocks)):
+                agent = MctsAgent(budget, playout=spec, seed=2026)
+                hits = 0
+                total: dict = {}
+                started = time.perf_counter()
+                for moves in sample:
+                    agent.new_game(2026)
+                    board = Bitboard.from_move_string(moves)
+                    allowed = _wins_here(board) if kind == "win" else _safe_here(board)
+                    move, stats = agent.choose_move(board)
+                    hits += move in allowed
+                    _mcts_accumulate(total, stats)
+                counts[kind] = (hits, time.perf_counter() - started, total)
+            win_hits, win_seconds, win_total = counts["win"]
+            block_hits, block_seconds, block_total = counts["block"]
+            both = {}
+            for key in set(win_total) | set(block_total):
+                both[key] = win_total.get(key, 0) + block_total.get(key, 0)
+            rows.append(
+                {
+                    **_mcts_row(both, spec, budget),
+                    "budget": "simulations",
+                    "positions": positions,
+                    "mate_in_one_rate": round(win_hits / positions, 4),
+                    "block_in_one_rate": round(block_hits / positions, 4),
+                    "nodes": both["nodes"],
+                    "seconds": round(win_seconds + block_seconds, 2),
+                    "ms_per_move": round(
+                        1000 * (win_seconds + block_seconds) / (2 * positions), 3
+                    ),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"{spec.name:<26} {budget:>6} sims  "
+                f"mate-in-one {row['mate_in_one_rate']:>7.1%}  "
+                f"block-in-one {row['block_in_one_rate']:>7.1%}  "
+                f"{row['nodes_per_simulation']:>7} nodes/sim  "
+                f"{row['ms_per_move']:>8.2f} ms/move",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def mcts_convergence(budgets: tuple[int, ...], depth: int) -> list[dict]:
+    """Does the visit distribution concentrate on a move that preserves a forced win?
+
+    The 1,050-record file cannot check an MCTS value, but a subset of it can still be
+    used: the records whose stored value is a **forced result** rather than a heuristic
+    score. For those the set of value-preserving moves is well defined and computable, and
+    "converges to the minimax answer" becomes a rate that can be measured.
+
+    Forced *losses* are excluded: every move loses, so the property is satisfied by
+    anything and the position says nothing about the search.
+    """
+    data = reference.load()
+    records = [
+        record for record in data["records"]
+        if record["depth"] == depth and record["value"] >= Score.MIN_WIN
+    ]
+    prober = NegamaxAgent(max(1, depth - 1), evaluation=DEFAULT, seed=2026)
+    cases = []
+    for record in records:
+        board = Bitboard.from_move_string(record["moves"])
+        keep = []
+        for col in board.legal_moves():
+            board.play(col)
+            if board.winner() is not None:
+                keep.append(col)
+            elif not board.is_terminal():
+                _, stats = prober.choose_move(board)
+                if -stats.value >= Score.MIN_WIN:
+                    keep.append(col)
+            board.undo()
+        if keep:
+            cases.append((record["moves"], tuple(keep), len(board.legal_moves())))
+
+    rows = []
+    for spec in MCTS_PLAYOUTS:
+        for budget in budgets:
+            agent = MctsAgent(budget, playout=spec, seed=2026)
+            hits = 0
+            share = 0.0
+            total: dict = {}
+            started = time.perf_counter()
+            for moves, keep, _ in cases:
+                agent.new_game(2026)
+                move, stats = agent.choose_move(Bitboard.from_move_string(moves))
+                hits += move in keep
+                share += stats.visit_share
+                _mcts_accumulate(total, stats)
+            seconds = time.perf_counter() - started
+            rows.append(
+                {
+                    **_mcts_row(total, spec, budget),
+                    "budget": "simulations",
+                    "depth": depth,
+                    "positions": len(cases),
+                    "mean_winning_moves": round(
+                        sum(len(keep) for _, keep, _ in cases) / len(cases), 2
+                    ),
+                    "mean_legal_moves": round(
+                        sum(legal for _, _, legal in cases) / len(cases), 2
+                    ),
+                    "preserved_rate": round(hits / len(cases), 4),
+                    "mean_visit_share": round(share / len(cases), 4),
+                    "nodes": total["nodes"],
+                    "seconds": round(seconds, 2),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"{spec.name:<26} {budget:>6} sims  "
+                f"keeps the win {row['preserved_rate']:>7.1%} of {len(cases)}  "
+                f"visit share {row['mean_visit_share']:>6.1%}  "
+                f"{row['nodes_per_simulation']:>7} nodes/sim  {seconds:7.1f}s",
+                flush=True,
+            )
+        print()
+    return rows
+
+
+def _match_row(match, budget_label: str, **extra) -> dict:
+    overall = match.overall
+    return {
+        "a": match.agent_a,
+        "b": match.agent_b,
+        "budget": budget_label,
+        "games": match.games,
+        "opening_plies": match.opening_plies,
+        "a_first_score": round(match.a_first.score, 4),
+        "b_first_score": round(match.b_first.score, 4),
+        "score": round(overall.score, 4),
+        "sigma": round(standard_error(overall), 4),
+        "wins": overall.wins,
+        "draws": overall.draws,
+        "losses": overall.losses,
+        "first_mover_wins": round(match.first_mover_wins / match.games, 4),
+        "mean_plies": round(match.mean_plies, 2),
+        "a_nodes_per_move": round(match.nodes_a / match.moves_a, 1) if match.moves_a else "",
+        "b_nodes_per_move": round(match.nodes_b / match.moves_b, 1) if match.moves_b else "",
+        "a_ms_per_move": round(1000 * match.seconds_a / match.moves_a, 3) if match.moves_a else "",
+        "b_ms_per_move": round(1000 * match.seconds_b / match.moves_b, 3) if match.moves_b else "",
+        "digest": match.digest(),
+        **extra,
+    }
+
+
+def _run_match(agent_a, agent_b, games: int, seed: int, opening_plies: int,
+               budget: Budget, label: str, **extra) -> dict:
+    match = play_match(
+        agent_a, agent_b, games=games, seed=seed,
+        opening_plies=opening_plies, budget=budget,
+    )
+    row = _match_row(match, label, **extra)
+    print(
+        f"{row['a']:<30} vs {row['b']:<26} {label:<14} "
+        f"{row['score']:>7.1%} +- {row['sigma']:.1%}  "
+        f"({row['wins']}-{row['draws']}-{row['losses']})  "
+        f"first {row['a_first_score']:>6.1%} / second {row['b_first_score']:>6.1%}  "
+        f"A {row['a_nodes_per_move']:>9,.0f} n {row['a_ms_per_move']:>8.1f} ms  |  "
+        f"B {row['b_nodes_per_move']:>9,.0f} n {row['b_ms_per_move']:>8.1f} ms",
+        flush=True,
+    )
+    return row
+
+
+def mcts_ablation(games: int, seed: int, opening_plies: int, simulations: int,
+                  rollout_simulations: int) -> list[dict]:
+    """Every switch in `search/playout.py`, measured rather than assumed.
+
+    All of these are run at **equal simulations**, which is a reproducible budget in the
+    sense Phase 9 demanded: the same seed and the same simulation count stop at the same
+    place every time, a clock does not. The rollout comparison is then repeated at equal
+    *time*, because a greedy rollout costs an order of magnitude more positions than a
+    random one and "better informed" has to beat "more samples" before it means anything.
+
+    **The knob sweep is run on random rollouts**, and that is a cost decision stated
+    rather than hidden: a random simulation is measured at 15.1 positions against the
+    greedy policy's 214.3, so for the price of a 100-simulation greedy search the same
+    sweep can ask a 500-simulation question. A 100-simulation root gives each of seven
+    children about fourteen visits, which is not a search, it is noise. The risk taken in
+    exchange is that the best exploration constant could differ between the two policies,
+    which is checked afterwards with a single confirming match rather than assumed away.
+    """
+    rows = []
+
+    def mcts(spec, count=simulations):
+        return MctsAgent(count, playout=spec, seed=seed)
+
+    # The rollout policy, the switch the phase is named after. Equal simulations, so the
+    # greedy side is being given an order of magnitude more work per simulation -- which
+    # is the point of also running it at equal time.
+    rows.append(_run_match(mcts(UCT, rollout_simulations), mcts(RANDOM, rollout_simulations),
+                           games, seed, opening_plies, UNLIMITED,
+                           f"simulations={rollout_simulations}", question="rollout"))
+
+    base = RANDOM
+
+    # The exploration constant. C = sqrt(2) is the textbook value for rewards on [0, 1].
+    for value in (0.4, 0.7, 1.0, 2.0):
+        rows.append(_run_match(
+            mcts(replace(base, exploration=value)), mcts(base), games, seed, opening_plies,
+            UNLIMITED, f"simulations={simulations}", question="exploration",
+        ))
+
+    # Tree reuse, the root rule, the first-visit order and the solver.
+    for question, spec in (
+        ("reuse", replace(base, reuse=True)),
+        ("root", replace(base, root="mean")),
+        ("order", replace(base, order="left_to_right")),
+        ("solver", replace(base, solver=True)),
+    ):
+        rows.append(_run_match(mcts(spec), mcts(base), games, seed, opening_plies,
+                               UNLIMITED, f"simulations={simulations}", question=question))
+    return rows
+
+
+def mcts_rollout_at_equal_time(games: int, seed: int, opening_plies: int,
+                               seconds: float) -> list[dict]:
+    """The other half of the rollout ablation, and the half that decides it.
+
+    A greedy rollout is worth more per simulation and costs about an order of magnitude
+    more positions, so at equal wall clock the random policy gets roughly fourteen times
+    the samples. Which of the two wins is not deducible from the equal-simulation match
+    and has to be run. **This row comes from a clock and is therefore not pinned
+    anywhere.**
+
+    The exploration constant is settled here too, and at a sample size that can settle it:
+    the 120-game sweep put every value of C within 1.2 sigma of every other, which is a
+    trend and not a result. Five hundred games resolve about 4.5 points at 2 sigma.
+    """
+    cap = 1_000_000  # the clock is the binding constraint; the count must not be
+    rows = [_run_match(
+        MctsAgent(cap, playout=UCT, seed=seed),
+        MctsAgent(cap, playout=RANDOM, seed=seed),
+        games, seed, opening_plies, Budget(time=seconds), f"time={seconds:g}s",
+        question="rollout",
+    )]
+    rows.append(_run_match(
+        MctsAgent(500, playout=replace(RANDOM, exploration=0.4), seed=seed),
+        MctsAgent(500, playout=RANDOM, seed=seed),
+        500, seed, opening_plies, UNLIMITED, "simulations=500", question="exploration",
+    ))
+    return rows
+
+
+def mcts_vs_alphabeta(games: int, seed: int, opening_plies: int,
+                      node_budget: int, times: tuple[tuple[float, int], ...]) -> list[dict]:
+    """The comparison the email promised, run twice on purpose.
+
+    The mentor's email names MCTS "compared with alpha-beta under equal time limits", so
+    the timed match is a contractual deliverable and not a methodological preference. It
+    is also the one measurement in this project that comes from a wall clock, which
+    Phase 9 learned the hard way is the axis that does not reproduce: a timed 540-game
+    match said 44.3% and its node-budgeted twin said 48.5%, and the second was the
+    controlled one. So both are run, both are reported, and both sides' realised cost is
+    quoted in both units.
+
+    The node budget is Phase 9's own 4,000, which keeps the two phases on one axis -- and
+    exposes the unit problem at its sharpest, because 4,000 positions is a depth-8-ish
+    alpha-beta search and about nineteen greedy MCTS simulations.
+
+    The alpha-beta side is the full Phase 10 stack under iterative deepening, which is the
+    only configuration that can be handed a clock at all: a fixed-depth search has no
+    answer until it finishes and simply ignores a time budget.
+    """
+    cap = 1_000_000
+
+    def timed_alphabeta():
+        return NegamaxAgent(CELLS, deepening=ITERATIVE, seed=seed)
+
+    rows = []
+    for spec in (UCT, RANDOM):
+        rows.append(_run_match(
+            MctsAgent(cap, playout=spec, seed=seed), timed_alphabeta(),
+            games, seed, opening_plies, Budget(nodes=node_budget), f"nodes={node_budget}",
+            question="mcts_vs_alphabeta",
+        ))
+    for seconds, count in times:
+        for spec in (UCT, RANDOM):
+            rows.append(_run_match(
+                MctsAgent(cap, playout=spec, seed=seed), timed_alphabeta(),
+                count, seed, opening_plies, Budget(time=seconds), f"time={seconds:g}s",
+                question="mcts_vs_alphabeta",
+            ))
+    return rows
+
+
+def mcts_cost(positions: int, simulations: int) -> list[dict]:
+    """What one simulation costs, which is what the interface has to price a move with.
+
+    Measured over the same stated sample every cost table in `session.py` uses: the empty
+    board plus four random openings at each of 2, 4, 6, 8, 10 and 12 plies, seed 2026.
+    Unlike a tree search, MCTS costs almost the same everywhere -- it does a fixed number
+    of simulations whatever the position -- so a single seconds-per-simulation figure is
+    a defensible estimate in a way that a single seconds-per-depth figure never was
+    (thesis point P11).
+    """
+    boards = [Bitboard()]
+    rng = random.Random(2026)
+    for plies in (2, 4, 6, 8, 10, 12):
+        for _ in range(4):
+            board = Bitboard()
+            while board.moves_played < plies:
+                board.play(rng.choice(board.legal_moves()))
+                if board.is_terminal():
+                    board = Bitboard()
+            boards.append(board)
+    boards = boards[:positions] if positions else boards
+
+    rows = []
+    for spec in MCTS_PLAYOUTS:
+        agent = MctsAgent(simulations, playout=spec, seed=2026)
+        worst = 0.0
+        total_seconds = 0.0
+        total: dict = {}
+        for board in boards:
+            agent.new_game(2026)
+            started = time.perf_counter()
+            _, stats = agent.choose_move(board.copy())
+            elapsed = time.perf_counter() - started
+            worst = max(worst, elapsed)
+            total_seconds += elapsed
+            _mcts_accumulate(total, stats)
+        rows.append(
+            {
+                **_mcts_row(total, spec, simulations),
+                "budget": "simulations",
+                "positions": len(boards),
+                "nodes": total["nodes"],
+                "seconds": round(total_seconds, 3),
+                "worst_seconds": round(worst, 4),
+                "worst_us_per_simulation": round(1e6 * worst / simulations, 2),
+                "mean_us_per_simulation": round(
+                    1e6 * total_seconds / (len(boards) * simulations), 2
+                ),
+                "nodes_per_second": round(total["nodes"] / total_seconds),
+            }
+        )
+        row = rows[-1]
+        print(
+            f"{spec.name:<26} {row['nodes_per_simulation']:>7} nodes/sim  "
+            f"worst {row['worst_us_per_simulation']:>8.2f} us/sim  "
+            f"mean {row['mean_us_per_simulation']:>8.2f} us/sim  "
+            f"{row['nodes_per_second']:>10,} nodes/s",
+            flush=True,
+        )
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--nodes", action="store_true")
@@ -1632,6 +2171,14 @@ def main() -> None:
     parser.add_argument("--scout-games", action="store_true")
     parser.add_argument("--scout-ordering", action="store_true")
     parser.add_argument("--scout-deepening", action="store_true")
+    parser.add_argument("--mcts-cost", action="store_true")
+    parser.add_argument("--mcts-tactics", action="store_true")
+    parser.add_argument("--mcts-convergence", action="store_true")
+    parser.add_argument("--mcts-ablation", action="store_true")
+    parser.add_argument("--mcts-rollout-time", action="store_true")
+    parser.add_argument("--mcts-vs-alphabeta", action="store_true")
+    parser.add_argument("--mcts-games", type=int, default=120)
+    parser.add_argument("--mcts-simulations", type=int, default=500)
     parser.add_argument("--max-depth", type=int, default=8)
     parser.add_argument("--timed-depth", type=int, default=6)
     parser.add_argument("--unpruned-depth", type=int, default=8)
@@ -1720,6 +2267,41 @@ def main() -> None:
         write(scout_by_ordering((5, 6, 7)), SCOUT_ORDERING_CSV)
     if args.scout_deepening:
         write(scout_under_deepening((4, 5, 6, 7)), SCOUT_DEEPENING_CSV)
+    if args.mcts_cost:
+        write(mcts_cost(positions=0, simulations=1000), MCTS_COST_CSV)
+    if args.mcts_tactics:
+        write(mcts_tactics((25, 50, 100, 250, 1000), positions=150), MCTS_TACTICS_CSV)
+    if args.mcts_convergence:
+        write(mcts_convergence((100, 1000, 5000), depth=5), MCTS_CONVERGENCE_CSV)
+    if args.mcts_ablation:
+        write(
+            mcts_ablation(
+                games=args.mcts_games, seed=args.seed,
+                opening_plies=args.opening_plies, simulations=args.mcts_simulations,
+                rollout_simulations=200,
+            ),
+            MCTS_ABLATION_CSV,
+        )
+    if args.mcts_rollout_time:
+        # Appended rather than written: it is the same question as the last block, at a
+        # budget that cannot be pinned, so it belongs beside it and labelled.
+        write(
+            read_rows(MCTS_ABLATION_CSV)
+            + mcts_rollout_at_equal_time(
+                games=args.mcts_games, seed=args.seed,
+                opening_plies=args.opening_plies, seconds=0.05,
+            ),
+            MCTS_ABLATION_CSV,
+        )
+    if args.mcts_vs_alphabeta:
+        write(
+            mcts_vs_alphabeta(
+                games=args.mcts_games, seed=args.seed,
+                opening_plies=args.opening_plies, node_budget=4_000,
+                times=((0.05, args.mcts_games), (0.25, 50)),
+            ),
+            MCTS_VS_ALPHABETA_CSV,
+        )
 
 
 if __name__ == "__main__":

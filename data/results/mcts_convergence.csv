@@ -1,0 +1,10 @@
+playout,iterations,exploration,simulations,rollouts,terminal_leaves,max_tree_depth,nodes_per_simulation,budget,depth,positions,mean_winning_moves,mean_legal_moves,preserved_rate,mean_visit_share,nodes,seconds
+uct_greedy,100,1.4142,6000,3425,2575,4,36.1,simulations,5,60,2.1,6.62,0.95,0.2957,216344,0.36
+uct_greedy,1000,1.4142,60000,17463,42537,6,21.0,simulations,5,60,2.1,6.62,1.0,0.5966,1261337,2.12
+uct_greedy,5000,1.4142,300000,46320,253680,8,11.8,simulations,5,60,2.1,6.62,1.0,0.7391,3547413,6.28
+uct_random,100,1.4142,6000,3300,2700,4,5.5,simulations,5,60,2.1,6.62,0.95,0.3402,33065,0.09
+uct_random,1000,1.4142,60000,16348,43652,6,3.7,simulations,5,60,2.1,6.62,0.9667,0.6216,222908,0.57
+uct_random,5000,1.4142,300000,37313,262687,8,2.5,simulations,5,60,2.1,6.62,0.9833,0.7813,745379,1.86
+uct_greedy+solver,100,1.4142,867,720,147,3,87.1,simulations,5,60,2.1,6.62,0.9667,0.4126,75504,0.12
+uct_greedy+solver,1000,1.4142,1957,1434,523,5,69.6,simulations,5,60,2.1,6.62,1.0,0.4143,136296,0.23
+uct_greedy+solver,5000,1.4142,4016,2465,1551,6,52.8,simulations,5,60,2.1,6.62,1.0,0.4144,211957,0.37

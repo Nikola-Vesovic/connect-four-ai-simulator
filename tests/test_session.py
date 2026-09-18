@@ -35,9 +35,11 @@ from session import (
     MAX_DEPTH_PRUNED,
     MAX_DEPTH_TABLE,
     MAX_DEPTH_UNPRUNED,
+    MCTS_WORST_SECONDS_PER_SIMULATION,
     MODES,
     ORDERED_WORST_SECONDS,
     PRUNED_WORST_SECONDS,
+    SIMULATION_BUDGETS,
     TABLE_WORST_SECONDS,
     TIME_BUDGETS,
     UNPRUNED_WORST_SECONDS,
@@ -45,7 +47,9 @@ from session import (
     SeatSpec,
     Session,
 )
+from agents.mcts import MctsAgent
 from search.deepening import DIRECT, ITERATIVE
+from search.playout import SQRT2
 from search.scouting import NO_SCOUT, SCOUT
 from search.stats import UNLIMITED, Budget
 from search.transposition import NO_TABLE, TABLE
@@ -197,6 +201,75 @@ def test_switches_only_apply_where_they_mean_something():
     assert machine("negamax", pruning=True, transposition=False).can_transpose
     assert not machine("negamax", pruning=True, transposition=False).transposition_active
     assert not machine("minimax").can_transpose
+
+
+# ---------------------------------------------------------------------------- Phase 11
+
+
+def test_mcts_is_a_fifth_entry_in_the_picker_and_not_a_sixth_checkbox():
+    """The rule Phase 3 and Phase 10 both applied, coming out the other way for once.
+
+    Alpha-beta and NegaScout are checkboxes because they provably cannot change the move
+    played -- they buy the same answer for less work. MCTS is an algorithm by exactly that
+    test: it computes no minimax value, never calls the evaluation function, and plays
+    different moves on purpose. So the five alpha-beta switches mean nothing for it and
+    the panel greys every one of them out.
+    """
+    assert ALGORITHM_KEYS == ("random", "greedy", "minimax", "negamax", "mcts")
+    spec = machine("mcts")
+    assert spec.searches_a_tree
+    assert not any(
+        (spec.spec.uses_pruning, spec.spec.uses_ordering, spec.spec.uses_transposition,
+         spec.spec.uses_scouting, spec.spec.uses_evaluation, spec.spec.uses_depth)
+    )
+    assert not spec.prunes and not spec.can_order and not spec.can_transpose
+    assert not spec.can_scout
+    # The one switch it shares, and it means the same thing in both: stop on the clock
+    # instead of at a fixed amount of work.
+    assert spec.can_deepen
+    assert not machine("negamax").searches_a_tree
+
+
+def test_the_mcts_switches_reach_the_agent_and_are_named_there():
+    spec = machine("mcts", simulations=250)
+    assert spec.build(seed=1).name == "mcts-250"
+    assert isinstance(spec.build(seed=1), MctsAgent)
+    assert replace(spec, greedy_rollouts=False).build().name == "mcts-250-uct_random"
+    assert replace(spec, tree_reuse=True).build().name == "mcts-250-uct_greedy+reuse"
+    assert replace(spec, solver=True).build().name == "mcts-250-uct_greedy+solver"
+    assert replace(spec, exploration=0.7).build().name == "mcts-250-uct_greedy+c0.7"
+    assert spec.playout_spec.exploration == SQRT2
+
+
+def test_the_mcts_estimate_is_linear_in_the_simulations_it_was_measured_over():
+    """The cost model is different in kind from the four depth tables above, and the
+    reason is a property of the algorithm: MCTS runs a fixed number of simulations
+    whatever the position, so one worst case per simulation covers every position. A tree
+    search is the opposite -- thesis point P11 is the story of that difference -- which is
+    why the depth caps needed a table each."""
+    for budget in SIMULATION_BUDGETS:
+        spec = machine("mcts", simulations=budget)
+        assert spec.estimated_seconds == pytest.approx(
+            budget * MCTS_WORST_SECONDS_PER_SIMULATION["greedy"]
+        )
+        cheap = replace(spec, greedy_rollouts=False)
+        assert cheap.estimated_seconds < spec.estimated_seconds
+    # Ticking the clock replaces the estimate with the budget, exactly as it does for
+    # alpha-beta -- the one switch in the window that makes the worst case smaller.
+    timed = machine("mcts", simulations=25_000, deepening=True, time_budget=0.5)
+    assert timed.estimated_seconds == 0.5
+    assert timed.budget == Budget(time=0.5)
+    assert timed.build().iterations > max(SIMULATION_BUDGETS)
+
+
+def test_the_simulation_budget_does_not_disturb_the_depth_setting():
+    """MCTS has no depth to clamp, so ticking its clock must not write 42 into a field the
+    other four algorithms share."""
+    session = Session((HUMAN, machine("negamax", depth=6)))
+    session.set_seat(1, machine("mcts", depth=6, deepening=True))
+    assert session.seats[1].depth == 6
+    stored = session.set_seat(1, machine("negamax", depth=6, deepening=True))
+    assert stored.depth == MAX_DEPTH_DEEPENING
 
     # A pruning flag set on an algorithm that cannot prune must not raise the depth cap.
     assert not machine("minimax", pruning=True).prunes

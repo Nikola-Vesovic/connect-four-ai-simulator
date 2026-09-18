@@ -210,6 +210,86 @@ def test_a_machine_move_under_a_clock_comes_back_inside_its_budget(game: Game):
     assert 1 <= stats.depth < stats.depth_cap
 
 
+def test_choosing_mcts_swaps_the_whole_optimisation_block_without_moving_a_pixel(game: Game):
+    """Phase 11's answer to "the panel is alpha-beta shaped".
+
+    MCTS is a fifth algorithm rather than a sixth checkbox, so it brings five switches of
+    its own -- and they take over the same five rows, because a greyed-out
+    "alfa-beta odsecanje" is an honest label for a negamax seat and a meaningless one
+    here. Exactly one of the two blocks is visible at a time, which is what keeps the
+    window at the size Phase 10 left it.
+    """
+    place = config.seat_layout(1)
+    game.session.set_seat(1, replace(game.session.seats[1], controller=Controller.MACHINE))
+
+    def rows(names):
+        return [w for w in game.widgets
+                if getattr(w, "label", None) in names and w.rect.x == place.inner_x]
+
+    tree = rows({"alfa-beta odsecanje", "sortiranje poteza", "tabela transpozicija",
+                 "progresivno produbljivanje", "negascout", "dubina"})
+    monte = rows({"greedy simulacije", "čuvanje stabla", "dokazivanje ishoda",
+                  "vremensko ograničenje", "istraživanje C", "simulacija"})
+    assert len(tree) == len(monte) == 6
+
+    assert all(w.visible() for w in tree) and not any(w.visible() for w in monte)
+    game.session.set_seat(1, replace(game.session.seats[1], algorithm="mcts"))
+    assert all(w.visible() for w in monte) and not any(w.visible() for w in tree)
+
+    # Every row of the new block reaches the session, and a hidden control ignores a click
+    # that lands on it -- the two blocks share their rectangles.
+    before = game.session.seats[1].playout_spec
+    for widget in monte:
+        widget.click(widget.rect.center)
+    assert game.session.seats[1].playout_spec != before
+    assert game.session.seats[1].greedy_rollouts is False
+    assert game.session.seats[1].tree_reuse is True
+    assert game.session.seats[1].solver is True
+    assert game.session.seats[1].deepening is True
+
+    game.session.set_seat(1, replace(game.session.seats[1], algorithm="negamax"))
+    hidden = game.session.seats[1].pruning
+    box = next(w for w in monte if w.label == "greedy simulacije")
+    assert box.click(box.rect.center) is False
+    assert game.session.seats[1].pruning == hidden
+
+    game.draw()  # both states have to be drawable, which is the other half of the claim
+
+
+def test_the_panel_reports_a_monte_carlo_move_in_its_own_units(game: Game):
+    """The nine statistics lines belong to the algorithm, not to alpha-beta. Cutoffs, the
+    first-move cutoff rate, transposition returns and re-searches do not exist here, so
+    rather than nine dashes the block is replaced -- and the two lines that do mean the
+    same thing in both, positions visited and depth reached, keep their names."""
+    game.session.set_seat(1, replace(
+        game.session.seats[1], controller=Controller.MACHINE, algorithm="mcts",
+        simulations=100, greedy_rollouts=False,
+    ))
+    game.session.commit(3, None)  # seat 1 to move
+    move, stats = game.session.plan()
+    game.session.commit(move, stats)
+    assert stats.simulations == 100
+    assert sum(stats.visits) == 100
+    assert stats.cutoffs == 0 and stats.tt_probes == 0 and stats.scout_searches == 0
+    game.draw()
+
+
+def test_the_panel_never_calls_a_real_cost_negligible(game: Game):
+    """Found by looking at the Phase 11 figure rather than by a test, which is the honest
+    way to record it: the cost line keyed off `uses_depth`, so an MCTS seat with a quarter
+    of a second per move was announced as costing nothing. Anything that searches has a
+    cost and the panel has to say it; only the agents whose work is bounded by their own
+    definition -- random and greedy -- are free."""
+    for algorithm, free in (("random", True), ("greedy", True), ("minimax", False),
+                            ("negamax", False), ("mcts", False)):
+        spec = replace(game.session.seats[1], controller=Controller.MACHINE,
+                       algorithm=algorithm)
+        game.session.set_seat(1, spec)
+        estimate = game.session.seats[1].estimated_seconds
+        assert (estimate == 0.0) is free, (algorithm, estimate)
+        game.draw()
+
+
 def test_the_ordering_checkbox_is_dead_while_pruning_is_off(game: Game):
     """There is nothing for a better move order to cut earlier when nothing is being cut,
     so the panel greys it out rather than offering a switch that does nothing."""
@@ -287,6 +367,16 @@ def test_the_window_keeps_drawing_while_the_search_runs(game: Game):
     would be reported as unresponsive. The threshold is three times under that and three
     times over a plausible scheduling hiccup, because this is a timing test and a machine
     under load must not be able to fail it for the wrong reason.
+
+    **The frame limiter is part of the test, not a concession** (added in Phase 11, after
+    this test started failing two runs in three for a reason that had nothing to do with
+    the code under test). The real loop in `Game.run` ends every iteration with
+    `clock.tick(FPS)`. A test loop without one spins as fast as CPython can dispatch
+    bytecode, holds the GIL, and can starve the very worker thread whose responsiveness it
+    is measuring -- and it gets worse every time the panel gains a widget to draw. The
+    assertions below are unchanged and still catch a search moved back onto the event
+    loop: that mutant spends the whole 0.6 s inside one `update()`, which fails both the
+    frame count and the frame time.
     """
     search_seconds = 0.6
     game.session.set_seat(0, SeatSpec(controller=Controller.MACHINE, algorithm="random"))
@@ -304,6 +394,7 @@ def test_the_window_keeps_drawing_while_the_search_runs(game: Game):
         if game.thinking:
             frames_while_thinking += 1
             slowest_frame = max(slowest_frame, elapsed)
+        game.clock.tick(config.FPS)
 
     assert game.session.board.moves_played == 1, "the search never came back"
     # The robust half: a synchronous search spans exactly one frame, a threaded one at

@@ -112,6 +112,29 @@ class SearchStats:
     scout_searches: int = 0  # moves searched with a null window instead of the real one
     researches: int = 0  # those that failed high and had to be searched again
 
+    # ---------------------------------------------------------------------------- MCTS
+    #
+    # Phase 11, and the block exists because **an MCTS iteration is not a search node**.
+    # One simulation walks a path, adds a node and plays a whole game out, so a budget
+    # expressed in simulations and a budget expressed in nodes differ by two orders of
+    # magnitude. Both are recorded, and every comparison in the thesis says which one it
+    # used. `nodes` keeps its meaning from Phase 4 -- a position reached by making a move
+    # -- which for MCTS counts tree descents, expansions, rollout plies and the probe
+    # positions a heuristic rollout policy looks at. It is the only unit in which this
+    # agent and alpha-beta can be put on the same axis.
+    #
+    # Three of the existing fields are reused rather than shadowed: `depth` is the deepest
+    # the tree got (a result, in the sense Phase 9 gave the word), `leaves` is the number
+    # of simulations that ended at a terminal node already in the tree and so needed no
+    # rollout at all, and `value` stays None unless the solver actually proved something.
+    simulations: int = 0  # complete select / expand / simulate / backpropagate cycles
+    rollouts: int = 0  # simulations that played a game out; leaves + rollouts = simulations
+    tree_nodes: int = 0  # nodes in the tree when the search stopped
+    tree_reused: int = 0  # simulations inherited from the previous move's tree
+    root_visits: int = 0  # visits to the child that was played
+    root_reward: float = 0.0  # its accumulated reward, on [0, 1] per simulation
+    visits: tuple[int, ...] = ()  # simulations spent on each column, root order
+
     # --------------------------------------------------------- transposition table
     #
     # Phase 8, and reported for the same reason as the ordering-quality figures above: a
@@ -146,6 +169,27 @@ class SearchStats:
     def research_rate(self) -> float:
         """Share of null-window searches that had to be redone. 0.0 is the ideal."""
         return self.researches / self.scout_searches if self.scout_searches else 0.0
+
+    @property
+    def win_rate(self) -> float:
+        """What MCTS thinks of the move it played, as a probability of winning from here.
+
+        It is the mean reward of the child that was chosen, so a draw counts a half in
+        exactly the way the match tables count one. It is not a score on the
+        `core.types.Score` scale and must never be printed as one.
+        """
+        return self.root_reward / self.root_visits if self.root_visits else 0.0
+
+    @property
+    def visit_share(self) -> float:
+        """Share of all root simulations that went to the move that was played.
+
+        The concentration of the visit distribution, and the honest way to say how sure
+        MCTS was: 1/7 is a search that learned nothing, 1.0 is one that never looked
+        anywhere else.
+        """
+        total = sum(self.visits)
+        return self.root_visits / total if total else 0.0
 
     @property
     def tt_hit_rate(self) -> float:

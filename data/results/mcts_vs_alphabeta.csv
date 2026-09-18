@@ -1,0 +1,7 @@
+a,b,budget,games,opening_plies,a_first_score,b_first_score,score,sigma,wins,draws,losses,first_mover_wins,mean_plies,a_nodes_per_move,b_nodes_per_move,a_ms_per_move,b_ms_per_move,digest,question
+mcts-1000000,alphabeta-d42-iterative+pv+order,nodes=4000,120,4,0.2083,0.1083,0.1583,0.0324,17,4,99,0.5333,22.92,4090.6,3624.5,7.06,54.101,56da93fd,mcts_vs_alphabeta
+mcts-1000000-uct_random,alphabeta-d42-iterative+pv+order,nodes=4000,120,4,0.275,0.2,0.2375,0.0383,27,3,90,0.525,27.34,4005.9,3605.4,9.767,52.741,e1678d5c,mcts_vs_alphabeta
+mcts-1000000,alphabeta-d42-iterative+pv+order,time=0.05s,120,4,0.4583,0.3833,0.4208,0.0447,49,3,68,0.525,30.61,28583.4,3237.2,50.172,41.713,e109cf2d,mcts_vs_alphabeta
+mcts-1000000-uct_random,alphabeta-d42-iterative+pv+order,time=0.05s,120,4,0.4333,0.3833,0.4083,0.0435,45,8,67,0.4917,29.52,20781.9,3338.2,50.162,42.49,9803b57b,mcts_vs_alphabeta
+mcts-1000000,alphabeta-d42-iterative+pv+order,time=0.25s,50,4,0.42,0.58,0.5,0.07,24,2,24,0.4,33.36,139074.5,14501.3,250.282,179.432,8968fb06,mcts_vs_alphabeta
+mcts-1000000-uct_random,alphabeta-d42-iterative+pv+order,time=0.25s,50,4,0.54,0.34,0.44,0.068,20,4,26,0.56,32.76,104787.0,14965.3,250.681,180.249,d3f3397c,mcts_vs_alphabeta

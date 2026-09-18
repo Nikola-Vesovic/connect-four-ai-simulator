@@ -1,0 +1,4 @@
+playout,iterations,exploration,simulations,rollouts,terminal_leaves,max_tree_depth,nodes_per_simulation,budget,positions,nodes,seconds,worst_seconds,worst_us_per_simulation,mean_us_per_simulation,nodes_per_second
+uct_greedy,1000,1.4142,25000,22759,2241,7,214.3,simulations,25,5358025,8.45,0.5481,548.09,338.0,634090
+uct_random,1000,1.4142,25000,22779,2221,6,15.1,simulations,25,378057,0.894,0.0487,48.68,35.74,423088
+uct_greedy+solver,1000,1.4142,21780,19559,2221,7,237.7,simulations,25,5176191,8.166,0.5442,544.18,326.65,633852
