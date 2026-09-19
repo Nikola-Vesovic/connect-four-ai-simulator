@@ -1,0 +1,7 @@
+label,agent,budget,budget_unit,positions,mean_depth,min_depth,max_depth,mean_nodes,mean_ms
+random,random,4000 nodes,nodes,25,0.0,0,0,0.0,0.0
+greedy,greedy,4000 nodes,nodes,25,2.0,2,2,14.0,0.02
+ab-plain,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,25,5.52,5,7,4000.0,74.98
+ab-order,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,25,5.8,5,7,4000.0,73.95
+ab-full,alphabeta-d42-iterative+pv+order,4000 nodes,nodes,25,6.24,6,8,4000.0,69.03
+mcts,mcts-1000000,4000 nodes,nodes,25,2.04,2,3,4157.0,6.64

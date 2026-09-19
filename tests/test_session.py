@@ -82,11 +82,18 @@ def test_nothing_headless_imports_pygame():
 
     Checked in a fresh interpreter, because inside the test suite pygame may already have
     been imported by the smoke test and `sys.modules` would no longer prove anything.
+
+    Phase 12 makes this assertion do a second job. macOS starts worker processes with
+    `spawn`, so a worker **is** a fresh interpreter that re-imports whichever module
+    holds the work function -- `experiments.tournament` -- and, as `__mp_main__`, the
+    module that was run. Asserting that importing them leaves pygame out is therefore
+    exactly the assertion that a tournament worker is pygame-free.
     """
     root = Path(__file__).resolve().parent.parent
     program = (
         "import sys;"
-        "import session, experiments.match, experiments.scaling, experiments.reference;"
+        "import session, experiments.match, experiments.scaling, experiments.reference,"
+        " experiments.tournament, experiments.runner;"
         "assert 'pygame' not in sys.modules, sorted(m for m in sys.modules if 'pygame' in m);"
         "print('clean')"
     )

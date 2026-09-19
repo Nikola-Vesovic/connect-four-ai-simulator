@@ -1,0 +1,18 @@
+{
+  "name": "speedup",
+  "note": "Sized to run in a few minutes serially, so the worker-count sweep can afford a real serial baseline. Three agents, one budget, one variable: the number of workers.",
+  "games": 60,
+  "seed": 2026,
+  "opening_plies": 4,
+  "budget": {"nodes": 4000},
+  "agents": [
+    {"label": "greedy", "algorithm": "greedy"},
+    {
+      "label": "ab-full",
+      "algorithm": "negamax",
+      "depth": 42,
+      "deepening": "iterative+pv+order"
+    },
+    {"label": "mcts", "algorithm": "mcts", "iterations": 1000000, "playout": "uct_greedy"}
+  ]
+}

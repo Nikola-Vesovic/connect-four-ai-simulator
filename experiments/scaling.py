@@ -82,7 +82,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import math
 import random
 import time
 from dataclasses import replace
@@ -96,7 +95,7 @@ from core.bitboard import Bitboard
 from core.rules import CELLS
 from core.types import Score
 from experiments import reference
-from experiments.match import Tally, play_match
+from experiments.match import Tally, play_match, standard_error
 from search.deepening import DIRECT, EVEN, ITERATIVE, NAIVE, Deepening
 from search.evaluation import DEFAULT, ZERO
 from search.ordering import DYNAMIC, LEFT, RANDOM as RANDOM_ORDER, STATIC, Ordering
@@ -205,19 +204,9 @@ SCOUTS: tuple[Scout, ...] = (NO_SCOUT, SCOUT, WIDE, DEEP)
 # number in these files is produced by a depth budget and says so.
 BUDGET = "depth"
 
-
-def standard_error(tally: Tally) -> float:
-    """How far the measured score could reasonably be from the true one, one sigma.
-
-    Draws count a half, so the per-game score is not a Bernoulli variable; this uses its
-    actual variance rather than p(1-p), which would understate a drawish pairing.
-    """
-    if tally.games < 2:
-        return 0.0
-    outcomes = [1.0] * tally.wins + [0.5] * tally.draws + [0.0] * tally.losses
-    mean = sum(outcomes) / len(outcomes)
-    variance = sum((value - mean) ** 2 for value in outcomes) / (len(outcomes) - 1)
-    return math.sqrt(variance / len(outcomes))
+# `standard_error` moved to `experiments.match` in Phase 12, next to the `Tally` whose
+# variance it computes, so a tournament worker does not import this 2,000-line module to
+# get it. Imported above rather than dropped, because it is part of this module's surface.
 
 
 def nodes_by_depth(max_depth: int, timed_depth: int) -> list[dict]:

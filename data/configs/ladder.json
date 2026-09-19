@@ -1,0 +1,40 @@
+{
+  "name": "ladder",
+  "note": "One node budget for every agent, i.e. equal positions examined. The three alpha-beta rungs differ only in which optimisations are on, so at a fixed budget the difference between them is the depth those optimisations buy - which is the conversion of speed into strength that thesis point P18 said was not yet demonstrated anywhere in this project. The MCTS row is on the biased axis by construction (P29/P31: 4000 positions is ~54 ms of alpha-beta and ~7 ms of MCTS) and is cross-referenced to the equal-time numbers in mcts_vs_alphabeta.csv; it is here to be placed on the ladder, not to settle the comparison. SIZED BEFORE RUNNING: 500 games resolves 4.5 points at 2 sigma, against P24's 540-game/4.3-point pairing and P30's ~1100 games for 3 points. REALISED: 7500 games in 1268.6 s at eight workers (5.91 games/s), which is about 76 minutes serial - the phase buys the sample size, not the wait.",
+  "games": 500,
+  "seed": 2026,
+  "opening_plies": 4,
+  "budget": {"nodes": 4000},
+  "agents": [
+    {"label": "random", "algorithm": "random"},
+    {"label": "greedy", "algorithm": "greedy"},
+    {
+      "label": "ab-plain",
+      "algorithm": "negamax",
+      "depth": 42,
+      "ordering": "center_first",
+      "transposition": "no_table",
+      "deepening": "iterative+pv+order",
+      "scouting": "no_scout"
+    },
+    {
+      "label": "ab-order",
+      "algorithm": "negamax",
+      "depth": 42,
+      "ordering": "center_first+killers+history",
+      "transposition": "no_table",
+      "deepening": "iterative+pv+order",
+      "scouting": "no_scout"
+    },
+    {
+      "label": "ab-full",
+      "algorithm": "negamax",
+      "depth": 42,
+      "ordering": "center_first+killers+history",
+      "transposition": "dict",
+      "deepening": "iterative+pv+order",
+      "scouting": "negascout"
+    },
+    {"label": "mcts", "algorithm": "mcts", "iterations": 1000000, "playout": "uct_greedy"}
+  ]
+}

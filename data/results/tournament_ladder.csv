@@ -1,0 +1,16 @@
+a,b,a_agent,b_agent,budget,budget_unit,workers,games,opening_plies,a_first_score,a_first_sigma,a_second_score,a_second_sigma,score,sigma,wins,draws,losses,first_mover_score,mean_plies,a_nodes_per_move,b_nodes_per_move,a_ms_per_move,b_ms_per_move,elo_diff,elo_diff_sigma,digest
+random,greedy,random,greedy,4000 nodes,nodes,8,500,4,0.012,0.0069,0.004,0.004,0.008,0.004,4,0,496,0.504,13.54,0.0,13.0,0.002,0.059,-837.4,87.3,fc834d34
+random,ab-plain,random,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,8,500,4,0.0,0.0,0.0,0.0,0.0,0.0,0,0,500,0.5,12.84,0.0,3996.4,0.007,154.068,-inf,inf,6024537f
+random,ab-order,random,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,8,500,4,0.0,0.0,0.0,0.0,0.0,0.0,0,0,500,0.5,12.84,0.0,3996.7,0.009,153.833,-inf,inf,a82ab96b
+random,ab-full,random,alphabeta-d42-iterative+pv+order,4000 nodes,nodes,8,500,4,0.0,0.0,0.0,0.0,0.0,0.0,0,0,500,0.5,13.09,0.0,3993.5,0.007,140.67,-inf,inf,524cc2f5
+random,mcts,random,mcts-1000000,4000 nodes,nodes,8,500,4,0.024,0.0097,0.02,0.0089,0.022,0.0066,11,0,489,0.502,13.76,0.0,4130.9,0.005,13.652,-659.2,53.0,27d11717
+greedy,ab-plain,greedy,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,8,500,4,0.164,0.0221,0.138,0.0198,0.151,0.0148,57,37,406,0.476,26.3,15.2,3649.4,0.055,119.043,-300.0,20.1,accf79cd
+greedy,ab-order,greedy,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,8,500,4,0.182,0.0223,0.152,0.0209,0.167,0.0153,61,45,394,0.47,26.11,15.2,3640.4,0.059,123.98,-279.2,19.1,a9d27b2c
+greedy,ab-full,greedy,alphabeta-d42-iterative+pv+order,4000 nodes,nodes,8,500,4,0.132,0.0195,0.138,0.02,0.135,0.014,48,39,413,0.458,25.37,15.3,3581.4,0.069,116.317,-322.7,20.8,954951df
+greedy,mcts,greedy,mcts-1000000,4000 nodes,nodes,8,500,4,0.386,0.0285,0.208,0.0239,0.297,0.019,120,57,323,0.532,24.89,13.7,4083.9,0.046,14.811,-149.7,15.8,e2a3d515
+ab-plain,ab-order,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,nodes,8,500,4,0.572,0.0304,0.398,0.0299,0.485,0.0217,227,31,242,0.556,31.1,3578.2,3575.7,123.394,120.844,-10.4,15.1,cdafeec4
+ab-plain,ab-full,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,alphabeta-d42-iterative+pv+order,4000 nodes,nodes,8,500,4,0.42,0.03,0.384,0.0292,0.402,0.0209,179,44,277,0.474,32.59,3550.1,3437.1,120.561,108.811,-69.0,15.1,89fec292
+ab-plain,mcts,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,mcts-1000000,4000 nodes,nodes,8,500,4,0.874,0.0207,0.782,0.0253,0.828,0.0165,407,14,79,0.532,21.42,3724.2,4094.7,127.203,14.169,273.0,20.1,de5509d6
+ab-order,ab-full,alphabeta-d42-no_table-iterative+pv+order-no_scout,alphabeta-d42-iterative+pv+order,4000 nodes,nodes,8,500,4,0.458,0.0298,0.364,0.0286,0.411,0.0207,178,55,267,0.492,33.6,3523.1,3404.4,115.945,106.165,-62.5,14.9,045b9b81
+ab-order,mcts,alphabeta-d42-no_table-iterative+pv+order-no_scout,mcts-1000000,4000 nodes,nodes,8,500,4,0.888,0.0194,0.816,0.0241,0.852,0.0155,420,12,68,0.524,21.38,3726.9,4095.7,128.384,13.978,304.1,21.4,daa57fb5
+ab-full,mcts,alphabeta-d42-iterative+pv+order,mcts-1000000,4000 nodes,nodes,8,500,4,0.892,0.0193,0.818,0.0235,0.855,0.0153,420,15,65,0.522,22.16,3659.8,4092.0,97.559,11.618,308.2,21.4,90fcceac

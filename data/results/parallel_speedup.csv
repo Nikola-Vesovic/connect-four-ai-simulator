@@ -1,0 +1,10 @@
+config,variable,games,budget,budget_unit,workers,shards_per_worker,shards,seconds,games_per_second,speedup,efficiency,digest,shard_bytes,result_bytes,pool_startup_seconds
+speedup,workers,180,4000 nodes,nodes,1,8,3,77.34,2.33,1.0,1.0,c5e028aeea05,385,349,0.196
+speedup,workers,180,4000 nodes,nodes,2,8,18,41.63,4.32,1.858,0.929,c5e028aeea05,385,349,0.196
+speedup,workers,180,4000 nodes,nodes,4,8,33,28.94,6.22,2.673,0.668,c5e028aeea05,385,349,0.196
+speedup,workers,180,4000 nodes,nodes,6,8,51,23.32,7.72,3.317,0.553,c5e028aeea05,385,349,0.196
+speedup,workers,180,4000 nodes,nodes,8,8,66,21.61,8.33,3.579,0.447,c5e028aeea05,385,349,0.196
+speedup,shards_per_worker,180,4000 nodes,nodes,8,1,9,23.43,7.68,3.301,0.413,c5e028aeea05,385,349,0.196
+speedup,shards_per_worker,180,4000 nodes,nodes,8,2,18,23.04,7.81,3.356,0.42,c5e028aeea05,385,349,0.196
+speedup,shards_per_worker,180,4000 nodes,nodes,8,4,33,21.77,8.27,3.553,0.444,c5e028aeea05,385,349,0.196
+speedup,shards_per_worker,180,4000 nodes,nodes,8,16,90,21.41,8.41,3.613,0.452,c5e028aeea05,385,349,0.196

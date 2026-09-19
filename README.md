@@ -96,8 +96,10 @@ connect4/
   gui/           renderer.py (crtanje), widgets.py (kontrole), sprites.py (diskovi)       [3]
   experiments/   match.py (mec izmedju dva agenta, sa semenom)                            [4]
                  reference.py (zamrznute vrednosti), scaling.py (cvorovi i kriva)         [5-6]
-                 turniri, benchmark, ablacije, grafici                                    [12-14]
-  data/          testsets/ (referentne vrednosti), results/ (CSV), figures/
+                 tournament.py (round-robin, deonice, Elo sa intervalima)                 [12]
+                 runner.py (turnir iz JSON konfiguracije, preko vise jezgara)             [12]
+                 benchmark, ablacije, grafici                                             [13-14]
+  data/          testsets/ (referentne vrednosti), configs/ (turniri), results/ (CSV), figures/
   tests/         pytest
 ```
 
@@ -177,6 +179,32 @@ Rezultat je uvek razdvojen po tome ko je igrao prvi: sa nasumicnom igrom prvi ig
 dobija 55.4% partija (mereno u fazi 2), pa procenat pobeda bez te podele nista ne govori
 o jacini agenta. Deterministicki agenti bez `--opening-plies` igraju uvek istu partiju,
 na sta izvestaj upozorava.
+
+## Pokretanje turnira
+
+```sh
+python -m experiments.runner --config data/configs/ladder.json --workers 8
+python -m experiments.runner --config data/configs/ladder.json --check 8      # gate
+python -m experiments.runner --config data/configs/speedup.json --speedup 1,2,4,6,8 \
+       --granularity 1,2,4,16                                                # ubrzanje
+```
+
+Turnir se opisuje **JSON datotekom** u `data/configs/`: agenti, broj partija, seme,
+nasumicni otvor i budzet. Jedna komanda igra round-robin i pise dva CSV-a u
+`data/results/` — jedan red po paru i jedan red po agentu sa Elo ocenom.
+
+- **Partije se dele po jezgrima.** Partija je ciste funkcija svog rednog broja (seme para
+  je odredjeno glavnim semenom, a `new_game` brise sve sto pretrazivanje pamti izmedju
+  partija), pa deonica nije priblizna nego *ista* igra. Isti otisak se dobija i sa jednim
+  procesom i sa osam, i pri svakoj granulaciji deonica.
+- **Vremenski budzet se u paraleli ODBIJA, ne upozorava.** Mec pod satom pod opterecenjem
+  meri opterecenje: faza 9 je istih 540 partija pod satom ocenila na 44,3%, a pod budzetom
+  po cvorovima na 48,5%, i samo je drugo bio kontrolisan ogled. Uz `--workers 1` je
+  dozvoljen, a izvestaj tada kaze da se ne ponavlja.
+- **Elo nije procenat pobeda.** Ocene se dobijaju zajednickim fitom nad celim turnirom
+  (Bradley-Terry, remi vredi pola poena), sa malim priorom bez kojeg agent koji nije
+  osvojio nijedan poen nema konacnu ocenu. Interval poverenja je butstrep: isti turnir se
+  1.000 puta ponovo izvlaci iz izmerenih ucestalosti i fit se ponavlja.
 
 ## Pokretanje testova
 

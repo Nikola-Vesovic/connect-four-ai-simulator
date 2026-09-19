@@ -1,0 +1,12 @@
+{
+  "name": "smoke",
+  "note": "Small, fast, and only for the test suite: it exercises every path of the runner (round robin, sharding, merging, the Elo fit, the seat split) in about a second.",
+  "games": 8,
+  "seed": 2026,
+  "opening_plies": 4,
+  "agents": [
+    {"label": "random", "algorithm": "random"},
+    {"label": "greedy", "algorithm": "greedy"},
+    {"label": "mm2", "algorithm": "minimax", "depth": 2}
+  ]
+}

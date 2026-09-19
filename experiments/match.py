@@ -18,9 +18,10 @@ from __future__ import annotations
 import argparse
 import functools
 import hashlib
+import math
 import random
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Iterable, Sequence
 
 from agents.alphabeta import NegamaxAgent
 from agents.base import Agent
@@ -81,6 +82,28 @@ class Tally:
     def score(self) -> float:
         """Chess scoring: a win is 1, a draw a half. 0.5 means evenly matched."""
         return (self.wins + 0.5 * self.draws) / self.games if self.games else 0.0
+
+    @property
+    def points(self) -> float:
+        return self.wins + 0.5 * self.draws
+
+    def mirrored(self) -> "Tally":
+        """The same games seen from the other side of the board."""
+        return Tally(self.losses, self.draws, self.wins)
+
+
+def standard_error(tally: Tally) -> float:
+    """How far the measured score could reasonably be from the true one, one sigma.
+
+    Draws count a half, so the per-game score is not a Bernoulli variable; this uses its
+    actual variance rather than p(1-p), which would understate a drawish pairing.
+    """
+    if tally.games < 2:
+        return 0.0
+    outcomes = [1.0] * tally.wins + [0.5] * tally.draws + [0.0] * tally.losses
+    mean = sum(outcomes) / len(outcomes)
+    variance = sum((value - mean) ** 2 for value in outcomes) / (len(outcomes) - 1)
+    return math.sqrt(variance / len(outcomes))
 
 
 @dataclass(slots=True)
@@ -229,6 +252,7 @@ def play_match(
     board_class=Bitboard,
     budget: Budget = UNLIMITED,
     opening_plies: int = 0,
+    indices: Iterable[int] | None = None,
 ) -> MatchResult:
     """Play `games` games, swapping seats every game, and tally them from A's side.
 
@@ -238,11 +262,17 @@ def play_match(
     back into a sample. Consecutive games share their opening, so the two agents meet
     each position once from each seat and the seat split stays a paired comparison
     rather than two independent ones.
+
+    `indices` is Phase 12's one hook and it changes nothing by default: a *shard* of this
+    match is the same match restricted to a subset of its game indices. `games` still
+    names the whole match, so a game's seeds, its seating and its opening are the ones
+    the full match would have given it, whichever shard happens to play it.
     """
     match = MatchResult(agent_a.name, agent_b.name, seed, opening_plies=opening_plies)
     seeds = game_seeds(seed, games)
 
-    for index, (seed_a, seed_b) in enumerate(seeds):
+    for index in range(games) if indices is None else indices:
+        seed_a, seed_b = seeds[index]
         agent_a.new_game(seed_a)
         agent_b.new_game(seed_b)
         a_first = index % 2 == 0
