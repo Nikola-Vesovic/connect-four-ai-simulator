@@ -87,13 +87,15 @@ def test_nothing_headless_imports_pygame():
     `spawn`, so a worker **is** a fresh interpreter that re-imports whichever module
     holds the work function -- `experiments.tournament` -- and, as `__mp_main__`, the
     module that was run. Asserting that importing them leaves pygame out is therefore
-    exactly the assertion that a tournament worker is pygame-free.
+    exactly the assertion that a tournament worker is pygame-free. Phase 13 adds
+    `experiments.benchmark`, whose workers are spawned the same way.
     """
     root = Path(__file__).resolve().parent.parent
     program = (
         "import sys;"
         "import session, experiments.match, experiments.scaling, experiments.reference,"
-        " experiments.tournament, experiments.runner;"
+        " experiments.tournament, experiments.runner, experiments.benchmark,"
+        " agents.oracle;"
         "assert 'pygame' not in sys.modules, sorted(m for m in sys.modules if 'pygame' in m);"
         "print('clean')"
     )

@@ -85,7 +85,7 @@ connect4/
                  minimax.py (MAX/MIN, ogranicen dubinom)                                  [5]
                  alphabeta.py (negamax; alfa-beta koja se iskljucuje)                     [6]
                  mcts.py (UCT: izbor, sirenje, simulacija, propagacija sa obrtanjem)      [11]
-                 oracle                                                                   [13]
+                 oracle.py (ogranicen savrseni resavac, samo za merenje)                  [13]
   search/        stats.py (Budget + SearchStats)                                          [4]
                  ordering.py (centar-prvo [4]; killer potezi + istorija, ukljucivi)       [7]
                  evaluation.py (pretnje, centar, parnost -- svaka iskljuciva)             [5]
@@ -98,7 +98,8 @@ connect4/
                  reference.py (zamrznute vrednosti), scaling.py (cvorovi i kriva)         [5-6]
                  tournament.py (round-robin, deonice, Elo sa intervalima)                 [12]
                  runner.py (turnir iz JSON konfiguracije, preko vise jezgara)             [12]
-                 benchmark, ablacije, grafici                                             [13-14]
+                 benchmark.py (poredjenje sa savrsenim resavacem, preko vise jezgara)     [13]
+                 ablacije, grafici                                                        [14]
   data/          testsets/ (referentne vrednosti), configs/ (turniri), results/ (CSV), figures/
   tests/         pytest
 ```
@@ -205,6 +206,39 @@ nasumicni otvor i budzet. Jedna komanda igra round-robin i pise dva CSV-a u
   (Bradley-Terry, remi vredi pola poena), sa malim priorom bez kojeg agent koji nije
   osvojio nijedan poen nema konacnu ocenu. Interval poverenja je butstrep: isti turnir se
   1.000 puta ponovo izvlaci iz izmerenih ucestalosti i fit se ponavlja.
+
+## Poredjenje sa savrsenim resavacem (faza 13)
+
+```sh
+python -m experiments.benchmark --verify --positions 1000,500 --workers 8 --write
+python -m experiments.benchmark --score  --positions 1000,200 --workers 8 --write
+python -m experiments.benchmark --check 8 --sets end-easy --positions 24     # gate
+```
+
+Ovo je jedino merenje u radu koje agenta ne poredi sa drugim agentom nego sa **tacnom
+vrednoscu pozicije**. Tece u tri koraka i prvi se ne preskace:
+
+1. **Dokazi resavac.** Nad objavljenim pozicijama Pascala Ponsa
+   (`data/testsets/gamesolver/`) nasa pretraga puno dubine reprodukuje tacan rezultat — i
+   ishod i udaljenost do mata. Izmereno: **1.551 pozicija, 100%, bez ijednog neslaganja.**
+   Provera ide u oba smera: skup potvrdjuje nas resavac, a nas resavac potvrdjuje skup.
+2. **Proceni svako dete.** Datoteka daje vrednost *pozicije*, ne pojedinacnog poteza, pa se
+   vrednost svakog legalnog poteza racuna posebno i iz njih se dobija skup poteza koji
+   cuvaju vrednost.
+3. **Oceni agente:** procenat optimalnih poteza, procenat grubih gresaka i prosecan gubitak.
+
+- **Tri mere nisu jedna te ista.** *Optimalan* znaci "u skupu koji cuva vrednost" — takvih
+  poteza u proseku ima 1,38, pa se nikada ne kaze "najbolji potez". *Gruba greska* menja
+  teorijski **ishod**; pobeda u 11 poteza umesto u 5 jeste losiji potez ali nije gruba
+  greska. *Gubitak vrednosti* je u polupotezima unutar istog ishoda, a oko 10.000 kada se
+  ishod promeni, pa se prikazuje razlozeno.
+- **Dve populacije se prikazuju odvojeno.** Pozicija u kojoj svaki potez cuva vrednost ne
+  razdvaja nikoga (**23,5% skupa End-Easy** je takvo), a u izgubljenoj poziciji gruba greska
+  nije ni moguca, pa je 0% tamo svojstvo pozicija a ne jacine agenta.
+- **Dokaz je jeftiniji od potpunog resavanja.** Vrednost u pobednickom ili gubitnickom opsegu
+  je tacna bez obzira na to na kojoj se dubini pretraga zaustavila; samo remi trazi celo
+  stablo. Zato resavac radi progresivno i sa budzetom u cvorovima, a pozicija koju ne uspe da
+  dokaze se **izbacuje i prebroji**, nikada ne pogadja.
 
 ## Pokretanje testova
 

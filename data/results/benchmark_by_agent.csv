@@ -1,0 +1,13 @@
+set,agent,agent_name,budget,workers,mean_legal,positions,optimal,optimal_rate,optimal_sigma,discriminating,optimal_rate_discriminating,blunder_available,blunders,blunder_rate,blunder_rate_exposed,mean_ply_loss,mean_value_loss,nodes_per_move,ms_per_move
+end-easy,random,random,4000 nodes,8,3.22,1000,507,0.507,0.0158,765,0.3556,497,313,0.313,0.6298,1.068,4628.9,0.0,0.008
+end-easy,greedy,greedy,4000 nodes,8,3.22,1000,905,0.905,0.0093,765,0.8758,497,55,0.055,0.1107,0.15,819.6,8.9,0.04
+end-easy,ab-plain,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,4000 nodes,8,3.22,1000,997,0.997,0.0017,765,0.9961,497,3,0.003,0.006,0.0,40.0,2237.5,37.928
+end-easy,ab-order,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,8,3.22,1000,998,0.998,0.0014,765,0.9974,497,1,0.001,0.002,0.002,20.0,2176.5,39.021
+end-easy,ab-full,alphabeta-d42-iterative+pv+order,4000 nodes,8,3.22,1000,1000,1.0,0.0,765,1.0,497,0,0.0,0.0,0.0,0.0,1944.2,31.479
+end-easy,mcts,mcts-1000000,4000 nodes,8,3.22,1000,930,0.93,0.0081,765,0.9085,497,8,0.008,0.0161,0.161,120.0,4006.8,20.419
+middle-easy,random,random,4000 nodes,8,6.06,190,43,0.2263,0.0304,189,0.2222,84,55,0.2895,0.6548,3.822,5472.9,0.0,0.01
+middle-easy,greedy,greedy,4000 nodes,8,6.06,190,142,0.7474,0.0315,189,0.746,84,17,0.0895,0.2024,0.832,1526.0,17.5,0.122
+middle-easy,ab-plain,alphabeta-d42-center_first-no_table-iterative+pv+order-no_scout,4000 nodes,8,6.06,190,186,0.9789,0.0104,189,0.9788,84,1,0.0053,0.0119,0.053,52.6,3986.9,159.965
+middle-easy,ab-order,alphabeta-d42-no_table-iterative+pv+order-no_scout,4000 nodes,8,6.06,190,185,0.9737,0.0116,189,0.9735,84,2,0.0105,0.0238,0.074,157.8,3986.5,154.768
+middle-easy,ab-full,alphabeta-d42-iterative+pv+order,4000 nodes,8,6.06,190,186,0.9789,0.0104,189,0.9788,84,2,0.0105,0.0238,0.053,157.7,3979.7,129.853
+middle-easy,mcts,mcts-1000000,4000 nodes,8,6.06,190,119,0.6263,0.0351,189,0.6243,84,5,0.0263,0.0595,1.73,422.4,4041.6,19.238
