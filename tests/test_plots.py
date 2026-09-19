@@ -185,10 +185,24 @@ def test_every_combination_returned_the_frozen_reference_value():
         assert len(keys) == 8, (depth, keys)
 
 
-def test_the_parallel_control_is_a_speedup_curve_that_starts_at_one():
+def test_the_parallel_control_is_a_repeated_measurement_not_a_single_sample():
+    """One sample of a speedup on a fanless laptop is not a result.
+
+    Measured five times, this machine is reproducible to about +-2% at two workers and
+    only +-15% at eight -- which is larger than most of the gap being argued about, so the
+    spread has to be recorded rather than averaged away.
+    """
     rows = list(csv.DictReader((RESULTS / "parallel_control.csv").open(encoding="utf-8")))
-    assert [int(row["workers"]) for row in rows] == [1, 2, 4, 6, 8]
-    assert float(rows[0]["speedup"]) == 1.0
+    samples = {int(r["sample"]) for r in rows}
+    assert len(samples) >= 3, samples
+    by_workers = {}
+    for row in rows:
+        by_workers.setdefault(int(row["workers"]), []).append(float(row["speedup"]))
+    assert sorted(by_workers) == [1, 2, 4, 6, 8]
+    for workers, values in by_workers.items():
+        assert len(values) == len(samples), workers
+        if workers == 1:
+            assert set(values) == {1.0}, "the serial baseline is the unit by definition"
     # Identical tasks, so the only thing it can measure is the machine.
     assert len({int(row["tasks"]) for row in rows}) == 1
 
@@ -357,25 +371,27 @@ def test_the_parallel_figure_carries_its_control_and_says_who_wins():
     assert all(row["ideal_speedup"] == float(row["workers"]) for row in data["rows"])
 
 
-def test_the_verdict_is_computed_from_the_numbers_and_not_asserted():
-    """P35 claims the harness beats the control at every worker count. Re-measured with
-    its own committed CSV it does so at 4, 6 and 8 -- and NOT at 2, where the two are
-    1.2% apart and the control is nominally ahead.
+def test_the_verdict_is_conservative_against_the_controls_best_sample():
+    """P35 as originally written -- "the harness beats the control at every worker count" --
+    does not survive measuring the control more than once. It is separated at 6 and 8
+    workers and indistinguishable at 2 and 4.
 
-    That "no" is pinned deliberately. A column that said "yes" everywhere would be
-    publishing a conclusion the data does not support, and the mutation check found that
-    the previous version of this test could not tell the difference.
+    The "no" rows are pinned deliberately. A column that said "yes" everywhere would be
+    publishing a conclusion the data does not support, and the mutation check found that an
+    earlier version of this test could not tell the difference.
     """
     data = plots.figure4_data()
-    verdicts = {row["workers"]: row["harness_beats_control"] for row in data["rows"]}
-    assert verdicts[2] == "no", verdicts
-    assert verdicts[4] == verdicts[6] == verdicts[8] == "yes", verdicts
     rows = {row["workers"]: row for row in data["rows"]}
+    verdicts = {workers: row["harness_beats_control"] for workers, row in rows.items()}
+    assert verdicts[2] == "no" and verdicts[4] == "no", verdicts
+    assert verdicts[6] == "yes" and verdicts[8] == "yes", verdicts
     for workers, row in rows.items():
-        if row["harness_speedup"] == "" or row["control_speedup"] == "":
+        if row["harness_speedup"] == "" or row["control_max"] == "":
             continue
-        expected = "yes" if row["harness_speedup"] > row["control_speedup"] else "no"
+        # Conservative on purpose: the harness must beat the control's BEST sample.
+        expected = "yes" if row["harness_speedup"] > row["control_max"] else "no"
         assert row["harness_beats_control"] == expected, workers
+        assert row["control_min"] <= row["control_median"] <= row["control_max"], workers
 
 
 def test_every_rate_that_gets_a_bar_carries_a_sigma():

@@ -43,6 +43,8 @@ import argparse
 import csv
 import itertools
 import multiprocessing as mp
+import os
+import sys
 import time
 from pathlib import Path
 
@@ -262,6 +264,24 @@ def check_against_committed(rows: list[dict]) -> list[str]:
 # a figure may not contain a number that is not in a committed file.
 
 
+def _refuse_if_main_is_not_importable() -> None:
+    """Refuse to build a spawn pool that would respawn dying workers for ever.
+
+    `spawn` starts every child as a fresh interpreter which re-imports `__main__` to find
+    the work function. Run from a heredoc (`python - <<EOF`), `__main__.__file__` is
+    `<stdin>`, so the child is told to load a path that does not exist, dies with
+    FileNotFoundError -- and `Pool` repairs it by spawning a replacement, for ever.
+    """
+    main = sys.modules.get("__main__")
+    path = getattr(main, "__file__", None)
+    if path is None or not os.path.isfile(path):
+        raise RuntimeError(
+            "the parallel control needs an importable __main__ (its workers are spawned, "
+            f"and each re-imports it); got {path!r}. Run it as "
+            "`python -m experiments.ablation --control`, never from a heredoc."
+        )
+
+
 def _burn(iterations: int) -> int:
     """A task that cannot be inefficient: no allocation, no I/O, one integer each way.
 
@@ -279,45 +299,59 @@ def cpu_control(
     worker_counts: tuple[int, ...] = (1, 2, 4, 6, 8),
     tasks: int = 32,
     iterations: int = 4_000_000,
+    repeats: int = 5,
 ) -> list[dict]:
     """The same shape as the tournament sweep: identical tasks, perfectly balanced.
 
     `tasks` is a multiple of every worker count in the default sweep, so load imbalance is
     not in the answer -- which is the point. Phase 12 already measured separately that
     granularity is worth 9% and the process boundary 0.196 s.
+
+    **Repeated, because one sample of this is not a result.** A speedup measured once on a
+    fanless laptop that is also running an editor is reproducible to about +-4% at two
+    workers and only +-23% at eight; the serial baseline alone drifted 15.1 s to 18.6 s
+    across five runs. Every sample is recorded and the figure draws the spread, for the
+    same reason every rate in this project carries a sigma.
+
+    MUST be started as `python -m experiments.ablation --control`. See
+    `_refuse_if_main_is_not_importable`.
     """
     rows = []
-    baseline = None
-    for workers in worker_counts:
-        started = time.perf_counter()
-        if workers == 1:
-            results = [_burn(iterations) for _ in range(tasks)]
-        else:
-            with mp.get_context("spawn").Pool(workers) as pool:
-                results = pool.map(_burn, [iterations] * tasks)
-        seconds = time.perf_counter() - started
-        assert len(set(results)) == 1, "the control tasks are not identical"
-        if baseline is None:
-            baseline = seconds
-        rows.append(
-            {
-                "config": "cpu_control",
-                "variable": "workers",
-                "tasks": tasks,
-                "iterations_per_task": iterations,
-                "workers": workers,
-                "seconds": round(seconds, 2),
-                "tasks_per_second": round(tasks / seconds, 3),
-                "speedup": round(baseline / seconds, 3),
-                "efficiency": round(baseline / seconds / workers, 3),
-            }
-        )
-        row = rows[-1]
-        print(
-            f"{workers} worker(s): {seconds:7.2f}s  {row['speedup']:>6.3f}x  "
-            f"efficiency {row['efficiency']:.1%}",
-            flush=True,
-        )
+    for sample in range(1, repeats + 1):
+        baseline = None
+        for workers in worker_counts:
+            if workers > 1:
+                _refuse_if_main_is_not_importable()
+            started = time.perf_counter()
+            if workers == 1:
+                results = [_burn(iterations) for _ in range(tasks)]
+            else:
+                with mp.get_context("spawn").Pool(workers) as pool:
+                    results = pool.map(_burn, [iterations] * tasks)
+            seconds = time.perf_counter() - started
+            assert len(set(results)) == 1, "the control tasks are not identical"
+            if baseline is None:
+                baseline = seconds
+            rows.append(
+                {
+                    "config": "cpu_control",
+                    "variable": "workers",
+                    "sample": sample,
+                    "tasks": tasks,
+                    "iterations_per_task": iterations,
+                    "workers": workers,
+                    "seconds": round(seconds, 2),
+                    "tasks_per_second": round(tasks / seconds, 3),
+                    "speedup": round(baseline / seconds, 3),
+                    "efficiency": round(baseline / seconds / workers, 3),
+                }
+            )
+            row = rows[-1]
+            print(
+                f"sample {sample}  {workers} worker(s): {seconds:7.2f}s  "
+                f"{row['speedup']:>6.3f}x  efficiency {row['efficiency']:.1%}",
+                flush=True,
+            )
     return rows
 
 
@@ -336,6 +370,9 @@ def main() -> None:
     parser.add_argument("--depths", type=str, default="", help="e.g. 4,5,6,7")
     parser.add_argument("--iterations", type=int, default=4_000_000)
     parser.add_argument("--tasks", type=int, default=32)
+    parser.add_argument("--repeats", type=int, default=5)
+    parser.add_argument("--no-write", action="store_true",
+                        help="measure and print, but leave the committed CSV alone")
     args = parser.parse_args()
 
     if args.matrix:
@@ -350,10 +387,14 @@ def main() -> None:
             print(f"DISAGREES WITH A COMMITTED CSV: {problem}", flush=True)
         assert not problems, "the matrix disagrees with an already-committed measurement"
         print("cross-checks against committed CSVs: all agree", flush=True)
-        write(rows, MATRIX_CSV)
+        if not args.no_write:
+            write(rows, MATRIX_CSV)
 
     if args.control:
-        write(cpu_control(tasks=args.tasks, iterations=args.iterations), CONTROL_CSV)
+        rows = cpu_control(tasks=args.tasks, iterations=args.iterations,
+                           repeats=args.repeats)
+        if not args.no_write:
+            write(rows, CONTROL_CSV)
 
 
 if __name__ == "__main__":

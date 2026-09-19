@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import statistics
 import warnings
 from pathlib import Path
 
@@ -137,8 +138,8 @@ LATIN = {
     "f3_title": "Elo lestvica sa 95% intervalom (7.500 partija, budžet 4.000 čvorova)",
     "workers": "broj procesa",
     "speedup": "ubrzanje (veće je bolje)",
-    "harness": "turnir (izmereno)",
-    "control": "sintetička kontrola, samo procesor",
+    "harness": "turnir (izmereno, jedan prolaz)",
+    "control": "sintetička kontrola, medijana od 5",
     "ideal": "idealno linearno ubrzanje",
     "f4_title": "Ubrzanje na osam jezgara, sa kontrolom koja ne može biti neefikasna",
     "simulations": "broj simulacija",
@@ -173,8 +174,8 @@ CYRILLIC = {
     "f3_title": "Ело лествица са 95% интервалом (7.500 партија, буџет 4.000 чворова)",
     "workers": "број процеса",
     "speedup": "убрзање (веће је боље)",
-    "harness": "турнир (измерено)",
-    "control": "синтетичка контрола, само процесор",
+    "harness": "турнир (измерено, један пролаз)",
+    "control": "синтетичка контрола, медијана од 5",
     "ideal": "идеално линеарно убрзање",
     "f4_title": "Убрзање на осам језгара, са контролом која не може бити неефикасна",
     "simulations": "број симулација",
@@ -449,30 +450,45 @@ def figure3_data() -> dict:
 def figure4_data() -> dict:
     """The harness against a program that cannot be inefficient (thesis point P35).
 
-    Linear y: a speedup of 3.58 against an ideal of 8 is a gap the reader is meant to see,
+    Linear y: a speedup of 3.08 against an ideal of 8 is a gap the reader is meant to see,
     and a log axis would flatter it.
+
+    The control is a REPEATED measurement and is drawn as a median with its full observed
+    range, because one sample of it is not a result -- on this machine it is reproducible
+    to about +-2% at two workers and only +-15% at eight. The verdict column is therefore
+    deliberately conservative: the harness "beats" the control only when it exceeds the
+    control's BEST observed sample, not its median.
     """
     harness = {
         _i(r["workers"]): _f(r["speedup"])
         for r in read("parallel_speedup.csv")
         if r["variable"] == "workers"
     }
-    control = {_i(r["workers"]): _f(r["speedup"]) for r in read("parallel_control.csv")}
-    workers = sorted(set(harness) | set(control))
+    samples: dict[int, list[float]] = {}
+    for record in read("parallel_control.csv"):
+        samples.setdefault(_i(record["workers"]), []).append(_f(record["speedup"]))
+
+    workers = sorted(set(harness) | set(samples))
     rows = []
     for count in workers:
-        h, c = harness.get(count), control.get(count)
+        h = harness.get(count)
+        values = samples.get(count, [])
+        median = round(statistics.median(values), 3) if values else ""
+        low = round(min(values), 3) if values else ""
+        high = round(max(values), 3) if values else ""
         rows.append(
             {
                 "workers": count,
                 "harness_speedup": h if h is not None else "",
-                "control_speedup": c if c is not None else "",
+                "control_median": median,
+                "control_min": low,
+                "control_max": high,
+                "control_samples": len(values),
                 "ideal_speedup": float(count),
                 "harness_beats_control": (
-                    "" if h is None or c is None else ("yes" if h > c else "no")
+                    "" if h is None or not values else ("yes" if h > high else "no")
                 ),
                 "harness_efficiency": "" if h is None else round(h / count, 3),
-                "control_efficiency": "" if c is None else round(c / count, 3),
             }
         )
     return {
@@ -482,20 +498,25 @@ def figure4_data() -> dict:
         "sources": ["parallel_speedup.csv", "parallel_control.csv"],
         "caption": (
             "Speedup against worker count on an Apple M3 with four performance and four "
-            "efficiency cores, in a fanless chassis. The harness curve is Phase 12's "
-            "tournament (180 games, 4,000-node budget). The control is a pure CPU-bound "
-            "Python loop, thirty-two identical perfectly balanced tasks, nothing crossing "
-            "the process boundary but an integer -- a program that CANNOT be inefficient, "
-            "so whatever it fails to achieve is the machine. The harness beats it at 4, 6 "
-            "and 8 workers, which is what licenses the claim that the missing speedup is "
-            "not in the harness. os.cpu_count() is a count of schedulable contexts, not a "
-            "speedup."
+            "efficiency cores, in a fanless chassis. The harness curve is one sweep of the "
+            "tournament (180 games, 4,000-node budget, identical digest at every worker "
+            "count). The control is a pure CPU-bound Python loop -- thirty-two identical "
+            "perfectly balanced tasks, nothing crossing the process boundary but an "
+            "integer -- a program that CANNOT be inefficient, so whatever it fails to "
+            "achieve is the machine; it is measured five times and drawn as a median with "
+            "its full range. **The honest reading is narrower than it first appears.** "
+            "Above two workers this machine is reproducible only to about +-15%, so the "
+            "harness is separated from the control at 6 and 8 workers and is "
+            "indistinguishable from it at 2 and 4. What survives the noise is the claim "
+            "that matters: at eight workers a program that cannot be wasteful does no "
+            "better than the harness, so the missing speedup is the machine. "
+            "os.cpu_count() is a count of schedulable contexts, not a speedup."
         ),
         "columns": list(rows[0]),
         "rows": rows,
         "workers": workers,
         "harness": harness,
-        "control": control,
+        "control_samples": samples,
     }
 
 
@@ -936,16 +957,21 @@ def _draw_figure4(plt, data, words):
     axis.plot(workers, workers, label=words["ideal"], color="#b0b0b0",
               linestyle=(0, (6, 2)), linewidth=1.0, marker="")
     harness = [(w, data["harness"][w]) for w in workers if w in data["harness"]]
-    control = [(w, data["control"][w]) for w in workers if w in data["control"]]
     axis.plot([p[0] for p in harness], [p[1] for p in harness],
               label=words["harness"], **STYLES[0])
-    axis.plot([p[0] for p in control], [p[1] for p in control],
-              label=words["control"], **STYLES[2])
+    # Five samples, so the control is a median with its full observed range: above two
+    # workers the spread is wider than most of the gap being argued about.
+    counts = [w for w in workers if data["control_samples"].get(w)]
+    medians = [statistics.median(data["control_samples"][w]) for w in counts]
+    lower = [medians[i] - min(data["control_samples"][w]) for i, w in enumerate(counts)]
+    upper = [max(data["control_samples"][w]) - medians[i] for i, w in enumerate(counts)]
+    axis.errorbar(counts, medians, yerr=[lower, upper], label=words["control"],
+                  capsize=3, **STYLES[2])
     axis.set_xlabel(words["workers"])
     axis.set_ylabel(words["speedup"])
     axis.set_xticks(workers)
-    axis.legend(loc="upper left")
-    axis.set_title(words["f4_title"])
+    axis.legend(loc="upper left", fontsize=8)
+    axis.set_title(words["f4_title"], fontsize=9)
     fig.tight_layout()
     return fig
 

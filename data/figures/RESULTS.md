@@ -64,15 +64,15 @@ Maximum-likelihood Bradley-Terry ratings over the whole round robin -- 6 agents,
 - **Files:** `f4_parallel_speedup.pdf`, `f4_parallel_speedup.png`
 - **Sources:** `parallel_speedup.csv`, `parallel_control.csv`
 
-Speedup against worker count on an Apple M3 with four performance and four efficiency cores, in a fanless chassis. The harness curve is Phase 12's tournament (180 games, 4,000-node budget). The control is a pure CPU-bound Python loop, thirty-two identical perfectly balanced tasks, nothing crossing the process boundary but an integer -- a program that CANNOT be inefficient, so whatever it fails to achieve is the machine. The harness beats it at 4, 6 and 8 workers, which is what licenses the claim that the missing speedup is not in the harness. os.cpu_count() is a count of schedulable contexts, not a speedup.
+Speedup against worker count on an Apple M3 with four performance and four efficiency cores, in a fanless chassis. The harness curve is one sweep of the tournament (180 games, 4,000-node budget, identical digest at every worker count). The control is a pure CPU-bound Python loop -- thirty-two identical perfectly balanced tasks, nothing crossing the process boundary but an integer -- a program that CANNOT be inefficient, so whatever it fails to achieve is the machine; it is measured five times and drawn as a median with its full range. **The honest reading is narrower than it first appears.** Above two workers this machine is reproducible only to about +-15%, so the harness is separated from the control at 6 and 8 workers and is indistinguishable from it at 2 and 4. What survives the noise is the claim that matters: at eight workers a program that cannot be wasteful does no better than the harness, so the missing speedup is the machine. os.cpu_count() is a count of schedulable contexts, not a speedup.
 
-| workers | harness_speedup | control_speedup | ideal_speedup | harness_beats_control | harness_efficiency | control_efficiency |
-|---|---|---|---|---|---|---|
-| 1 | 1.0 | 1.0 | 1.0 | no | 1.0 | 1.0 |
-| 2 | 1.858 | 1.881 | 2.0 | no | 0.929 | 0.941 |
-| 4 | 2.673 | 2.494 | 4.0 | yes | 0.668 | 0.624 |
-| 6 | 3.317 | 2.65 | 6.0 | yes | 0.553 | 0.442 |
-| 8 | 3.579 | 2.839 | 8.0 | yes | 0.447 | 0.355 |
+| workers | harness_speedup | control_median | control_min | control_max | control_samples | ideal_speedup | harness_beats_control | harness_efficiency |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 1.0 | 1.0 | 1.0 | 1.0 | 5 | 1.0 | no | 1.0 |
+| 2 | 1.89 | 1.964 | 1.921 | 1.983 | 5 | 2.0 | no | 0.945 |
+| 4 | 2.508 | 2.54 | 2.357 | 2.573 | 5 | 4.0 | no | 0.627 |
+| 6 | 2.963 | 2.67 | 2.451 | 2.759 | 5 | 6.0 | yes | 0.494 |
+| 8 | 3.077 | 2.674 | 1.975 | 2.784 | 5 | 8.0 | yes | 0.385 |
 
 ## f5_mcts_convergence
 
