@@ -535,6 +535,27 @@ def test_the_timestamp_detector_actually_detects_a_timestamp(tmp_path):
     assert plots.stamps_in(clean) == []
 
 
+def test_the_reproducibility_check_would_report_a_stamped_figure(tmp_path, monkeypatch):
+    """The stamp half of `check_determinism`, exercised on a file that actually has one.
+
+    Without this the stamp branch only ever runs against clean files, so a version that
+    ignored stamps altogether would pass -- which is exactly what the mutation check found.
+    Asking for unsuppressed PDF metadata makes the check produce the complaint.
+
+    Written into a temporary directory, so a failure here can never leave the committed
+    figures carrying a timestamp.
+    """
+    pytest.importorskip("matplotlib")
+    monkeypatch.setattr(plots, "FIGURES", tmp_path)
+    problems = plots.check_determinism("latin", pdf_metadata={})
+    # The stamp half must fire. The byte half MAY also fire, and whether it does is a coin
+    # toss: the CreationDate changes once a second, so two draws catch it only when they
+    # happen to straddle a second boundary. That is the whole reason the stamp check
+    # exists, and asserting only on the stamps is what makes this test deterministic.
+    assert any("stamp" in problem for problem in problems), problems
+    assert plots.check_determinism("latin") == [], "suppression should still be clean"
+
+
 def test_a_written_figure_has_both_a_vector_and_a_raster_form():
     """PDF for the document, PNG for the slides, from one call."""
     pytest.importorskip("matplotlib")

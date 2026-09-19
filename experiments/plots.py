@@ -867,18 +867,25 @@ def _pyplot():
     return plt
 
 
-def save(fig, slug: str, language: str) -> list[Path]:
+def save(fig, slug: str, language: str, pdf_metadata: dict | None = None) -> list[Path]:
     """Write the PDF and the PNG, with every source of run-to-run variation suppressed.
 
     matplotlib stamps a CreationDate into PDF metadata and a Software tag into PNG
     metadata. Both are timestamps-by-another-name for reproducibility purposes and both are
     switched off here, which is what makes `--check` able to pass.
+
+    `pdf_metadata` is injectable for ONE reason: so a test can ask for a deliberately
+    stamped file and prove the reproducibility check would notice. Without that the stamp
+    half of the check is only ever exercised on files that have no stamp, and a version
+    that ignored stamps entirely would pass.
     """
     suffix = "" if language == "latin" else "_cyr"
     paths = []
     pdf = FIGURES / f"{slug}{suffix}.pdf"
     png = FIGURES / f"{slug}{suffix}.png"
-    fig.savefig(pdf, format="pdf", metadata=PDF_METADATA, bbox_inches="tight")
+    fig.savefig(pdf, format="pdf",
+                metadata=PDF_METADATA if pdf_metadata is None else pdf_metadata,
+                bbox_inches="tight")
     fig.savefig(png, format="png", metadata=PNG_METADATA, bbox_inches="tight")
     paths += [pdf, png]
     return paths
@@ -1061,7 +1068,7 @@ DRAWERS = {
 }
 
 
-def draw_all(language: str = "latin") -> list[Path]:
+def draw_all(language: str = "latin", pdf_metadata: dict | None = None) -> list[Path]:
     """Every figure, in one language, as PDF and PNG. Never calls `plt.show()`."""
     plt = _pyplot()
     words = LANGUAGES[language]
@@ -1069,7 +1076,7 @@ def draw_all(language: str = "latin") -> list[Path]:
     for builder in FIGURES_DATA:
         data = builder()
         figure = DRAWERS[data["slug"]](plt, data, words)
-        written += save(figure, data["slug"], language)
+        written += save(figure, data["slug"], language, pdf_metadata)
         plt.close(figure)
     return written
 
@@ -1137,14 +1144,16 @@ def stamps_in(path: Path) -> list[str]:
     ]
 
 
-def check_determinism(language: str = "latin") -> list[str]:
+def check_determinism(language: str = "latin", pdf_metadata: dict | None = None) -> list[str]:
     """Draw everything twice, compare the bytes, AND check no timestamp survived.
 
     Both halves are needed and neither is sufficient: the byte comparison catches anything
     that varies within a run, and the stamp check catches what varies only between days.
     """
-    first = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in draw_all(language)}
-    second = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in draw_all(language)}
+    first = {path: hashlib.sha256(path.read_bytes()).hexdigest()
+             for path in draw_all(language, pdf_metadata)}
+    second = {path: hashlib.sha256(path.read_bytes()).hexdigest()
+              for path in draw_all(language, pdf_metadata)}
     problems = [f"{path.name}: bytes changed" for path in first if first[path] != second[path]]
     for path in first:
         for stamp in stamps_in(path):
