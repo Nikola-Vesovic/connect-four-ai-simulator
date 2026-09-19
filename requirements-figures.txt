@@ -1,0 +1,11 @@
+# Figures only. NOT needed to run the program.
+#
+# `requirements.txt` deliberately stays at pygame + pytest so `python main.py` works on a
+# machine that has never heard of matplotlib, and so the test suite stays green there too
+# (the rendering tests skip rather than fail). This file is for regenerating the thesis
+# figures:
+#
+#     pip install -r requirements-figures.txt
+#     python -m experiments.plots --all --both-languages
+#
+matplotlib==3.11.2

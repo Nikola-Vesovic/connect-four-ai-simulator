@@ -1,0 +1,6 @@
+config,variable,tasks,iterations_per_task,workers,seconds,tasks_per_second,speedup,efficiency
+cpu_control,workers,32,8000000,1,15.05,2.127,1.0,1.0
+cpu_control,workers,32,8000000,2,8.0,4.001,1.881,0.941
+cpu_control,workers,32,8000000,4,6.03,5.305,2.494,0.624
+cpu_control,workers,32,8000000,6,5.68,5.635,2.65,0.442
+cpu_control,workers,32,8000000,8,5.3,6.037,2.839,0.355

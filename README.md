@@ -240,6 +240,33 @@ vrednoscu pozicije**. Tece u tri koraka i prvi se ne preskace:
   stablo. Zato resavac radi progresivno i sa budzetom u cvorovima, a pozicija koju ne uspe da
   dokaze se **izbacuje i prebroji**, nikada ne pogadja.
 
+## Ablaciona matrica i figure (faza 14)
+
+Ova faza nista ne meri iznova osim same matrice — sve ostalo cita vec zamrznute CSV
+fajlove iz `data/results/`.
+
+```sh
+python -m experiments.ablation --matrix    # svih 8 kombinacija O/T/S, ~48 s
+python -m experiments.ablation --control   # sinteticka kontrola za paralelizaciju
+
+pip install -r requirements-figures.txt    # matplotlib NIJE potreban za igru
+python -m experiments.plots --all --both-languages   # 6 figura, pdf + png, latinica i cirilica
+python -m experiments.plots --check        # dokaz da se ponovnim pokretanjem dobijaju isti bajtovi
+python -m experiments.plots --glyphs       # dokaz da se sva slova zaista iscrtavaju
+```
+
+- **Matrica prikazuje KOMBINACIJE, ne spisak procenata.** Pored izmerenog dobitka stoji
+  **proizvod** pojedinacnih dobitaka, pa se preklapanje vidi kao broj. Sortiranje poteza se
+  preklapa sa svim ostalim; jedini izuzetak u porodici je par *tabela + negascout*, koji daje
+  **vise** od proizvoda (109,8% / 107,3% / 112,3% na dubinama 4/5/6), jer cvor pretrazen
+  nultim prozorom ne moze da upise tacnu vrednost, pa zapis iz tabele prestaje da *odgovara*
+  na cvor i pocinje da *nudi potez*.
+- **Dve kombinacije nisu novi brojevi**: osnovna reprodukuje `alphabeta_by_position.csv`, a
+  puna `scout_by_position.csv`, u cvor — i to se proverava dok merenje traje.
+- **Svaki broj sa figure postoji i u tabeli.** `data/figures/RESULTS.md` se generise iz istih
+  objekata iz kojih se crtaju figure, pa se ne mogu razici.
+- `requirements.txt` ostaje `pygame` + `pytest`. Aplikacija i testovi rade i bez matplotliba.
+
 ## Pokretanje testova
 
 ```sh
