@@ -1,0 +1,12 @@
+optimisation,control,depth,positions,nodes_with,nodes_without,trees_identical,samples,seconds_with_median,seconds_with_min,seconds_with_max,seconds_without_median,seconds_without_min,seconds_without_max,overhead_percent,node_gain
+sortiranje poteza,pruning off,2,200,10147,10147,yes,3,0.2312,0.2291,0.2345,0.2281,0.2274,0.2294,1.37,1.0
+sortiranje poteza,pruning off,3,200,66850,66850,yes,3,1.4582,1.4567,1.7378,1.4482,1.4471,1.4909,0.69,1.0
+sortiranje poteza,pruning off,4,200,433681,433681,yes,3,9.5414,9.4665,9.5509,9.66,9.6115,9.757,-1.23,1.0
+sortiranje poteza,pruning off,5,200,2800545,2800545,yes,3,62.3404,61.834,63.5462,62.2798,62.0287,64.512,0.1,1.0
+sortiranje poteza,shallow gain,1,200,1358,1358,yes,3,0.0386,0.0386,0.0387,0.0385,0.0385,0.0386,0.16,1.0
+sortiranje poteza,shallow gain,2,200,4709,4994,no,3,0.0928,0.0927,0.0966,0.1002,0.0998,0.1004,-7.41,1.0605
+sortiranje poteza,shallow gain,3,200,16969,20323,no,3,0.3301,0.3262,0.3615,0.4045,0.4025,0.4046,-18.38,1.1977
+tabela transpozicija,write only,4,200,44006,44006,yes,3,0.7809,0.7807,0.7816,0.7649,0.764,0.7656,2.1,1.0
+tabela transpozicija,write only,5,200,134867,134867,yes,3,2.5463,2.5402,2.5525,2.5029,2.5001,2.512,1.73,1.0
+tabela transpozicija,write only,6,40,66404,66404,yes,3,1.1613,1.161,1.164,1.1358,1.1314,1.1363,2.25,1.0
+tabela transpozicija,write only,7,10,38296,38296,yes,3,1.0841,0.788,1.6937,0.9223,0.7036,1.1663,17.53,1.0
