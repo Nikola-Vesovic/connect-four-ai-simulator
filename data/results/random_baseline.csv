@@ -1,0 +1,2 @@
+agent_a,agent_b,board,games,seed,opening_plies,first_mover_wins,second_mover_wins,draws,first_mover_rate,first_mover_sigma,second_mover_rate,second_mover_sigma,draw_rate,draw_sigma,mean_plies,digest
+random,random,bitboard,50000,2026,0,27813,22051,136,0.55626,0.00222,0.44102,0.00222,0.00272,0.00023,21.31,57bfd6de
