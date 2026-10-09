@@ -56,6 +56,11 @@ Elo estimates are fitted jointly with a Bradley-Terry model; draws count as half
 a point. Bootstrap intervals describe the sampled tournament and have limited
 information about outcomes never observed. They are not universal Elo ratings.
 
+Use the same Python version when reproducing exact bootstrap bounds. Python 3.11
+samples individual Bernoulli trials; Python 3.12+ uses the standard library's
+binomial sampler. Both sample the same distribution, but their seeded results
+need not be identical across versions. Stored thesis results are unchanged.
+
 ## Minimax Reference Checks
 
 The committed reference file stores values from the unoptimized baseline.

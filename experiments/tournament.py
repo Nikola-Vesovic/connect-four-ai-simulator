@@ -404,6 +404,15 @@ def fit_elo(
     return {label: value - offset for label, value in ratings.items()}
 
 
+def _binomial(rng: random.Random, trials: int, probability: float) -> int:
+    sampler = getattr(rng, "binomialvariate", None)
+    if sampler is not None:
+        return sampler(trials, probability)
+    if trials < 0 or not 0.0 <= probability <= 1.0:
+        raise ValueError("binomial sampling requires trials >= 0 and 0 <= probability <= 1")
+    return sum(rng.random() < probability for _ in range(trials))
+
+
 def bootstrap_elo(
     outcomes: Sequence[PairingOutcome],
     labels: Sequence[str],
@@ -424,7 +433,7 @@ def bootstrap_elo(
     not a statement about the agents' strength in any wider setting, and it inherits
     every assumption of the fit, including draws counted as halves.
 
-    Seeded, so the band reproduces exactly; that is a gate condition, not a nicety.
+    Seeded, so repeated runs on the same Python version reproduce exactly.
 
     **Its one blind spot, written down rather than discovered later.** An agent that has
     not won a single game is resampled from `p = 0`, wins none in every resample, and so
@@ -441,10 +450,10 @@ def bootstrap_elo(
             if not games:
                 continue
             win_rate = outcome.wins / games
-            wins = rng.binomialvariate(games, win_rate)
+            wins = _binomial(rng, games, win_rate)
             remaining = games - wins
             draws = (
-                rng.binomialvariate(remaining, outcome.draws / (games - outcome.wins))
+                _binomial(rng, remaining, outcome.draws / (games - outcome.wins))
                 if remaining and outcome.wins < games
                 else 0
             )

@@ -315,7 +315,27 @@ def test_a_clean_sweep_has_no_finite_rating_without_a_prior():
     assert ratings["a"] > ratings["b"]
 
 
-def test_identical_agents_get_identical_ratings_and_a_band_that_covers_zero():
+@pytest.fixture(params=[False, True], ids=["default", "bernoulli"])
+def binomial_sampler(request, monkeypatch):
+    if request.param:
+        from experiments import tournament
+
+        monkeypatch.delattr(tournament.random.Random, "binomialvariate", raising=False)
+
+
+@pytest.mark.parametrize(("probability", "expected"), [(0.0, 0), (0.5, 2), (1.0, 4)])
+def test_binomial_fallback_counts_successful_trials(monkeypatch, probability, expected):
+    from experiments import tournament
+
+    monkeypatch.delattr(tournament.random.Random, "binomialvariate", raising=False)
+    rng = tournament.random.Random(2026)
+    values = iter((0.0, 0.49, 0.5, 0.99))
+    monkeypatch.setattr(rng, "random", lambda: next(values))
+    assert tournament._binomial(rng, 0, probability) == 0
+    assert tournament._binomial(rng, 4, probability) == expected
+
+
+def test_identical_agents_get_identical_ratings_and_a_band_that_covers_zero(binomial_sampler):
     outcomes = [
         PairingOutcome("a", "b", 50, 100, 50),
         PairingOutcome("b", "c", 50, 100, 50),
@@ -327,7 +347,7 @@ def test_identical_agents_get_identical_ratings_and_a_band_that_covers_zero():
     assert all(low < 0.0 < high for low, high in band.values())
 
 
-def test_the_fit_and_its_band_both_reproduce_exactly():
+def test_the_fit_and_its_band_both_reproduce_exactly(binomial_sampler):
     outcomes = [PairingOutcome("a", "b", 120, 30, 50), PairingOutcome("a", "c", 90, 10, 100),
                 PairingOutcome("b", "c", 70, 20, 110)]
     labels = ["a", "b", "c"]
@@ -339,7 +359,7 @@ def test_the_fit_and_its_band_both_reproduce_exactly():
     assert other != bootstrap_elo(outcomes, labels, resamples=100, seed=5)
 
 
-def test_a_wider_band_needs_fewer_games_and_a_narrower_one_more():
+def test_a_wider_band_needs_fewer_games_and_a_narrower_one_more(binomial_sampler):
     """A confidence interval that did not shrink with the sample would be decoration."""
     labels = ["a", "b"]
     small = bootstrap_elo([PairingOutcome("a", "b", 30, 10, 20)], labels,
@@ -377,7 +397,7 @@ def test_the_elo_gap_is_a_logistic_curve_and_not_a_win_rate():
     )
 
 
-def test_a_percentile_interpolates_instead_of_taking_an_extreme():
+def test_a_percentile_interpolates_instead_of_taking_an_extreme(binomial_sampler):
     """Also added after the mutation check: returning `min` and `max` instead of the
     2.5th and 97.5th percentile still produces a band that contains the estimate, still
     reproduces, and still narrows with the sample, so three band tests passed anyway.
