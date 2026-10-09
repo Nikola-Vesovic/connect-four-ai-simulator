@@ -192,8 +192,15 @@ def load_set(label: str, limit: int | None = None) -> tuple[Position, ...]:
     if label not in FILES:
         raise BadPosition(f"unknown test set {label!r}; known are {sorted(FILES)}.")
     path = TESTSETS / FILES[label]
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            f"Missing optional benchmark input {path.name}. "
+            "Run: python -m experiments.download_testsets"
+        ) from error
     positions = []
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, line in enumerate(lines, start=1):
         positions.append(parse_position(label, number, line))
         if limit is not None and len(positions) >= limit:
             break

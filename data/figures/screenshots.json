@@ -1,0 +1,308 @@
+{
+  "simulator_agents": {
+    "seed": 2026,
+    "size": [
+      1170,
+      930
+    ],
+    "moves": [
+      4,
+      2,
+      4,
+      4,
+      4,
+      4,
+      5,
+      6,
+      5,
+      6,
+      6,
+      6,
+      2,
+      1,
+      2,
+      2,
+      6,
+      5
+    ],
+    "result": "IN_PROGRESS",
+    "seats": [
+      {
+        "controller": "machine",
+        "algorithm": "negamax",
+        "depth": 6,
+        "pruning": true,
+        "move_ordering": true,
+        "transposition": true,
+        "deepening": false,
+        "scouting": true,
+        "time_budget": 1.0,
+        "threats": true,
+        "center": true,
+        "parity": true,
+        "simulations": 1000,
+        "greedy_rollouts": true,
+        "tree_reuse": false,
+        "solver": false,
+        "exploration": 1.4142135623730951
+      },
+      {
+        "controller": "machine",
+        "algorithm": "mcts",
+        "depth": 6,
+        "pruning": true,
+        "move_ordering": true,
+        "transposition": true,
+        "deepening": false,
+        "scouting": true,
+        "time_budget": 1.0,
+        "threats": true,
+        "center": true,
+        "parity": true,
+        "simulations": 1000,
+        "greedy_rollouts": true,
+        "tree_reuse": false,
+        "solver": false,
+        "exploration": 1.4142135623730951
+      }
+    ],
+    "totals": [
+      {
+        "moves": 9,
+        "nodes": 19142,
+        "leaves": 10589,
+        "cutoffs": 5126,
+        "seconds": 0.32949183200253174
+      },
+      {
+        "moves": 9,
+        "nodes": 1867150,
+        "leaves": 338,
+        "cutoffs": 0,
+        "seconds": 3.1253905819976353
+      }
+    ],
+    "searches": [
+      {
+        "seat": 0,
+        "column": 4,
+        "nodes": 960,
+        "simulations": 0,
+        "seconds": 0.014401332999113947
+      },
+      {
+        "seat": 1,
+        "column": 2,
+        "nodes": 341737,
+        "simulations": 1000,
+        "seconds": 0.5532577079975454
+      },
+      {
+        "seat": 0,
+        "column": 4,
+        "nodes": 2381,
+        "simulations": 0,
+        "seconds": 0.03976183300255798
+      },
+      {
+        "seat": 1,
+        "column": 4,
+        "nodes": 275163,
+        "simulations": 1000,
+        "seconds": 0.44691537499966216
+      },
+      {
+        "seat": 0,
+        "column": 4,
+        "nodes": 2486,
+        "simulations": 0,
+        "seconds": 0.04209370800163015
+      },
+      {
+        "seat": 1,
+        "column": 4,
+        "nodes": 263532,
+        "simulations": 1000,
+        "seconds": 0.4328399160003755
+      },
+      {
+        "seat": 0,
+        "column": 5,
+        "nodes": 2320,
+        "simulations": 0,
+        "seconds": 0.041906999998900574
+      },
+      {
+        "seat": 1,
+        "column": 6,
+        "nodes": 212065,
+        "simulations": 1000,
+        "seconds": 0.35349608400065335
+      },
+      {
+        "seat": 0,
+        "column": 5,
+        "nodes": 2857,
+        "simulations": 0,
+        "seconds": 0.05218720799894072
+      },
+      {
+        "seat": 1,
+        "column": 6,
+        "nodes": 182351,
+        "simulations": 1000,
+        "seconds": 0.3100327499996638
+      },
+      {
+        "seat": 0,
+        "column": 6,
+        "nodes": 3126,
+        "simulations": 0,
+        "seconds": 0.05723762500201701
+      },
+      {
+        "seat": 1,
+        "column": 6,
+        "nodes": 210823,
+        "simulations": 1000,
+        "seconds": 0.36458166599913966
+      },
+      {
+        "seat": 0,
+        "column": 2,
+        "nodes": 1644,
+        "simulations": 0,
+        "seconds": 0.026354749999882188
+      },
+      {
+        "seat": 1,
+        "column": 1,
+        "nodes": 127194,
+        "simulations": 1000,
+        "seconds": 0.21935245799977565
+      },
+      {
+        "seat": 0,
+        "column": 2,
+        "nodes": 1685,
+        "simulations": 0,
+        "seconds": 0.028726832999382168
+      },
+      {
+        "seat": 1,
+        "column": 2,
+        "nodes": 122050,
+        "simulations": 1000,
+        "seconds": 0.21156441700077266
+      },
+      {
+        "seat": 0,
+        "column": 6,
+        "nodes": 1683,
+        "simulations": 0,
+        "seconds": 0.026821542000107
+      },
+      {
+        "seat": 1,
+        "column": 5,
+        "nodes": 132235,
+        "simulations": 1000,
+        "seconds": 0.23335020800004713
+      }
+    ]
+  },
+  "simulator_humans": {
+    "seed": 2026,
+    "size": [
+      1170,
+      930
+    ],
+    "moves": [
+      7,
+      6,
+      6,
+      3,
+      4,
+      3,
+      7,
+      2,
+      7,
+      2,
+      2,
+      6,
+      6,
+      5,
+      1,
+      7,
+      2,
+      6,
+      5,
+      7,
+      7,
+      3,
+      2,
+      4,
+      4,
+      6,
+      3
+    ],
+    "result": "ONE_WINS",
+    "seats": [
+      {
+        "controller": "human",
+        "algorithm": "negamax",
+        "depth": 6,
+        "pruning": true,
+        "move_ordering": true,
+        "transposition": true,
+        "deepening": false,
+        "scouting": true,
+        "time_budget": 1.0,
+        "threats": true,
+        "center": true,
+        "parity": true,
+        "simulations": 1000,
+        "greedy_rollouts": true,
+        "tree_reuse": false,
+        "solver": false,
+        "exploration": 1.4142135623730951
+      },
+      {
+        "controller": "human",
+        "algorithm": "negamax",
+        "depth": 6,
+        "pruning": true,
+        "move_ordering": true,
+        "transposition": true,
+        "deepening": false,
+        "scouting": true,
+        "time_budget": 1.0,
+        "threats": true,
+        "center": true,
+        "parity": true,
+        "simulations": 1000,
+        "greedy_rollouts": true,
+        "tree_reuse": false,
+        "solver": false,
+        "exploration": 1.4142135623730951
+      }
+    ],
+    "totals": [
+      {
+        "moves": 14,
+        "nodes": 0,
+        "leaves": 0,
+        "cutoffs": 0,
+        "seconds": 0.0
+      },
+      {
+        "moves": 13,
+        "nodes": 0,
+        "leaves": 0,
+        "cutoffs": 0,
+        "seconds": 0.0
+      }
+    ],
+    "searches": []
+  }
+}

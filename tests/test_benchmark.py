@@ -21,7 +21,10 @@ is small and stated.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
+import io
 import random
+from unittest.mock import Mock
 
 import pytest
 
@@ -44,6 +47,7 @@ from agents.alphabeta import NegamaxAgent
 from core.bitboard import Bitboard
 from core.rules import CELLS
 from core.types import Score
+from experiments import benchmark, download_testsets
 from experiments.benchmark import (
     SETS,
     SOLVABLE,
@@ -187,7 +191,7 @@ def test_outcome_of_reads_the_three_bands():
 # ------------------------------------------------------------------------- the loader
 
 
-def test_every_committed_test_set_parses_strictly():
+def test_every_downloaded_test_set_parses_strictly():
     """All 6,000 positions, replayed move by move on a real board. The files arrived over
     plain HTTP, so they are validated rather than believed."""
     total = 0
@@ -228,6 +232,72 @@ def test_a_loaded_position_is_legal_and_still_in_progress():
 def test_an_unknown_test_set_is_refused():
     with pytest.raises(BadPosition):
         load_set("no-such-set")
+
+
+def test_missing_benchmark_data_explains_how_to_download_it(tmp_path, monkeypatch):
+    monkeypatch.setattr(benchmark, "TESTSETS", tmp_path)
+    with pytest.raises(FileNotFoundError, match="python -m experiments.download_testsets"):
+        load_set("end-easy")
+
+
+def test_download_manifest_covers_every_benchmark_file():
+    assert set(download_testsets.SHA256) == {filename for _, filename in SETS}
+    for checksum in download_testsets.SHA256.values():
+        assert len(checksum) == 64
+        int(checksum, 16)
+
+
+@pytest.fixture
+def benchmark_download(monkeypatch):
+    payload = b"mock benchmark input\n"
+    filename = "Test_L3_R1"
+    monkeypatch.setattr(
+        download_testsets, "SHA256", {filename: hashlib.sha256(payload).hexdigest()}
+    )
+    opener = Mock(return_value=io.BytesIO(payload))
+    monkeypatch.setattr(download_testsets, "urlopen", opener)
+    return filename, payload, opener
+
+
+def test_download_verifies_bytes_before_publishing_the_file(tmp_path, benchmark_download):
+    filename, payload, opener = benchmark_download
+    target = download_testsets.download_file(filename, tmp_path)
+    assert target.read_bytes() == payload
+    assert list(tmp_path.iterdir()) == [target]
+    opener.assert_called_once_with(download_testsets.BASE_URL + filename, timeout=30)
+
+
+def test_verified_local_download_does_not_need_the_network(tmp_path, benchmark_download):
+    filename, payload, opener = benchmark_download
+    (tmp_path / filename).write_bytes(payload)
+    assert download_testsets.download_file(filename, tmp_path).read_bytes() == payload
+    opener.assert_not_called()
+
+
+def test_corrupt_download_never_creates_a_benchmark_file(tmp_path, benchmark_download):
+    filename, _, opener = benchmark_download
+    opener.return_value = io.BytesIO(b"corrupted response")
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        download_testsets.download_file(filename, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_corrupt_local_download_is_not_silently_overwritten(tmp_path, benchmark_download):
+    filename, _, opener = benchmark_download
+    target = tmp_path / filename
+    target.write_bytes(b"local content")
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        download_testsets.download_file(filename, tmp_path)
+    assert target.read_bytes() == b"local content"
+    opener.assert_not_called()
+
+
+def test_download_rejects_an_oversized_response(tmp_path, benchmark_download, monkeypatch):
+    filename, _, _ = benchmark_download
+    monkeypatch.setattr(download_testsets, "MAX_BYTES", 4)
+    with pytest.raises(ValueError, match="size limit"):
+        download_testsets.download_file(filename, tmp_path)
+    assert list(tmp_path.iterdir()) == []
 
 
 # --------------------------------------------------------------------------- the oracle

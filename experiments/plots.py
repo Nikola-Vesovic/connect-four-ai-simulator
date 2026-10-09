@@ -132,8 +132,8 @@ LATIN = {
     "reference_positions": "referentne pozicije (n = 200 do dubine 5, pa 40 i 10)",
     "f1_title": "Broj pregledanih čvorova po dubini",
     "ebf": "efektivni faktor grananja",
-    "floor": "donja granica √7 = 2,6458",
-    "f2_title": "Približavanje minimalnom stablu (referentne pozicije, n = 200/200/40/10)",
+    "floor": "asimptotska referenca √7 = 2,6458",
+    "f2_title": "Efektivni faktor grananja (n = 200/200/40/10)",
     "elo": "Elo rejting",
     "f3_title": "Elo lestvica sa 95% intervalom (7.500 partija, budžet 4.000 čvorova)",
     "workers": "broj procesa",
@@ -155,6 +155,13 @@ LATIN = {
     "drawn": "remi",
     "lost": "izgubljena",
     "minimax": "minimax (bez odsecanja)",
+    "alpha-beta": "alfa-beta",
+    "+ move ordering": "+ sortiranje poteza",
+    "+ table + negascout": "+ tabela transpozicija i NegaScout",
+    "Phase 6: alpha-beta, static centre-first": "alfa-beta, statički redosled od centra",
+    "Phase 7: + killers and history": "+ killer potezi i istorija",
+    "Phase 8: + transposition table": "+ tabela transpozicija",
+    "Phase 10: + NegaScout": "+ nulti prozor (NegaScout)",
     "between": "između agenata",
     "most": "najviše",
     "length": "dužina",
@@ -168,8 +175,8 @@ CYRILLIC = {
     "reference_positions": "референтне позиције (n = 200 до дубине 5, па 40 и 10)",
     "f1_title": "Број прегледаних чворова по дубини",
     "ebf": "ефективни фактор гранања",
-    "floor": "доња граница √7 = 2,6458",
-    "f2_title": "Приближавање минималном стаблу (референтне позиције, n = 200/200/40/10)",
+    "floor": "асимптотска референца √7 = 2,6458",
+    "f2_title": "Ефективни фактор гранања (n = 200/200/40/10)",
     "elo": "Ело рејтинг",
     "f3_title": "Ело лествица са 95% интервалом (7.500 партија, буџет 4.000 чворова)",
     "workers": "број процеса",
@@ -190,7 +197,14 @@ CYRILLIC = {
     "won": "добијена",
     "drawn": "реми",
     "lost": "изгубљена",
-    "minimax": "минимакс (без одсецања)",
+    "minimax": "minimax (без одсецања)",
+    "alpha-beta": "алфа-бета",
+    "+ move ordering": "+ сортирање потеза",
+    "+ table + negascout": "+ табела транспозиција и NegaScout",
+    "Phase 6: alpha-beta, static centre-first": "алфа-бета, статички редослед од центра",
+    "Phase 7: + killers and history": "+ killer потези и историја",
+    "Phase 8: + transposition table": "+ табела транспозиција",
+    "Phase 10: + NegaScout": "+ нулти прозор (NegaScout)",
     "between": "између агената",
     "most": "највише",
     "length": "дужина",
@@ -900,7 +914,7 @@ def _draw_figure1(plt, data, words):
     for axis, (population, series), label in zip(axes, data["panels"], labels):
         depths = set()
         for style, (name, points) in zip(STYLES, series):
-            axis.plot([p[0] for p in points], [p[1] for p in points], label=name, **style)
+            axis.plot([p[0] for p in points], [p[1] for p in points], label=words[name], **style)
             depths.update(point[0] for point in points)
         axis.set_yscale("log")
         axis.set_xlabel(words["depth"])
@@ -916,7 +930,7 @@ def _draw_figure1(plt, data, words):
 def _draw_figure2(plt, data, words):
     fig, axis = plt.subplots(figsize=(6.5, 4.2))
     for style, (name, values) in zip(STYLES, data["stages"]):
-        axis.plot(data["depths"], values, label=name, **style)
+        axis.plot(data["depths"], values, label=words[name], **style)
     axis.axhline(data["floor"], color="#000000", linewidth=1.2, linestyle=(0, (6, 2)))
     axis.annotate(
         words["floor"],

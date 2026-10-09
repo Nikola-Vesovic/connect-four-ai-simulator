@@ -1,5 +1,16 @@
 Connect Four benchmark positions with known theoretical scores.
 
+DISTRIBUTION The six input files are not included in the public repository or its
+             published history. No explicit redistribution license for these datasets
+             was established during release preparation. Their availability online and
+             the license of the C++ solver do not establish a license for this data.
+
+SETUP        For local benchmark validation, run from the repository root:
+                 python -m experiments.download_testsets
+             The downloader checks SHA-256 against the files used for the thesis and
+             rejects mismatches. Downloads are ignored by Git. Hashes establish byte
+             consistency with those inputs, not source authenticity or reuse rights.
+
 SOURCE      Pascal Pons, "Solving Connect 4: how to build a perfect AI",
             part 2 - Benchmarking solvers.
             http://blog.gamesolver.org/solving-connect-four/02-test-protocol/
